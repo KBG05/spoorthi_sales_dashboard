@@ -1,242 +1,150 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
-# -----------------------
-# Shared / config models
-# -----------------------
-class FinancialYearsResponse(BaseModel):
-    financial_years: List[str]
-    default: Optional[str]
-
-# -----------------------
-# auth / login_server.R
-# -----------------------
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-class LoginResponse(BaseModel):
-    success: bool
-    token: Optional[str] = None
-    user: Optional[str] = None
-    message: Optional[str] = None
 
 # -----------------------
 # dashboard_server.R
 # -----------------------
-class DashboardKPI(BaseModel):
+class KPIResponse(BaseModel):
     total_revenue: float
-    total_quantity: float
+    total_quantity: int
     month_name: str
     time_id: int
 
-class RollingSummaryRecord(BaseModel):
-    time_id: int
-    month: str
-    total_revenue: float
-    total_quantity: float
-    abc_category: Optional[str] = None
-    xyz_category: Optional[str] = None
+class CategoryCountResponse(BaseModel):
+    category: str
+    count: int
 
-class DashboardKPIsResponse(BaseModel):
-    kpis: DashboardKPI
+class CategoryRevenueResponse(BaseModel):
+    category: str
+    revenue: float  # in millions
 
-class RollingSummaryResponse(BaseModel):
-    table_used: str
-    records: List[RollingSummaryRecord]
+class ComboCountResponse(BaseModel):
+    abc_category: str
+    xyz_category: str
+    abc_xyz: str
+    count: int
+
 
 # -----------------------
 # abc_server.R
 # -----------------------
-class ABCTrendRequest(BaseModel):
-    fy: str
-    abc_categories: List[str]
-    xyz_categories: List[str]
-    metric: str  # "Revenue" or "Quantity"
-
-class ABCDataPoint(BaseModel):
-    month_date: str    # ISO date or YYYY-MM
-    abc_category: str
-    total_value: float
-    total_quantity: float
+class ABCTrendDataPoint(BaseModel):
+    """Single data point for ABC trend (revenue or quantity)"""
+    month_date: str  # Format: "YYYY-MM-DD"
+    abc_category: str  # "A", "B", "C", or "Overall"
+    value: float  # Revenue in millions or Quantity
 
 class ABCTrendResponse(BaseModel):
-    data: List[ABCDataPoint]
-    metric: str
-    fy: str
-    table_used: Optional[str] = None
-
-class AggregateRecord(BaseModel):
-    category: str
-    product_count: int
-    total_revenue: float
-    total_quantity: float
-
-class ABCSummaryResponse(BaseModel):
-    abc_summary: List[AggregateRecord]
-    xyz_summary: List[AggregateRecord]
-    fy: str
-    table_used: Optional[str] = None
-
-# -----------------------
-# product_behaviour_server.R
-# -----------------------
-class ProductListRequest(BaseModel):
-    fy: str
-    abc_class: str
-
-class ProductListResponse(BaseModel):
-    products: List[int]  # or List[str] if product codes are strings
-
-class SeriesPoint(BaseModel):
-    month: str
-    value: float
-
-class ProductTrendRequest(BaseModel):
-    fy: str
-    abc_class: str
-    product_id: int
+    """Response for ABC trend endpoint"""
+    data: List[ABCTrendDataPoint]
     metric: str  # "Revenue" or "Quantity"
+    financial_year: str
 
-class ProductTrendResponse(BaseModel):
-    class_total: List[SeriesPoint]
-    product_data: List[SeriesPoint]
-    metric: str
-
-# -----------------------
-# customer_behaviour_server.R
-# -----------------------
-class CustomerBehaviorRequest(BaseModel):
-    fy: str
-    abc_classes: List[str]
-    xyz_classes: Optional[List[str]] = None
-    metric: str  # "Revenue" or "Quantity"
-
-class CustomerRecord(BaseModel):
-    customer_id: int
-    customer_name: Optional[str] = None
-    total_revenue: float
-    total_quantity: float
-
-class CustomerBehaviorResponse(BaseModel):
-    customers: List[CustomerRecord]
-    fy: str
-
-# -----------------------
-# customer_trend_server.R
-# -----------------------
-class CustomerTrendRequest(BaseModel):
-    fy: str
-    customer_id: int
-    metric: str  # "Revenue" or "Quantity"
-
-class CustomerTrendPoint(BaseModel):
-    month: str
-    value: float
-
-class CustomerTrendResponse(BaseModel):
-    monthly: List[CustomerTrendPoint]
-    metric: str
-    fy: str
-
-# -----------------------
-# ticket_size_server.R
-# -----------------------
-class TicketSizeRequest(BaseModel):
-    fy: str
-    abc_class: Optional[str] = None
-
-class TicketSizePoint(BaseModel):
-    month: str
-    avg_ticket_size: float
-
-class TicketSizeResponse(BaseModel):
-    series: List[TicketSizePoint]
-    fy: str
-
-# -----------------------
-# top_performance_server.R
-# -----------------------
-class TopPerformanceRequest(BaseModel):
-    fy: str
-    top_n: int = 10
-    metric: str  # "Revenue" or "Quantity"
-
-class TopItem(BaseModel):
-    id: int
-    name: Optional[str] = None
-    value: float
-    rank: int
-
-class TopPerformanceResponse(BaseModel):
-    items: List[TopItem]
-    fy: str
 
 # -----------------------
 # cross_sell_server.R
 # -----------------------
-class CrossSellRequest(BaseModel):
-    fy: str
+class CrossSellRecommendation(BaseModel):
+    """Cross-sell recommendation for a distributor"""
+    customer: str  # Distributor_Code
+    products_purchased: str  # Comma-separated list
+    recommendations: str  # Comma-separated list
+
+
+# -----------------------
+# customer_behaviour_server.R
+# -----------------------
+class CustomerListItem(BaseModel):
+    """Customer ID for dropdown"""
     customer_id: int
-    top_n: int = 10
 
-class CrossSellItem(BaseModel):
-    product_id: int
-    co_purchase_count: int
-    lift: Optional[float] = None
-
-class CrossSellResponse(BaseModel):
-    recommendations: List[CrossSellItem]
-    customer_id: int
-    fy: str
-
-# -----------------------
-# forecast_server.R
-# -----------------------
-class ForecastRequest(BaseModel):
-    product_id: int
-    periods: int = 6
-    method: Optional[str] = None  # e.g., "ets", "arima", "prophet"
-
-class ForecastPoint(BaseModel):
-    month: str
-    predicted: float
-    lower: Optional[float] = None
-    upper: Optional[float] = None
-
-class ForecastResponse(BaseModel):
-    forecast: List[ForecastPoint]
-    model: Optional[str] = None
+class ProductListItem(BaseModel):
+    """Product ID for dropdown"""
     product_id: int
 
-# -----------------------
-# export_server.R
-# -----------------------
-class ExportRequest(BaseModel):
-    module: str
-    filters: Optional[dict] = None
-    format: Optional[str] = "csv"  # "csv" or "xlsx"
+class CustomerBehaviourDataPoint(BaseModel):
+    """Single data point for customer behaviour plot"""
+    month: str  # Format: "YYYY-MM-DD"
+    value: float
+    type: str  # e.g., "Selected Customers Overall" or "Product 123"
+    product_id: Optional[int] = None
 
-class ExportResponse(BaseModel):
-    download_url: str
-    filename: str
+
+# -----------------------
+# customer_trend_server.R
+# -----------------------
+class CustomerTrendDataPoint(BaseModel):
+    """Single data point for customer trend"""
+    month_label: str  # e.g., "Apr", "May", etc.
+    category: str  # "A", "B", "C", or "Overall"
+    value: float  # Revenue or Quantity
+
+
+# -----------------------
+# product_behaviour_server.R
+# -----------------------
+class ProductBehaviourDataPoint(BaseModel):
+    """Single data point for product behaviour (dual axis)"""
+    month: str  # Format: "YYYY-MM-DD"
+    value: float
+    scaled_value: float  # For dual axis plotting
+    type: str  # e.g., "Class A Total" or "Product 456"
+    product_id: Optional[int] = None
+
+
+# -----------------------
+# top_performance_server.R
+# -----------------------
+class TopPerformerItem(BaseModel):
+    """Top performer (customer or product)"""
+    id: int  # CustomerID or ProductID
+    revenue: float  # Total revenue
+
+class TopPerformersResponse(BaseModel):
+    """Response containing top performers"""
+    top_fy: List[TopPerformerItem]  # Top 10 for entire FY
+    top_latest: List[TopPerformerItem]  # Top 10 for latest month
+    entity_type: str  # "Customers" or "Products"
+
+
+# -----------------------
+# ticket_size_server.R
+# -----------------------
+class TicketSizeBand(BaseModel):
+    """Ticket size band data"""
+    band: str  # e.g., "0-5L", "5L-20L", etc.
+    metric: str  # "Count" or "Revenue"
+    value: float
+    plot_label: str  # Formatted label for display
+
 
 # -----------------------
 # transition_analysis_server.R
 # -----------------------
-class TransitionRequest(BaseModel):
-    fy_from: str
-    fy_to: str
-    abc_from: Optional[List[str]] = None
-    abc_to: Optional[List[str]] = None
+class TransitionRow(BaseModel):
+    """Single row of transition analysis"""
+    id: int  # ProductID or CustomerID
+    categories: Dict[str, str]  # e.g., {"Category_Jan_2025": "A", "Category_Feb_2025": "B", ...}
 
-class TransitionRecord(BaseModel):
-    from_category: str
-    to_category: str
-    count: int
-    revenue: float
+class TransitionAnalysisResponse(BaseModel):
+    """Response for transition analysis"""
+    data: List[Dict[str, Any]]  # Flexible structure for different columns
+    analysis_type: str  # "Products" or "Customers"
+    column_headers: List[str]  # Dynamic column names
 
-class TransitionResponse(BaseModel):
-    transitions: List[TransitionRecord]
-    fy_from: str
-    fy_to: str
+
+# -----------------------
+# forecast_server.R
+# -----------------------
+class ForecastRow(BaseModel):
+    """Single forecast row"""
+    product_id: int
+    forecast_month: str
+    predicted_quantity: float
+
+class ForecastResponse(BaseModel):
+    """Response for forecast data"""
+    table_name: str
+    display_month: str
+    data: List[ForecastRow]

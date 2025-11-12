@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve": "serve -s dist -l 5173"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,9 +16,14 @@
     "@fontsource/roboto": "^5.2.8",
     "@mui/icons-material": "^7.3.5",
     "@mui/material": "^7.3.5",
+    "@mui/x-charts": "^7.29.1",
+    "@mui/x-data-grid": "^8.16.0",
     "@tailwindcss/vite": "^4.1.16",
+    "axios": "^1.13.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-router": "^7.9.5",
+    "react-router-dom": "^7.9.5",
     "tailwindcss": "^4.1.16"
   },
   "devDependencies": {

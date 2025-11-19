@@ -53,6 +53,8 @@ const TicketSize: React.FC = () => {
     };
   }, [data]);
 
+  // Approximate total revenue in Crores
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
@@ -129,7 +131,7 @@ const TicketSize: React.FC = () => {
               slotProps={{
                 barLabel: {
                   style: {
-                    fill: '#FFFFFF',
+                    fill: '#ffffff',
                     fontSize: 11,
                     fontWeight: 600,
                   },
@@ -144,9 +146,13 @@ const TicketSize: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Total Revenue
           </Typography>
+          
           <Box flex={1} minHeight={0}>
             <BarChart
               xAxis={[{ scaleType: 'band', data: revenueData.bands }]}
+              yAxis={[{
+                valueFormatter: (value) => `₹${value?.toFixed(1)} Cr`,
+              }]}
               series={[
                 {
                   data: revenueData.values,
@@ -154,19 +160,22 @@ const TicketSize: React.FC = () => {
                   color: '#2ecc71',
                   valueFormatter: (value, { dataIndex }) => 
                     revenueData.labels[dataIndex] || `₹${value?.toFixed(1)} CR`,
+
                 },
               ]}
               margin={{ top: 50, right: 30, bottom: 50, left: 70 }}
               grid={{ vertical: false, horizontal: true }}
-              barLabel={(item) => `₹${item.value?.toFixed(1)}`}
+              barLabel="value"
               slotProps={{
                 barLabel: {
                   style: {
-                    fill: '#FFFFFF',
+                    fill: '#ffffff',
                     fontSize: 11,
                     fontWeight: 600,
                   },
+
                 },
+
               }}
             />
           </Box>

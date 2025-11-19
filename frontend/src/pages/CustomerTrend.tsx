@@ -46,9 +46,9 @@ const TrendChart = memo(({
         yAxis={[{
           valueFormatter: (value: number) => {
             if (metric === 'Revenue') {
-              return `${value.toFixed(0)}M`;
+              return `₹${value.toLocaleString('en-IN')}`;
             }
-            return value.toLocaleString();
+            return value.toLocaleString('en-IN');
           },
         }]}
         series={chartConfig.chartSeries}
@@ -142,11 +142,9 @@ const CustomerTrend = () => {
           valueFormatter: (value: number | null) => {
             if (value === null || value === undefined) return '';
             if (metric === 'Revenue') {
-              // Check if value is already in millions (< 1000) or needs conversion
-              const displayValue = value > 1000 ? value / 1000000 : value;
-              return `${displayValue.toFixed(2)}M`;
+              return `₹${value.toLocaleString('en-IN')}`;
             }
-            return value.toLocaleString();
+            return value.toLocaleString('en-IN');
           },
         };
       });

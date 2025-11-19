@@ -206,10 +206,15 @@ async def get_customer_behaviour_trend(
     
     metric_col = "Revenue" if metric == "Revenue" else "Quantity"
     
-    # Overall summary
-    overall = defaultdict(float)
+    # Parse product filter
+    selected_products = []
+    if product_ids:
+        selected_products = [int(pid.strip()) for pid in product_ids.split(",") if pid.strip()]
     
-    # Product summaries
+    # 1. Overall summary (all products for selected customers)
+    overall_data = defaultdict(float)
+    
+    # 2. Individual product summaries (selected products, selected customers)
     product_data = defaultdict(lambda: defaultdict(float))
     
     for row in rows:
@@ -217,38 +222,40 @@ async def get_customer_behaviour_trend(
         product_id = row["ProductID"]
         value = float(row[metric_col] or 0)
         
-        overall[time_id] += value
-        product_data[product_id][time_id] += value
+        # Always add to overall
+        overall_data[time_id] += value
+        
+        # If products are selected, aggregate by product
+        if selected_products and product_id in selected_products:
+            product_data[product_id][time_id] += value
     
     # Build response
     result = []
     
-    # Parse product filter
-    selected_products = []
-    if product_ids:
-        selected_products = [int(pid.strip()) for pid in product_ids.split(",") if pid.strip()]
-    
-    # Add overall line
-    for time_id in sorted(overall.keys()):
-        month_date = BASE_DATE + timedelta(days=30 * (time_id - 1))
+    # Generate all months in the financial year range
+    for time_id in range(start_time_id, end_time_id + 1):
+        # Calculate proper month/year from TimeID
+        months_offset = time_id - 1
+        year = BASE_DATE.year + (BASE_DATE.month + months_offset - 1) // 12
+        month = (BASE_DATE.month + months_offset - 1) % 12 + 1
+        month_date = datetime(year, month, 1)
+        
+        # Add overall line
         result.append(CustomerBehaviourDataPoint(
             month=month_date.strftime("%Y-%m-%d"),
-            value=round(overall[time_id], 2),
+            value=round(overall_data.get(time_id, 0.0), 2),
             type="Selected Customers Overall",
             product_id=None
         ))
-    
-    # Add individual product lines (if products selected)
-    if selected_products:
+        
+        # Add individual product lines
         for prod_id in selected_products:
             if prod_id in product_data:
-                for time_id in sorted(product_data[prod_id].keys()):
-                    month_date = BASE_DATE + timedelta(days=30 * (time_id - 1))
-                    result.append(CustomerBehaviourDataPoint(
-                        month=month_date.strftime("%Y-%m-%d"),
-                        value=round(product_data[prod_id][time_id], 2),
-                        type=f"Product {prod_id}",
-                        product_id=prod_id
-                    ))
+                result.append(CustomerBehaviourDataPoint(
+                    month=month_date.strftime("%Y-%m-%d"),
+                    value=round(product_data[prod_id].get(time_id, 0.0), 2),
+                    type=f"Product {prod_id}",
+                    product_id=prod_id
+                ))
     
     return result

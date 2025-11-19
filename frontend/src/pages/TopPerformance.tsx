@@ -111,6 +111,7 @@ const TopPerformance: React.FC = () => {
           <Box flex={1} minHeight={0}>
             <BarChart
               xAxis={[{ scaleType: 'band', data: fyChartData.ids }]}
+              yAxis={[{ valueFormatter: (value) => `₹${value}M` }]}
               series={[
                 {
                   data: fyChartData.revenues,
@@ -125,7 +126,7 @@ const TopPerformance: React.FC = () => {
               slotProps={{
                 barLabel: {
                   style: {
-                    fill: '#FFFFFF',
+                    fill: '#ffffff',
                     fontSize: 11,
                     fontWeight: 600,
                   },
@@ -142,6 +143,7 @@ const TopPerformance: React.FC = () => {
           <Box flex={1} minHeight={0}>
             <BarChart
               xAxis={[{ scaleType: 'band', data: latestChartData.ids }]}
+              yAxis={[{ valueFormatter: (value) => `₹${value}M` }]}
               series={[
                 {
                   data: latestChartData.revenues,
@@ -156,7 +158,7 @@ const TopPerformance: React.FC = () => {
               slotProps={{
                 barLabel: {
                   style: {
-                    fill: '#FFFFFF',
+                    fill: '#ffffff',
                     fontSize: 11,
                     fontWeight: 600,
                   },

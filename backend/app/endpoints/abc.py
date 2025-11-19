@@ -142,7 +142,12 @@ async def get_abc_trend(
     data_points = []
     
     for time_id in sorted(grouped.keys()):
-        month_date = BASE_DATE + timedelta(days=30 * (time_id - 1))
+        # Calculate proper month/year from TimeID
+        # TimeID 1 = Jan 2021, so we add (time_id - 1) months to BASE_DATE
+        months_offset = time_id - 1
+        year = BASE_DATE.year + (BASE_DATE.month + months_offset - 1) // 12
+        month = (BASE_DATE.month + months_offset - 1) % 12 + 1
+        month_date = datetime(year, month, 1)
         month_str = month_date.strftime("%Y-%m-%d")
         
         # Add individual ABC categories

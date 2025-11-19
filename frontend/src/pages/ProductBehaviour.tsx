@@ -212,29 +212,59 @@ const ProductBehaviour: React.FC = () => {
               scaleType: 'band',
               data: [...new Set(data.map(d => d.month))],
             }]}
-            yAxis={[{
-              valueFormatter: (value: number) => {
-                if (metric === 'Revenue') {
-                  return `${value.toFixed(0)}M`;
-                }
-                return value.toLocaleString();
+            yAxis={[
+              {
+                id: 'classAxis',
+                scaleType: 'linear',
+                position: 'left',
+                label: metric === 'Revenue' ? 'Class Total (Cr)' : 'Class Total',
+                valueFormatter: (value: number) => {
+                  if (metric === 'Revenue') {
+                    return `₹${(value / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })} Cr`;
+                  }
+                  return value.toLocaleString('en-IN');
+                },
               },
-            }]}
-            series={[...new Set(data.map(d => d.type))].map(type => ({
-              data: data.filter(d => d.type === type).map(d => d.value),
-              label: type,
-              curve: 'linear',
-              showMark: showLabels,
-              valueFormatter: (value) =>
-                metric === 'Revenue'
-                  ? `₹${((value || 0) / 1_000_000).toFixed(2)}M`
-                  : (value?.toLocaleString() || '0'),
-            }))}
-            margin={{ top: 10, right: 30, bottom: 50, left: 100 }}
+              {
+                id: 'productAxis',
+                scaleType: 'linear',
+                position: 'right',
+                label: metric === 'Revenue' ? 'Product (Cr)' : 'Product',
+                valueFormatter: (value: number) => {
+                  if (metric === 'Revenue') {
+                    return `₹${(value / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })} Cr`;
+                  }
+                  return value.toLocaleString('en-IN');
+                },
+              },
+            ]}
+            series={(() => {
+              const types = [...new Set(data.map(d => d.type))];
+              return types.map((type) => {
+                const isClassTotal = type.startsWith('Class');
+                return {
+                  data: data.filter(d => d.type === type).map(d => d.value),
+                  label: type,
+                  curve: 'linear' as const,
+                  showMark: showLabels,
+                  yAxisId: isClassTotal ? 'classAxis' : 'productAxis',
+                  valueFormatter: (value: number | null) => {
+                    if (value === null || value === undefined) return '';
+                    if (metric === 'Revenue') {
+                      return `₹${(value / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 2 })} Cr`;
+                    }
+                    return value.toLocaleString('en-IN');
+                  },
+                };
+              });
+            })()}
+            leftAxis="classAxis"
+            rightAxis="productAxis"
+            margin={{ top: 10, right: 100, bottom: 50, left: 100 }}
             grid={{ vertical: false, horizontal: true }}
             slotProps={{
               legend: {
-                hidden: data.length > 50, // Hide legend if too many series
+                hidden: data.length > 50,
                 direction: 'row',
                 position: { vertical: 'top', horizontal: 'middle' },
                 padding: 0,

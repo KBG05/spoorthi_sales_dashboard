@@ -239,8 +239,7 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: abcCount.map(d => d.count || 0),
-                  label: 'Count',
-                  valueFormatter: (value) => value?.toLocaleString() || '0',
+                  label: 'Product Count',
                 }]}
                 height={300}
                 margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
@@ -248,9 +247,9 @@ const Dashboard = () => {
                 slotProps={{
                   barLabel: {
                     style: {
-                      fill: 'currentColor',
-                      fontSize: 12,
-                      fontWeight: 500,
+                      fill: '#ffffff',
+                      fontSize: 11,
+                      fontWeight: 600,
                     },
                   },
                 }}
@@ -291,6 +290,7 @@ const Dashboard = () => {
                   tickLabelStyle: {
                     fontSize: 12,
                   },
+                  valueFormatter: (value) => `₹${value}M`,
                 }]}
                 series={[{ 
                   data: abcRevenue.map(d => d.revenue || 0),
@@ -303,9 +303,9 @@ const Dashboard = () => {
                 slotProps={{
                   barLabel: {
                     style: {
-                      fill: 'currentColor',
-                      fontSize: 12,
-                      fontWeight: 500,
+                      fill: '#ffffff',
+                      fontSize: 11,
+                      fontWeight: 600,
                     },
                   },
                 }}
@@ -357,9 +357,9 @@ const Dashboard = () => {
                 slotProps={{
                   barLabel: {
                     style: {
-                      fill: 'currentColor',
-                      fontSize: 12,
-                      fontWeight: 500,
+                      fill: '#ffffff',
+                      fontSize: 11,
+                      fontWeight: 600,
                     },
                   },
                 }}
@@ -395,6 +395,7 @@ const Dashboard = () => {
                   tickLabelStyle: {
                     fontSize: 12,
                   },
+                  valueFormatter: (value) => `₹${value}M`,
                 }]}
                 series={[{ 
                   data: xyzRevenue.map(d => d.revenue || 0), 
@@ -408,9 +409,9 @@ const Dashboard = () => {
                 slotProps={{
                   barLabel: {
                     style: {
-                      fill: 'currentColor',
-                      fontSize: 12,
-                      fontWeight: 500,
+                      fill: '#ffffff',
+                      fontSize: 11,
+                      fontWeight: 600,
                     },
                   },
                 }}
@@ -471,13 +472,13 @@ const Dashboard = () => {
               slotProps={{
                 barLabel: {
                   style: {
-                    fill: 'currentColor',
-                    fontSize: 12,
-                    fontWeight: 500,
+                    fill: '#ffffff',
+                    fontSize: 11,
+                    fontWeight: 600,
                   },
                 },
               }}
-              barLabel="value"
+              barLabel={(item) => item.value?.toLocaleString() || '0'}
             />
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}>

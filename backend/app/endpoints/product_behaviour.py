@@ -162,7 +162,11 @@ async def get_product_behaviour_trend(
     all_time_ids = sorted(set(list(class_total.keys()) + list(product_total.keys())))
     
     for time_id in all_time_ids:
-        month_date = BASE_DATE + timedelta(days=30 * (time_id - 1))
+        # Calculate proper month/year from TimeID
+        months_offset = time_id - 1
+        year = BASE_DATE.year + (BASE_DATE.month + months_offset - 1) // 12
+        month = (BASE_DATE.month + months_offset - 1) % 12 + 1
+        month_date = datetime(year, month, 1)
         month_str = month_date.strftime("%Y-%m-%d")
         
         # Class total (not scaled)

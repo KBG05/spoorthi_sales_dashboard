@@ -319,9 +319,9 @@ const CustomerBehaviour: React.FC = () => {
             yAxis={[{
               valueFormatter: (value: number) => {
                 if (metric === 'Revenue') {
-                  return `${value.toFixed(0)}M`;
+                  return `₹${value.toLocaleString('en-IN')}`;
                 }
-                return value.toLocaleString();
+                return value.toLocaleString('en-IN');
               },
             }]}
             series={[...new Set(data.map(d => d.type))].map(type => ({
@@ -331,8 +331,8 @@ const CustomerBehaviour: React.FC = () => {
               showMark: showLabels,
               valueFormatter: (value) =>
                 metric === 'Revenue'
-                  ? `₹${((value || 0) / 1_000_000).toFixed(2)}M`
-                  : (value?.toLocaleString() || '0'),
+                  ? `₹${(value || 0).toLocaleString('en-IN')}`
+                  : (value?.toLocaleString('en-IN') || '0'),
             }))}
             margin={{ top: 10, right: 30, bottom: 50, left: 100 }}
             grid={{ vertical: false, horizontal: true }}

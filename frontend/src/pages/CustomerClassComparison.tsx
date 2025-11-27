@@ -13,7 +13,6 @@ import {
   FormGroup,
   ToggleButtonGroup,
   ToggleButton,
-  type SelectChangeEvent,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';

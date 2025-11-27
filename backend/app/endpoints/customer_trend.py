@@ -7,13 +7,14 @@ UI Reference: ui/customer_trend_ui.R
 Provides customer trend analysis by ABC category over time.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
 from ..database import query_all
-from ..schemas import CustomerTrendDataPoint
+from ..schemas import CustomerTrendDataPoint, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/customer-trend", tags=["Customer Trend"])
+router = APIRouter(prefix="/customer-trend", tags=["Customer Trend"], dependencies=[Depends(get_current_user)])
 
 BASE_DATE = datetime(2021, 1, 1)
 

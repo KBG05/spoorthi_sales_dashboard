@@ -7,13 +7,14 @@ UI Reference: ui/abc_ui.R
 Provides product trend data grouped by ABC and XYZ categories.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
 from ..database import query_all
-from ..schemas import ABCTrendDataPoint, ABCTrendResponse
+from ..schemas import ABCTrendDataPoint, ABCTrendResponse, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/abc", tags=["ABC Analysis"])
+router = APIRouter(prefix="/abc", tags=["ABC Analysis"], dependencies=[Depends(get_current_user)])
 
 BASE_DATE = datetime(2021, 1, 1)
 

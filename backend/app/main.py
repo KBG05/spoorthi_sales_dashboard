@@ -11,6 +11,7 @@ from . import database
 from .endpoints import (
     dashboard,
     abc,
+    auth,
     cross_sell,
     customer_behaviour,
     customer_trend,
@@ -18,7 +19,9 @@ from .endpoints import (
     top_performance,
     ticket_size,
     forecast,
-    transition_analysis
+    transition_analysis,
+    cba,
+    customer_class_comparison
 )
 
 
@@ -60,6 +63,7 @@ app.add_middleware(LoggingMiddleware)
 
 
 # Include all routers
+app.include_router(auth.router)  # Auth router should be first (no auth required)
 app.include_router(dashboard.router)
 app.include_router(abc.router)
 app.include_router(cross_sell.router)
@@ -70,6 +74,8 @@ app.include_router(top_performance.router)
 app.include_router(ticket_size.router)
 app.include_router(forecast.router)
 app.include_router(transition_analysis.router)
+app.include_router(cba.router)
+app.include_router(customer_class_comparison.router)
 
 
 @app.get("/")

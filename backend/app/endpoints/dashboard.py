@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta
@@ -7,11 +7,12 @@ from ..database import (
     get_latest_rolling_table, get_latest_time_id,
     safe_table_name
 )
-from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse
+from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse, User
+from ..endpoints.auth import get_current_user
 from typing import Any, Dict, List, Optional
 import pandas as pd
 
-router=APIRouter(prefix="/dashboard", tags=["Dashboard"])
+router=APIRouter(prefix="/dashboard", tags=["Dashboard"], dependencies=[Depends(get_current_user)])
 
 #HELPER FUNCTION
 

@@ -7,12 +7,13 @@ UI Reference: ui/top_performance_ui.R
 Provides top performers (customers and products) analysis.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Literal
 from ..database import query_all, query_one, get_latest_time_id
-from ..schemas import TopPerformersResponse, TopPerformerItem
+from ..schemas import TopPerformersResponse, TopPerformerItem, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/top-performance", tags=["Top Performance"])
+router = APIRouter(prefix="/top-performance", tags=["Top Performance"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/top-performers", response_model=TopPerformersResponse)

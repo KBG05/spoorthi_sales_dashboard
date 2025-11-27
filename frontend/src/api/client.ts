@@ -13,7 +13,11 @@ export const apiClient = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // You can add auth tokens here if needed in the future
+    // Add auth token if available
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -29,7 +33,12 @@ apiClient.interceptors.response.use(
   (error) => {
     // Global error handling
     if (error.response) {
-      // Server responded with error status
+      // Handle 401 Unauthorized - token expired or invalid
+      if (error.response.status === 401) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('token_type');
+        window.location.href = '/login';
+      }
       console.error('API Error:', error.response.data);
     } else if (error.request) {
       // Request made but no response

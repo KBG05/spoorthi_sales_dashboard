@@ -26,6 +26,8 @@ import {
   CompareArrows as CompareArrowsIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  Analytics as AnalyticsIcon,
+  Compare as CompareIcon,
 } from '@mui/icons-material';
 import { DRAWER_WIDTH } from '../constants/constants';
 
@@ -40,6 +42,8 @@ const navItems: NavItem[] = [
   { path: '/abc-analysis', label: 'Trend Analysis', icon: <CategoryIcon /> },
   { path: '/customer-trend', label: 'Customer Trends', icon: <TrendingUpIcon /> },
   { path: '/customer-behaviour', label: 'Customer Behavior', icon: <PeopleIcon /> },
+  { path: '/cba', label: 'CBA', icon: <AnalyticsIcon /> },
+  { path: '/customer-class-comparison', label: 'Class Comparison', icon: <CompareIcon /> },
   { path: '/ticket-size', label: 'Ticket Size Analysis', icon: <ReceiptIcon /> },
   { path: '/product-behaviour', label: 'Product Behavior', icon: <InventoryIcon /> },
   { path: '/transition-analysis', label: 'Transition Analysis', icon: <SwapHorizIcon /> },

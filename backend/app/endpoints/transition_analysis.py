@@ -7,13 +7,14 @@ UI Reference: ui/transition_analysis_ui.R
 Provides ABC category transition analysis for products and customers.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Literal
 from datetime import datetime
 from ..database import query_one, query_all
-from ..schemas import TransitionAnalysisResponse
+from ..schemas import TransitionAnalysisResponse, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/transition-analysis", tags=["Transition Analysis"])
+router = APIRouter(prefix="/transition-analysis", tags=["Transition Analysis"], dependencies=[Depends(get_current_user)])
 
 BASE_DATE = datetime(2021, 1, 1)
 

@@ -7,13 +7,14 @@ UI Reference: ui/ticket_size_ui.R
 Provides revenue band analysis for customers or products.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Literal
 from datetime import datetime
 from ..database import query_all
-from ..schemas import TicketSizeBand
+from ..schemas import TicketSizeBand, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/ticket-size", tags=["Ticket Size"])
+router = APIRouter(prefix="/ticket-size", tags=["Ticket Size"], dependencies=[Depends(get_current_user)])
 
 BASE_DATE = datetime(2021, 1, 1)
 

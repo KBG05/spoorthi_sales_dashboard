@@ -89,3 +89,54 @@ export interface TransitionAnalysisResponse {
   analysis_type: 'Products' | 'Customers';
   column_headers: string[];
 }
+
+// ============================================================================
+// CBA (Customer Behaviour Analysis) Types
+// ============================================================================
+
+export interface RFMMetrics {
+  customer_id: number;
+  recency: number;
+  frequency: number;
+  monetary: number;
+  total_transactions: number;
+  avg_order_value: number;
+  r_score: number;
+  f_score: number;
+  m_score: number;
+  rfm_score: string;
+  segment: string;
+}
+
+export interface RFMSummary {
+  total_customers: number;
+  avg_recency: number;
+  avg_frequency: number;
+  avg_monetary: number;
+  total_revenue: number;
+}
+
+export interface SegmentData {
+  segment: string;
+  customer_count: number;
+  total_revenue: number;
+  [key: string]: string | number; // Add index signature for dataset compatibility
+}
+
+export interface DistributionBin {
+  bin: string;
+  count: number;
+}
+
+// ============================================================================
+// Customer Class Comparison Types
+// ============================================================================
+
+export interface ClassComparisonDataPoint {
+  month: string;  // Format: "YYYY-MM"
+  financial_year: string;  // e.g., "FY24-25"
+  class_total: number;  // Total for the entire class
+  customer_value: number;  // Value for the specific customer
+  metric: string;  // "Revenue" or "Quantity"
+}
+

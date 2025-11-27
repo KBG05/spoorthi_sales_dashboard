@@ -15,16 +15,30 @@ import TicketSize from './pages/TicketSize';
 import Forecast from './pages/Forecast';
 import TransitionAnalysis from './pages/TransitionAnalysis';
 import ExportData from './pages/ExportData';
+import CBA from './pages/CBA';
+import CustomerClassComparison from './pages/CustomerClassComparison';
+import Login from './pages/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<AppLayout />}>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="abc-analysis" element={<ABCAnalysis />} />
         <Route path="customer-trend" element={<CustomerTrend />} />
         <Route path="customer-behaviour" element={<CustomerBehaviour />} />
+        <Route path="cba" element={<CBA />} />
+        <Route path="customer-class-comparison" element={<CustomerClassComparison />} />
         <Route path="ticket-size" element={<TicketSize />} />
         <Route path="product-behaviour" element={<ProductBehaviour />} />
         <Route path="transition-analysis" element={<TransitionAnalysis />} />

@@ -148,3 +148,78 @@ class ForecastResponse(BaseModel):
     table_name: str
     display_month: str
     data: List[ForecastRow]
+
+
+# -----------------------
+# CBA (Customer Behaviour Analysis)
+# server/CustomerBehaviour2.R
+# -----------------------
+class RFMMetrics(BaseModel):
+    """RFM metrics for a single customer"""
+    customer_id: int
+    recency: int
+    frequency: int
+    monetary: float
+    total_transactions: int
+    avg_order_value: float
+    r_score: int
+    f_score: int
+    m_score: int
+    rfm_score: str
+    segment: str
+
+
+class RFMSummary(BaseModel):
+    """Summary statistics for RFM analysis"""
+    total_customers: int
+    avg_recency: float
+    avg_frequency: float
+    avg_monetary: float
+    total_revenue: float
+
+
+class SegmentData(BaseModel):
+    """Customer segment aggregated data"""
+    segment: str
+    customer_count: int
+    total_revenue: float
+
+
+# -----------------------
+# Customer Class Comparison
+# -----------------------
+class ClassComparisonDataPoint(BaseModel):
+    """Single data point for class vs customer comparison"""
+    month: str  # Format: "YYYY-MM"
+    financial_year: str  # e.g., "FY24-25"
+    class_total: float  # Total for the entire class
+    customer_value: float  # Value for the specific customer
+    metric: str  # "Revenue" or "Quantity"
+
+
+# -----------------------
+# Authentication
+# -----------------------
+class Token(BaseModel):
+    """JWT token response"""
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    """Data stored in JWT token"""
+    username: Optional[str] = None
+
+class User(BaseModel):
+    """User model"""
+    id: int
+    username: str
+    role: str
+
+class UserInDB(User):
+    """User model with hashed password"""
+    hashed_password: str
+
+class PasswordChange(BaseModel):
+    """Password change request"""
+    current_password: str
+    new_password: str

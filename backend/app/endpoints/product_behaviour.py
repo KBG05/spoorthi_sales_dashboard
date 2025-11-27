@@ -7,13 +7,14 @@ UI Reference: ui/product_behaviour_ui.R
 Provides product purchase behaviour analysis with dual-axis plotting support.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
 from ..database import query_all
-from ..schemas import ProductListItem, ProductBehaviourDataPoint
+from ..schemas import ProductListItem, ProductBehaviourDataPoint, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/product-behaviour", tags=["Product Behaviour"])
+router = APIRouter(prefix="/product-behaviour", tags=["Product Behaviour"], dependencies=[Depends(get_current_user)])
 
 BASE_DATE = datetime(2021, 1, 1)
 

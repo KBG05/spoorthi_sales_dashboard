@@ -7,11 +7,12 @@ UI Reference: ui/forecast_ui.R
 Provides demand forecast data from the latest forecast table.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from ..database import query_one, query_all
-from ..schemas import ForecastResponse, ForecastRow
+from ..schemas import ForecastResponse, ForecastRow, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/forecast", tags=["Forecast"])
+router = APIRouter(prefix="/forecast", tags=["Forecast"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/demand", response_model=ForecastResponse)

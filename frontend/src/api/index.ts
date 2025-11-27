@@ -12,7 +12,15 @@ import type {
   TicketSizeBand,
   ForecastResponse,
   TransitionAnalysisResponse,
+  RFMMetrics,
+  RFMSummary,
+  SegmentData,
+  ClassComparisonDataPoint,
 } from './types.js';
+
+// No longer needed - types and API merged into this file
+// export { cbaApi } from './cba.js';
+// export type { RFMMetrics, RFMSummary, SegmentData } from './cbaTypes.js';
 
 // Dashboard API
 export const dashboardApi = {
@@ -185,6 +193,100 @@ export const transitionAnalysisApi = {
         financial_year: financialYear,
       },
     });
+    return response.data;
+  },
+};
+
+// ============================================================================
+// CBA (Customer Behaviour Analysis) API
+// ============================================================================
+
+export const cbaApi = {
+  /**
+   * Get RFM analysis data for all customers
+   */
+  getRFMAnalysis: async (timePeriod: number): Promise<RFMMetrics[]> => {
+    const response = await apiClient.get<RFMMetrics[]>('/cba/rfm-analysis', {
+      params: { time_period: timePeriod }
+    });
+    return response.data;
+  },
+
+  /**
+   * Get summary statistics
+   */
+  getSummary: async (timePeriod: number): Promise<RFMSummary> => {
+    const response = await apiClient.get<RFMSummary>('/cba/summary', {
+      params: { time_period: timePeriod }
+    });
+    return response.data;
+  },
+
+  /**
+   * Get segment data (count and revenue by segment)
+   */
+  getSegments: async (timePeriod: number): Promise<SegmentData[]> => {
+    const response = await apiClient.get<SegmentData[]>('/cba/segments', {
+      params: { time_period: timePeriod }
+    });
+    return response.data;
+  },
+};
+
+// ============================================================================
+// Customer Class Comparison API
+// ============================================================================
+
+export const customerClassComparisonApi = {
+  /**
+   * Get available financial years from database
+   */
+  getAvailableYears: async (): Promise<{ financial_years: string[] }> => {
+    const response = await apiClient.get<{ financial_years: string[] }>(
+      '/customer-class-comparison/available-years'
+    );
+    return response.data;
+  },
+
+  /**
+   * Get customers in a specific ABC class across multiple financial years
+   */
+  getCustomers: async (
+    abcClass: string,
+    financialYears: string
+  ): Promise<CustomerListItem[]> => {
+    const response = await apiClient.get<CustomerListItem[]>(
+      '/customer-class-comparison/customers',
+      {
+        params: {
+          abc_class: abcClass,
+          financial_years: financialYears,
+        },
+      }
+    );
+    return response.data;
+  },
+
+  /**
+   * Get class comparison trend data
+   */
+  getTrend: async (
+    abcClass: string,
+    customerId: number,
+    financialYears: string,
+    metric: string
+  ): Promise<ClassComparisonDataPoint[]> => {
+    const response = await apiClient.get<ClassComparisonDataPoint[]>(
+      '/customer-class-comparison/trend',
+      {
+        params: {
+          abc_class: abcClass,
+          customer_id: customerId,
+          financial_years: financialYears,
+          metric: metric,
+        },
+      }
+    );
     return response.data;
   },
 };

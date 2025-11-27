@@ -7,13 +7,14 @@ UI Reference: ui/customer_behaviour_ui.R
 Provides customer purchase behaviour analysis with product-level details.
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
 from ..database import query_all
-from ..schemas import CustomerListItem, ProductListItem, CustomerBehaviourDataPoint
+from ..schemas import CustomerListItem, ProductListItem, CustomerBehaviourDataPoint, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/customer-behaviour", tags=["Customer Behaviour"])
+router = APIRouter(prefix="/customer-behaviour", tags=["Customer Behaviour"], dependencies=[Depends(get_current_user)])
 
 BASE_DATE = datetime(2021, 1, 1)
 

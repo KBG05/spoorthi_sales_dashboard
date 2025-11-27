@@ -7,12 +7,13 @@ UI Reference: ui/cross_sell_ui.R
 Provides cross-sell product recommendations for distributors.
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from ..database import query_one, query_all
-from ..schemas import CrossSellRecommendation
+from ..schemas import CrossSellRecommendation, User
+from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/cross-sell", tags=["Cross-Sell Analysis"])
+router = APIRouter(prefix="/cross-sell", tags=["Cross-Sell Analysis"], dependencies=[Depends(get_current_user)])
 
 
 @router.get("/recommendations", response_model=List[CrossSellRecommendation])

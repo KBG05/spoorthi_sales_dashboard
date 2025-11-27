@@ -36,7 +36,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/', label: 'Dashboard', icon: <DashboardIcon /> },
+  { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/abc-analysis', label: 'Trend Analysis', icon: <CategoryIcon /> },
   { path: '/customer-trend', label: 'Customer Trends', icon: <TrendingUpIcon /> },
   { path: '/customer-behaviour', label: 'Customer Behavior', icon: <PeopleIcon /> },
@@ -103,7 +103,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
             <ListItem disablePadding sx={{ display: 'block' }}>
               <NavLink
                 to={item.path}
-                end={item.path === '/'}
+                end={item.path === '/dashboard'}
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 {({ isActive }: { isActive: boolean }) => (
@@ -115,13 +115,13 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                       mx: open ? 0.5 : 0.5,
                       my: 0.5,
                       borderRadius: 1,
-                      backgroundColor: isActive ? 'primary.main' : 'transparent',
+                      backgroundColor: isActive ? '#8B5CF6' : 'transparent',
                       color: isActive ? '#FFFFFF' : 'inherit',
-                      border: isActive ? '1.5px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+                      border: isActive ? '1.5px solid #8B5CF6' : '1px solid transparent',
                       transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-                      '&:hover': {
-                        backgroundColor: isActive ? 'primary.dark' : 'rgba(255, 255, 255, 0.05)',
-                        borderColor: isActive ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)',
+                      '&:hover, &:active, &:focus': {
+                        backgroundColor: isActive ? '#8B5CF6' : 'rgba(255, 255, 255, 0.05)',
+                        borderColor: isActive ? '#8B5CF6' : 'rgba(255, 255, 255, 0.1)',
                       },
                     }}
                   >

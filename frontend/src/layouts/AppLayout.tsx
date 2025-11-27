@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Outlet } from 'react-router';
 import { Box, AppBar, Toolbar, Typography, IconButton } from '@mui/material';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
+import PriyafilLogo from '../../public/Priyafil-Logo-PNG-Final.png';
+import Logo1 from '../../public/logo1.png';
 import Sidebar from '../components/Sidebar';
 import { useThemeMode } from '../theme/ThemeProvider';
 
@@ -37,10 +39,14 @@ export const AppLayout = () => {
           }}
         >
           <Toolbar sx={{ minHeight: 64, px: { xs: 2, sm: 3 } }}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Textile Analytics
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <img src={PriyafilLogo} alt="Priyafil Logo" style={{ height: 40, marginRight: 12 }} />
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Textile Analytics
+              </Typography>
+            </Box>
             <Box sx={{ flexGrow: 1 }} />
+            <img src={Logo1} alt="Logo1" style={{ height: 50, marginRight: 16 }} />
             <IconButton onClick={toggleTheme} color="inherit">
               {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
             </IconButton>

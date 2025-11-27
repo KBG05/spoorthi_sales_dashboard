@@ -17,6 +17,8 @@ import {
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
+import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
+import { ABC_COLORS } from '../constants/constants';
 import { abcApi } from '../api';
 import type { ABCTrendResponse } from '../api/types';
 
@@ -42,17 +44,52 @@ const TrendChart = memo(({
         xAxis={[{
           scaleType: 'point',
           data: chartConfig.formattedDates,
+          valueFormatter: (value: string, context: AxisValueFormatterContext) => {
+            if (context.location === 'tick') {
+              // Short format for tick labels - just month abbreviation
+              return value.split(' ')[0]; // "Jan" from "Jan 2024"
+            }
+            // Full format for tooltips
+            return value;
+          },
         }]}
         yAxis={[{
-          valueFormatter: (value: number) => {
+          valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+            if (context.location === 'tick') {
+              // Short format for tick labels
+              if (metric === 'Revenue') {
+                if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                return `${value.toFixed(0)}`;
+              }
+              // For quantity, use K for thousands
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+              return value.toLocaleString();
+            }
+            // Full format for tooltips
             if (metric === 'Revenue') {
-              return `${value.toFixed(0)}M`;
+              return `₹${value.toFixed(2)}M`;
             }
             return value.toLocaleString();
           },
+          min: 0,
+          tickMinStep: (() => {
+            // Calculate dynamic tick step based on data range
+            const allValues = chartConfig.chartSeries.flatMap(series => series.data || []);
+            if (allValues.length === 0) return 1;
+            const maxVal = Math.max(...allValues);
+            const minVal = Math.min(...allValues);
+            const range = maxVal - minVal;
+            
+            if (range < 10) return 1;
+            if (range < 50) return 5;
+            if (range < 100) return 10;
+            if (range < 500) return 50;
+            if (range < 1000) return 100;
+            return Math.ceil(range / 5 / 100) * 100;
+          })(),
         }]}
         series={chartConfig.chartSeries}
-        margin={{ top: 20, bottom: 50, left: 100, right: 20 }}
+        margin={{ top: 20, bottom: 50, left: 100, right: 30 }}
         grid={{ vertical: false, horizontal: true }}
         slotProps={{
           mark: {
@@ -151,7 +188,7 @@ const ABCAnalysis = () => {
             const point = categoryData.find(d => d.month_date === date);
             return point?.value !== undefined && point?.value !== null ? point.value : null;
           }),
-          color: cat === 'A' ? '#00D25B' : cat === 'B' ? '#FCAB00' : cat === 'C' ? '#FF4747' : '#8B5CF6',
+          color: cat === 'A' ? ABC_COLORS.A : cat === 'B' ? ABC_COLORS.B : cat === 'C' ? ABC_COLORS.C : ABC_COLORS.Overall,
           curve: 'linear' as const,
           showMark: true,
           valueFormatter: (value: number | null) => {

@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { Box, Typography, Card, CardContent, Paper, CircularProgress } from '@mui/material';
 import { ShoppingCart } from '@mui/icons-material';
 import { BarChart } from '@mui/x-charts/BarChart';
+import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
+import { useTheme } from '@mui/material/styles';
 import { dashboardApi } from '../api';
 import type { KPIResponse } from '../api/types';
+import { ABC_COLORS } from '../constants/constants';
 
 // Custom Rupee Icon Component
 const RupeeIcon = () => (
@@ -26,6 +29,7 @@ interface ComboData {
 }
 
 const Dashboard = () => {
+  const theme = useTheme();
   const [kpiData, setKpiData] = useState<KPIResponse | null>(null);
   const [abcCount, setAbcCount] = useState<CategoryData[]>([]);
   const [abcRevenue, setAbcRevenue] = useState<CategoryData[]>([]);
@@ -228,7 +232,7 @@ const Dashboard = () => {
                   },
                   colorMap: {
                     type: 'ordinal',
-                    colors: ['#00D25B', '#FCAB00', '#FF4747'],
+                    colors: [ABC_COLORS.A, ABC_COLORS.B, ABC_COLORS.C],
                     values: abcCount.map(d => d.category),
                   },
                 }]}
@@ -236,24 +240,39 @@ const Dashboard = () => {
                   tickLabelStyle: {
                     fontSize: 12,
                   },
+                  min: 0,
+                  max: Math.ceil(Math.max(...abcCount.map(d => d.count || 0)) * 1.1),
+                  tickMinStep: (() => {
+                    const counts = abcCount.map(d => d.count || 0);
+                    const maxVal = Math.max(...counts);
+                    const range = maxVal;
+                    if (range < 10) return 1;
+                    if (range < 50) return 5;
+                    if (range < 100) return 10;
+                    if (range < 500) return 50;
+                    return Math.ceil(range / 5 / 100) * 100;
+                  })(),
                 }]}
                 series={[{ 
                   data: abcCount.map(d => d.count || 0),
                   label: 'Product Count',
                 }]}
-                height={300}
+                  height={380}
                 margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
+                barLabel="value"
                 slotProps={{
                   barLabel: {
+                    placement: 'outside',
                     style: {
-                      fill: '#ffffff',
-                      fontSize: 11,
+                      fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                       fontWeight: 600,
+                      fontSize: 14,
+                      transform: 'translateY(-5px)',
+                      zIndex: 2,
                     },
                   },
                 }}
-                barLabel="value"
               />
             ) : (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
@@ -282,34 +301,59 @@ const Dashboard = () => {
                   },
                   colorMap: {
                     type: 'ordinal',
-                    colors: ['#00D25B', '#FCAB00', '#FF4747'],
+                    colors: [ABC_COLORS.A, ABC_COLORS.B, ABC_COLORS.C],
                     values: abcRevenue.map(d => d.category),
                   },
                 }]}
                 yAxis={[{
                   tickLabelStyle: {
                     fontSize: 12,
+                    fontWeight: 500,
                   },
-                  valueFormatter: (value) => `₹${value}M`,
+                  valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                    if (context.location === 'tick') {
+                      // Short format for axis ticks
+                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+                      if (value >= 100) return `₹${value.toFixed(0)}`;
+                      if (value >= 10) return `₹${value.toFixed(0)}`;
+                      return `₹${value.toFixed(0)}`;
+                    }
+                    // Full format for tooltips
+                    return `₹${value.toFixed(2)}M`;
+                  },
+                  min: 0,
+                  max: Math.ceil(Math.max(...abcRevenue.map(d => d.revenue || 0)) * 1.1),
+                  tickMinStep: (() => {
+                    const revenues = abcRevenue.map(d => d.revenue || 0);
+                    const maxVal = Math.max(...revenues);
+                    const range = maxVal;
+                    if (range < 10) return 1;
+                    if (range < 50) return 5;
+                    if (range < 100) return 10;
+                    if (range < 500) return 50;
+                    return Math.ceil(range / 5 / 100) * 100;
+                  })(),
                 }]}
                 series={[{ 
                   data: abcRevenue.map(d => d.revenue || 0),
                   label: 'Revenue (M)',
-                  valueFormatter: (value) => value ? `₹${value.toFixed(2)}M` : '₹0M',
+                  valueFormatter: (value: number | null) => value ? `₹${value.toFixed(2)}M` : '₹0M',
                 }]}
-                height={300}
-                margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
+                  height={380}
+                margin={{ top: 50, bottom: 50, left: 100, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
+                barLabel="value"
                 slotProps={{
                   barLabel: {
+                    placement: 'outside',
                     style: {
-                      fill: '#ffffff',
-                      fontSize: 11,
+                      fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                       fontWeight: 600,
+                      fontSize: 14,
+                      transform: 'translateY(-8px)',
                     },
                   },
                 }}
-                barLabel={(item) => `₹${item.value?.toFixed(1)}M`}
               />
             ) : (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
@@ -344,6 +388,18 @@ const Dashboard = () => {
                   tickLabelStyle: {
                     fontSize: 12,
                   },
+                  min: 0,
+                  max: Math.ceil(Math.max(...xyzCount.map(d => d.count || 0)) * 1.1),
+                  tickMinStep: (() => {
+                    const counts = xyzCount.map(d => d.count || 0);
+                    const maxVal = Math.max(...counts);
+                    const range = maxVal;
+                    if (range < 10) return 1;
+                    if (range < 50) return 5;
+                    if (range < 100) return 10;
+                    if (range < 500) return 50;
+                    return Math.ceil(range / 5 / 100) * 100;
+                  })(),
                 }]}
                 series={[{ 
                   data: xyzCount.map(d => d.count || 0), 
@@ -351,19 +407,21 @@ const Dashboard = () => {
                   label: 'Count',
                   valueFormatter: (value) => value?.toLocaleString() || '0',
                 }]}
-                height={300}
+                  height={380}
                 margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
+                barLabel="value"
                 slotProps={{
                   barLabel: {
+                    placement: 'outside',
                     style: {
-                      fill: '#ffffff',
-                      fontSize: 11,
+                      fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                       fontWeight: 600,
+                      fontSize: 14,
+                      transform: 'translateY(-8px)',
                     },
                   },
                 }}
-                barLabel="value"
               />
             ) : (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
@@ -394,28 +452,54 @@ const Dashboard = () => {
                 yAxis={[{
                   tickLabelStyle: {
                     fontSize: 12,
+                    fontWeight: 500,
                   },
-                  valueFormatter: (value) => `₹${value}M`,
+                  valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                    if (context.location === 'tick') {
+                      // Short format for axis ticks
+                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+                      if (value >= 100) return `₹${value.toFixed(0)}`;
+                      if (value >= 10) return `₹${value.toFixed(0)}`;
+                      return `₹${value.toFixed(0)}`;
+                    }
+                    // Full format for tooltips
+                    return `₹${value.toFixed(2)}M`;
+                  },
+                  min: 0,
+                  max: Math.ceil(Math.max(...xyzRevenue.map(d => d.revenue || 0)) * 1.1),
+                  tickMinStep: (() => {
+                    const revenues = xyzRevenue.map(d => d.revenue || 0);
+                    const maxVal = Math.max(...revenues);
+                    const range = maxVal;
+                    if (range < 10) return 1;
+                    if (range < 50) return 5;
+                    if (range < 100) return 10;
+                    if (range < 500) return 50;
+                    return Math.ceil(range / 5 / 100) * 100;
+                  })(),
                 }]}
                 series={[{ 
                   data: xyzRevenue.map(d => d.revenue || 0), 
                   color: '#FF4747',
                   label: 'Revenue (M)',
-                  valueFormatter: (value) => value ? `₹${value.toFixed(2)}M` : '₹0M',
+                  valueFormatter: (value: number | null) => value ? `₹${value.toFixed(2)}M` : '₹0M',
+                  barLabelPlacement:"outside"
                 }]}
-                height={300}
-                margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
+                  height={380}
+                margin={{ top: 65, bottom: 50, left: 100, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
+                barLabel="value"
                 slotProps={{
                   barLabel: {
+                    placement: 'outside',
                     style: {
-                      fill: '#ffffff',
-                      fontSize: 11,
+                      fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                       fontWeight: 600,
+                      fontSize: 14,
+                      transform: 'translateY(-5px)',
                     },
                   },
                 }}
-                barLabel={(item) => `₹${item.value?.toFixed(1)}M`}
               />
             ) : (
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
@@ -460,25 +544,39 @@ const Dashboard = () => {
                 tickLabelStyle: {
                   fontSize: 12,
                 },
+                min: 0,
+                max: Math.ceil(Math.max(...comboCount.map(d => d.count || 0)) * 1.1),
+                tickMinStep: (() => {
+                  const counts = comboCount.map(d => d.count || 0);
+                  const maxVal = Math.max(...counts);
+                  const range = maxVal;
+                  if (range < 10) return 1;
+                  if (range < 50) return 5;
+                  if (range < 100) return 10;
+                  if (range < 500) return 50;
+                  return Math.ceil(range / 5 / 100) * 100;
+                })(),
               }]}
               series={[{ 
                 data: comboCount.map(d => d.count), 
                 label: 'Count',
                 valueFormatter: (value) => value?.toLocaleString() || '0',
               }]}
-              height={400}
+                height={500}
               margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
               grid={{ vertical: false, horizontal: true }}
+              barLabel="value"
               slotProps={{
                 barLabel: {
+                  placement: 'outside',
                   style: {
-                    fill: '#ffffff',
-                    fontSize: 11,
+                    fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
+                    fontSize: 14,
+                    transform: 'translateY(-8px)',
                   },
                 },
               }}
-              barLabel={(item) => item.value?.toLocaleString() || '0'}
             />
           ) : (
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}>

@@ -16,7 +16,9 @@ import {
   Button,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
+import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { productBehaviourApi } from '../api';
+import { ABC_COLORS } from '../constants/constants';
 import type { ProductListItem, ProductBehaviourDataPoint } from '../api/types';
 
 const ProductBehaviour: React.FC = () => {
@@ -80,7 +82,6 @@ const ProductBehaviour: React.FC = () => {
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
         Product Behavior vs Class Trend
       </Typography>
-
       {/* Filter Section */}
       <Box 
         sx={{ 
@@ -189,7 +190,6 @@ const ProductBehaviour: React.FC = () => {
           label="Show Labels"
         />
       </Box>
-
       {/* Chart Section */}
       {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
@@ -206,7 +206,7 @@ const ProductBehaviour: React.FC = () => {
           <Typography color="text.secondary">No data available</Typography>
         </Box>
       ) : (
-        <Box flex={1} minHeight={0}>
+  <Box flex={1} minHeight={0} sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1, p: 2 }}>
           <LineChart
             xAxis={[{
               scaleType: 'band',
@@ -217,60 +217,138 @@ const ProductBehaviour: React.FC = () => {
                 id: 'classAxis',
                 scaleType: 'linear',
                 position: 'left',
-                label: metric === 'Revenue' ? 'Class Total (Cr)' : 'Class Total',
-                valueFormatter: (value: number) => {
+                label: metric === 'Revenue' ? 'Class Total (M)' : 'Class Total',
+                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                  if (context.location === 'tick') {
+                    // Short format for tick labels with unit suffix
+                    if (metric === 'Revenue') {
+                      const mValue = value / 1000000;
+                      if (mValue >= 1000) return `₹${(mValue / 1000).toFixed(0)}K`;
+                      return `₹${mValue.toFixed(0)}M`;
+                    }
+                    // For quantity with unit suffix
+                    if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
+                    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                    return `${value.toFixed(0)}`;
+                  }
+                  // Full format for tooltips
                   if (metric === 'Revenue') {
-                    return `₹${(value / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })} Cr`;
+                    return `₹${(value / 1000000).toLocaleString('en-IN', { maximumFractionDigits: 2 })}M`;
                   }
                   return value.toLocaleString('en-IN');
                 },
+                min: 0,
+                tickMinStep: (() => {
+                  // Calculate dynamic tick step based on data range
+                  const classData = data.filter(d => d.type.startsWith('Class')).map(d => d.value);
+                  const maxVal = Math.max(...classData);
+                  const minVal = Math.min(...classData);
+                  const range = maxVal - minVal;
+                  
+                  // If range is very small (like all zeros or very close values), use appropriate step
+                  if (range < 10) return 1;
+                  if (range < 100) return 10;
+                  if (range < 1000) return 100;
+                  return Math.ceil(range / 5 / 1000) * 1000; // Divide into ~5 steps
+                })(),
               },
               {
                 id: 'productAxis',
                 scaleType: 'linear',
                 position: 'right',
-                label: metric === 'Revenue' ? 'Product (Cr)' : 'Product',
-                valueFormatter: (value: number) => {
+                label: metric === 'Revenue' ? 'Product (M)' : 'Product',
+                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                  if (context.location === 'tick') {
+                    // Short format for tick labels with decimals and unit
+                    if (metric === 'Revenue') {
+                      const mValue = value / 1000000;
+                      if (mValue >= 1000) return `₹${(mValue / 1000).toFixed(0)}K`; // No decimals for K
+                      if (mValue >= 1) return `₹${mValue.toFixed(1)}M`;
+                      if (mValue >= 0.01) return `₹${mValue.toFixed(2)}M`; // 2 decimals for 0.01-0.99
+                      return `₹${mValue.toFixed(3)}M`; // 3 decimals only for very small values
+                    }
+                    // For quantity with unit suffix
+                    if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`; // No decimals for M
+                    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`; // No decimals for K
+                    return `${value.toFixed(0)}`
+                  }
+                  // Full format for tooltips
                   if (metric === 'Revenue') {
-                    return `₹${(value / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 1 })} Cr`;
+                    return `₹${(value / 1000000).toLocaleString('en-IN', { maximumFractionDigits: 2 })}M`;
                   }
                   return value.toLocaleString('en-IN');
                 },
+                min: 0,
+                tickLabelStyle: {
+                  fontSize: 12,
+                },
+                tickMinStep: (() => {
+                  // Calculate dynamic tick step based on data range
+                  const productData = data.filter(d => !d.type.startsWith('Class')).map(d => d.value);
+                  if (productData.length === 0) return 1;
+                  
+                  const maxVal = Math.max(...productData);
+                  const minVal = Math.min(...productData);
+                  const range = maxVal - minVal;
+                  
+                  // If range is very small (like all zeros or very close values), use appropriate step
+                  if (range < 10) return 1;
+                  if (range < 100) return 10;
+                  if (range < 1000) return 100;
+                  return Math.ceil(range / 5 / 1000) * 1000; // Divide into ~5 steps
+                })(),
               },
             ]}
             series={(() => {
               const types = [...new Set(data.map(d => d.type))];
               return types.map((type) => {
                 const isClassTotal = type.startsWith('Class');
+                let color;
+                let strokeWidth;
+                
+                if (isClassTotal) {
+                  // Match 'Class A Total', 'Class B Total', 'Class C Total'
+                  const match = type.match(/Class\s([ABC])\sTotal/i);
+                  if (match) {
+                    color = ABC_COLORS[match[1] as 'A' | 'B' | 'C'];
+                  }
+                  strokeWidth = 2;
+                } else {
+                  // Product lines use Overall color
+                  color = ABC_COLORS.Overall;
+                  strokeWidth = 1.5;
+                }
                 return {
                   data: data.filter(d => d.type === type).map(d => d.value),
                   label: type,
                   curve: 'linear' as const,
                   showMark: showLabels,
                   yAxisId: isClassTotal ? 'classAxis' : 'productAxis',
+                  color,
+                  strokeWidth,
                   valueFormatter: (value: number | null) => {
                     if (value === null || value === undefined) return '';
                     if (metric === 'Revenue') {
-                      return `₹${(value / 10000000).toLocaleString('en-IN', { maximumFractionDigits: 2 })} Cr`;
+                      return `₹${(value / 1000000).toLocaleString('en-IN', { maximumFractionDigits: 2 })}M`;
                     }
                     return value.toLocaleString('en-IN');
                   },
                 };
               });
             })()}
-            leftAxis="classAxis"
-            rightAxis="productAxis"
-            margin={{ top: 10, right: 100, bottom: 50, left: 100 }}
+            margin={{ top: 10, right: 200, bottom: 50, left: 120 }}
             grid={{ vertical: false, horizontal: true }}
             slotProps={{
               legend: {
-                hidden: data.length > 50,
-                direction: 'row',
-                position: { vertical: 'top', horizontal: 'middle' },
-                padding: 0,
-              },
+                direction: "horizontal",
+
+                position: {
+                  vertical: 'top',
+                  horizontal: "center"
+                }
+              }
             }}
-          />
+            hideLegend={data.length > 50} />
         </Box>
       )}
     </Box>

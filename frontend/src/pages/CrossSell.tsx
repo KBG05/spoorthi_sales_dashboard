@@ -53,7 +53,7 @@ const CrossSell = () => {
       headerName: 'Products Purchased',
       flex: 1,
       minWidth: 350,
-      wrapText: true,
+  // ...existing code...
       renderCell: (params) => (
         <Box sx={{ 
           whiteSpace: 'normal', 
@@ -69,7 +69,7 @@ const CrossSell = () => {
       headerName: 'Recommendations',
       flex: 1,
       minWidth: 350,
-      wrapText: true,
+  // ...existing code...
       renderCell: (params) => (
         <Box sx={{ 
           whiteSpace: 'normal', 

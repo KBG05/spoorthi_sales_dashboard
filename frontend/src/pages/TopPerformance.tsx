@@ -11,10 +11,13 @@ import {
   Typography,
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
+import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
+import { useTheme } from '@mui/material/styles';
 import { topPerformanceApi } from '../api';
 import type { TopPerformersResponse } from '../api/types';
 
 const TopPerformance: React.FC = () => {
+  const theme = useTheme();
   const [financialYear, setFinancialYear] = useState('FY24-25');
   const [entityType, setEntityType] = useState<'Customers' | 'Products'>('Customers');
   const [data, setData] = useState<TopPerformersResponse | null>(null);
@@ -111,24 +114,51 @@ const TopPerformance: React.FC = () => {
           <Box flex={1} minHeight={0}>
             <BarChart
               xAxis={[{ scaleType: 'band', data: fyChartData.ids }]}
-              yAxis={[{ valueFormatter: (value) => `₹${value}M` }]}
+              yAxis={[{ 
+                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                  if (context.location === 'tick') {
+                    // Short format for tick labels
+                    if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+                    return `₹${value.toFixed(0)}`;
+                  }
+                  // Full format for tooltips
+                  return `₹${value.toFixed(2)}M`;
+                },
+                min: 0,
+                tickMinStep: (() => {
+                  // Calculate dynamic tick step based on data range
+                  if (fyChartData.revenues.length === 0) return 1;
+                  const maxVal = Math.max(...fyChartData.revenues);
+                  const minVal = Math.min(...fyChartData.revenues);
+                  const range = maxVal - minVal;
+                  
+                  // Adaptive step to prevent duplicate ticks
+                  if (range < 5) return 1;
+                  if (range < 20) return 5;
+                  if (range < 100) return 10;
+                  if (range < 500) return 50;
+                  return Math.ceil(range / 5 / 100) * 100;
+                })(),
+              }]}
               series={[
                 {
                   data: fyChartData.revenues,
                   label: 'Revenue (M)',
-                  color: '#8B5CF6',
-                  valueFormatter: (value) => `₹${value?.toFixed(1)}M`,
+                  color: '#9b59b6',
+                  valueFormatter: (value) => `₹${value?.toFixed(2)}M`,
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 60 }}
+              margin={{ top: 50, right: 30, bottom: 50, left: 100 }}
               grid={{ vertical: false, horizontal: true }}
               barLabel={(item) => `₹${item.value?.toFixed(1)}M`}
               slotProps={{
                 barLabel: {
+                  placement: 'outside',
                   style: {
-                    fill: '#ffffff',
-                    fontSize: 11,
+                    fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
+                    fontSize: 14,
+                    transform: 'translateY(-8px)',
                   },
                 },
               }}
@@ -143,24 +173,51 @@ const TopPerformance: React.FC = () => {
           <Box flex={1} minHeight={0}>
             <BarChart
               xAxis={[{ scaleType: 'band', data: latestChartData.ids }]}
-              yAxis={[{ valueFormatter: (value) => `₹${value}M` }]}
+              yAxis={[{ 
+                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                  if (context.location === 'tick') {
+                    // Short format for tick labels
+                    if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+                    return `₹${value.toFixed(0)}`;
+                  }
+                  // Full format for tooltips
+                  return `₹${value.toFixed(2)}M`;
+                },
+                min: 0,
+                tickMinStep: (() => {
+                  // Calculate dynamic tick step based on data range
+                  if (latestChartData.revenues.length === 0) return 1;
+                  const maxVal = Math.max(...latestChartData.revenues);
+                  const minVal = Math.min(...latestChartData.revenues);
+                  const range = maxVal - minVal;
+                  
+                  // Adaptive step to prevent duplicate ticks
+                  if (range < 5) return 1;
+                  if (range < 20) return 5;
+                  if (range < 100) return 10;
+                  if (range < 500) return 50;
+                  return Math.ceil(range / 5 / 100) * 100;
+                })(),
+              }]}
               series={[
                 {
                   data: latestChartData.revenues,
                   label: 'Revenue (M)',
-                  color: '#5E72E4',
-                  valueFormatter: (value) => `₹${value?.toFixed(1)}M`,
+                  color: '#16a085',
+                  valueFormatter: (value) => `₹${value?.toFixed(2)}M`,
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 60 }}
+              margin={{ top: 50, right: 30, bottom: 50, left: 100 }}
               grid={{ vertical: false, horizontal: true }}
               barLabel={(item) => `₹${item.value?.toFixed(1)}M`}
               slotProps={{
                 barLabel: {
+                  placement: 'outside',
                   style: {
-                    fill: '#ffffff',
-                    fontSize: 11,
+                    fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
+                    fontSize: 14,
+                    transform: 'translateY(-8px)',
                   },
                 },
               }}

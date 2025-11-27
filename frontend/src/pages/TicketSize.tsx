@@ -11,10 +11,14 @@ import {
   Typography,
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
+import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
+import { useTheme } from '@mui/material/styles';
 import { ticketSizeApi } from '../api';
 import type { TicketSizeBand } from '../api/types';
+import { ABC_COLORS } from '../constants/constants';
 
 const TicketSize: React.FC = () => {
+  const theme = useTheme();
   const [financialYear, setFinancialYear] = useState('FY24-25');
   const [dimension, setDimension] = useState<'Products' | 'Customers'>('Customers');
   const [data, setData] = useState<TicketSizeBand[]>([]);
@@ -116,24 +120,39 @@ const TicketSize: React.FC = () => {
           <Box flex={1} minHeight={0}>
             <BarChart
               xAxis={[{ scaleType: 'band', data: countData.bands }]}
+              yAxis={[{
+                min: 0,
+                tickMinStep: (() => {
+                  if (countData.values.length === 0) return 1;
+                  const maxVal = Math.max(...countData.values);
+                  const range = maxVal;
+                  if (range < 10) return 1;
+                  if (range < 50) return 5;
+                  if (range < 100) return 10;
+                  if (range < 500) return 50;
+                  return Math.ceil(range / 5 / 100) * 100;
+                })(),
+              }]}
               series={[
                 {
                   data: countData.values,
                   label: 'Count',
-                  color: '#3498db',
+                  color: ABC_COLORS.Overall,
                   valueFormatter: (value, { dataIndex }) => 
                     countData.labels[dataIndex] || value?.toString() || '0',
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 70 }}
+              margin={{ top: 50, right: 30, bottom: 50, left: 80 }}
               grid={{ vertical: false, horizontal: true }}
               barLabel="value"
               slotProps={{
                 barLabel: {
+                  placement: 'outside',
                   style: {
-                    fill: '#ffffff',
-                    fontSize: 11,
+                    fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
+                    fontSize: 14,
+                    transform: 'translateY(-8px)',
                   },
                 },
               }}
@@ -151,32 +170,62 @@ const TicketSize: React.FC = () => {
             <BarChart
               xAxis={[{ scaleType: 'band', data: revenueData.bands }]}
               yAxis={[{
-                valueFormatter: (value) => `₹${value?.toFixed(1)} Cr`,
+                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                  if (context.location === 'tick') {
+                    // Short format for tick labels
+                    return `₹${value.toFixed(0)}`;
+                  }
+                  // Full format for tooltips
+                  return `₹${value.toFixed(2)}Cr`;
+                },
+                min: 0,
+                tickMinStep: (() => {
+                  if (revenueData.values.length === 0) return 1;
+                  const maxVal = Math.max(...revenueData.values);
+                  const range = maxVal;
+                  if (range < 10) return 1;
+                  if (range < 50) return 5;
+                  if (range < 100) return 10;
+                  if (range < 500) return 50;
+                  return Math.ceil(range / 5 / 100) * 100;
+                })(),
               }]}
               series={[
                 {
                   data: revenueData.values,
                   label: 'Revenue (CR)',
-                  color: '#2ecc71',
+                  color: ABC_COLORS.A,
                   valueFormatter: (value, { dataIndex }) => 
-                    revenueData.labels[dataIndex] || `₹${value?.toFixed(1)} CR`,
-
+                    revenueData.labels[dataIndex] || `₹${value?.toFixed(2)}Cr`,
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 70 }}
-              grid={{ vertical: false, horizontal: true }}
-              barLabel="value"
+              margin={{ top: 50, right: 30, bottom: 50, left: 100 }}
+              barLabel={(item) => `₹${item.value?.toFixed(1)}Cr`}
               slotProps={{
                 barLabel: {
+                  placement: 'outside',
+                  
                   style: {
-                    fill: '#ffffff',
-                    fontSize: 11,
+                    fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
+                    fontSize: 14,
+                    transform: 'translateY(-8px)',
                   },
-
                 },
-
               }}
+              grid={{ vertical: false, horizontal: true }}
+              
+              // slotProps={{
+              //   barLabel: {
+              //     style: {
+              //       fill: '#ffffff',
+              //       fontSize: 11,
+              //       fontWeight: 600,
+              //     },
+
+              //   },
+
+              // }}
             />
           </Box>
         </Box>

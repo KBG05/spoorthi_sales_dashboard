@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { ScatterChart } from '@mui/x-charts/ScatterChart';
+import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { cbaApi } from '../api';
 import type { RFMMetrics, RFMSummary, SegmentData } from '../api/types';
 
@@ -258,10 +259,10 @@ const CBA = () => {
             <Card sx={{ flex: '1 1 calc(20% - 16px)', minWidth: 180 }}>
               <CardContent>
                 <Typography color="text.secondary" gutterBottom>
-                  Avg Monetary (M)
+                  Avg Monetary
                 </Typography>
                 <Typography variant="h5">
-                  ₹{(summary.avg_monetary / 1_000_000).toFixed(2)}
+                  ₹{summary.avg_monetary.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </Typography>
               </CardContent>
             </Card>
@@ -276,10 +277,10 @@ const CBA = () => {
             <Card sx={{ flex: '1 1 calc(20% - 16px)', minWidth: 180 }}>
               <CardContent>
                 <Typography color="text.secondary" gutterBottom>
-                  Total Revenue (M)
+                  Total Revenue
                 </Typography>
                 <Typography variant="h5">
-                  ₹{(summary.total_revenue / 1_000_000).toFixed(2)}
+                  ₹{summary.total_revenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                 </Typography>
               </CardContent>
             </Card>
@@ -354,7 +355,13 @@ const CBA = () => {
               xAxis={[{ label: 'Months Since Last Purchase' }]}
               yAxis={[{ 
                 label: 'Total Revenue',
-                valueFormatter: (value: number | null) => value ? `₹${value.toFixed(1)}M` : '₹0M'
+                valueFormatter: (value: number | null, context: AxisValueFormatterContext) => {
+                  if (value === null) return '₹0M';
+                  if (context.location === 'tick') {
+                    return `₹${value.toFixed(0)}M`;
+                  }
+                  return `₹${value.toFixed(1)}M`;
+                }
               }]}
               height={320}
               grid={{ vertical: true, horizontal: true }}
@@ -377,7 +384,13 @@ const CBA = () => {
               xAxis={[{ label: 'Number of Purchase Periods' }]}
               yAxis={[{ 
                 label: 'Total Revenue',
-                valueFormatter: (value: number | null) => value ? `₹${value.toFixed(1)}M` : '₹0M'
+                valueFormatter: (value: number | null, context: AxisValueFormatterContext) => {
+                  if (value === null) return '₹0M';
+                  if (context.location === 'tick') {
+                    return `₹${value.toFixed(0)}M`;
+                  }
+                  return `₹${value.toFixed(1)}M`;
+                }
               }]}
               height={320}
               grid={{ vertical: true, horizontal: true }}
@@ -411,7 +424,7 @@ const CBA = () => {
         Customer Segmentation
       </Typography>
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <Paper sx={{ flex: '1 1 calc(50% - 16px)', minWidth: 400, p: 2, height: 400 }}>
+        <Paper sx={{ flex: '1 1 calc(50% - 16px)', minWidth: 600, p: 2, height: 400 }}>
           <Typography variant="h6" gutterBottom>
             Customer Count by Segment
           </Typography>
@@ -422,6 +435,9 @@ const CBA = () => {
               {
                 scaleType: 'band',
                 dataKey: 'segment',
+                tickLabelStyle: {
+                  fontSize: 13,
+                },
               },
             ]}
             xAxis={[{ label: 'Number of Customers' }]}
@@ -434,11 +450,11 @@ const CBA = () => {
             ]}
             colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}
             height={320}
-            margin={{ left: 180 }}
+            margin={{ left: 100, bottom: 50, right: 10, top: 10 }}
             grid={{ vertical: true, horizontal: true }}
           />
         </Paper>
-        <Paper sx={{ flex: '1 1 calc(50% - 16px)', minWidth: 400, p: 2, height: 400 }}>
+        <Paper sx={{ flex: '1 1 calc(50% - 16px)', minWidth: 600, p: 2, height: 400 }}>
           <Typography variant="h6" gutterBottom>
             Revenue by Segment (M)
           </Typography>
@@ -452,11 +468,20 @@ const CBA = () => {
               {
                 scaleType: 'band',
                 dataKey: 'segment',
+                tickLabelStyle: {
+                  fontSize: 13,
+                },
               },
             ]}
             xAxis={[{ 
               label: 'Total Revenue',
-              valueFormatter: (value: number | null) => value ? `${value.toFixed(1)}M` : '0M'
+              valueFormatter: (value: number | null, context: AxisValueFormatterContext) => {
+                if (value === null) return '0M';
+                if (context.location === 'tick') {
+                  return `${value.toFixed(0)}M`;
+                }
+                return `${value.toFixed(1)}M`;
+              }
             }]}
             series={[
               {
@@ -467,7 +492,7 @@ const CBA = () => {
             ]}
             colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}
             height={320}
-            margin={{ left: 180 }}
+            margin={{ left: 100, bottom: 50, right: 10, top: 10 }}
             grid={{ vertical: true, horizontal: true }}
           />
         </Paper>

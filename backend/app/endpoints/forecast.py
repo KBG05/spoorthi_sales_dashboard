@@ -15,6 +15,49 @@ from ..endpoints.auth import get_current_user
 router = APIRouter(prefix="/forecast", tags=["Forecast"], dependencies=[Depends(get_current_user)])
 
 
+@router.get("/available-months")
+async def get_available_forecast_months():
+    """
+    Get list of available forecast months from demand_forecast tables.
+    Returns list of formatted month strings.
+    """
+    table_query = """
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name LIKE 'demand_forecast_%_%'
+        ORDER BY table_name DESC
+    """
+    
+    rows = query_all(table_query)  # type: ignore
+    
+    if not rows:
+        return {"months": []}
+    
+    import re
+    from datetime import datetime
+    
+    months = []
+    for row in rows:
+        table_name = row["table_name"]
+        match = re.search(r'(\d{4})_(\d{2})$', table_name)
+        if match:
+            year = match.group(1)
+            month = int(match.group(2))
+            try:
+                month_date = datetime(int(year), month, 1)
+                months.append({
+                    "table_name": table_name,
+                    "display": month_date.strftime("%B %Y"),
+                    "year": year,
+                    "month": f"{month:02d}"
+                })
+            except ValueError:
+                continue
+    
+    return {"months": months}
+
+
 @router.get("/demand", response_model=ForecastResponse)
 async def get_demand_forecast():
     """
@@ -64,14 +107,20 @@ async def get_demand_forecast():
     
     table_name = result["table_name"]
     
-    # Extract month from table name (e.g., demand_forecast_2025_03)
+    # Extract month from table name (e.g., demand_forecast_2025_07 -> July 2025)
     import re
+    from datetime import datetime
     match = re.search(r'(\d{4})_(\d{2})$', table_name)
     if match:
-        year_month = f"{match.group(1)}-{match.group(2)}"
-        display_month = f"Displaying forecast generated for: {year_month}"
+        year = match.group(1)
+        month = int(match.group(2))
+        try:
+            month_date = datetime(int(year), month, 1)
+            display_month = f"Forecast Generated: {month_date.strftime('%B %Y')}"
+        except ValueError:
+            display_month = f"Forecast Generated: {year}-{match.group(2)}"
     else:
-        display_month = f"Displaying forecast from table: {table_name}"
+        display_month = f"Forecast Table: {table_name}"
     
     # Fetch forecast data
     data_query = f'''

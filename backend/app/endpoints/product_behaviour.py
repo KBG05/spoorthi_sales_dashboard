@@ -19,6 +19,38 @@ router = APIRouter(prefix="/product-behaviour", tags=["Product Behaviour"], depe
 BASE_DATE = datetime(2021, 1, 1)
 
 
+@router.get("/available-years")
+async def get_available_years():
+    """
+    Get list of available financial years based on product_ABC_XYZ_FY* tables.
+    """
+    import re
+    
+    table_query = """
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name LIKE 'product_ABC_XYZ_FY%'
+        AND table_name ~ 'product_ABC_XYZ_FY[0-9]+_[0-9]+'
+        ORDER BY table_name DESC
+    """
+    
+    rows = query_all(table_query)  # type: ignore
+    
+    if not rows:
+        return {"financial_years": []}
+    
+    fy_years = []
+    for row in rows:
+        table_name = row["table_name"]
+        match = re.search(r'FY(\d{2})_(\d{2})$', table_name)
+        if match:
+            fy_key = f"FY{match.group(1)}-{match.group(2)}"
+            fy_years.append(fy_key)
+    
+    return {"financial_years": sorted(set(fy_years), reverse=True)}
+
+
 @router.get("/products", response_model=List[ProductListItem])
 async def get_products_by_class(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),

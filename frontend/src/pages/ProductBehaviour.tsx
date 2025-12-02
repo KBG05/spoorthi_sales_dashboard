@@ -22,7 +22,8 @@ import { ABC_COLORS } from '../constants/constants';
 import type { ProductListItem, ProductBehaviourDataPoint } from '../api/types';
 
 const ProductBehaviour: React.FC = () => {
-  const [financialYear, setFinancialYear] = useState('FY24-25');
+  const [financialYear, setFinancialYear] = useState('');
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [abcClass, setAbcClass] = useState<'A' | 'B' | 'C'>('A');
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [products, setProducts] = useState<ProductListItem[]>([]);
@@ -32,8 +33,29 @@ const ProductBehaviour: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
+  // Fetch available years on mount
+  useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const response = await productBehaviourApi.getAvailableYears();
+        const years = response.data.financial_years;
+        setAvailableYears(years);
+        // Auto-select the first (latest) year
+        if (years.length > 0 && !financialYear) {
+          setFinancialYear(years[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching available years:', error);
+        setAvailableYears([]);
+      }
+    };
+    fetchAvailableYears();
+  }, []);
+
   // Fetch products when FY or ABC class changes
   useEffect(() => {
+    if (!financialYear) return; // Don't fetch if year not selected yet
+    
     const fetchProducts = async () => {
       setLoadingProducts(true);
       try {
@@ -101,10 +123,11 @@ const ProductBehaviour: React.FC = () => {
             value={financialYear}
             label="Financial Year"
             onChange={(e) => setFinancialYear(e.target.value)}
+            disabled={availableYears.length === 0}
           >
-            <MenuItem value="FY23-24">FY23-24</MenuItem>
-            <MenuItem value="FY24-25">FY24-25</MenuItem>
-            <MenuItem value="FY25-26">FY25-26</MenuItem>
+            {availableYears.map(year => (
+              <MenuItem key={year} value={year}>{year}</MenuItem>
+            ))}
           </Select>
         </FormControl>
 

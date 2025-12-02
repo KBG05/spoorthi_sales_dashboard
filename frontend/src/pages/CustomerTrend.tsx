@@ -115,11 +115,31 @@ const TrendChart = memo(({
 const CustomerTrend = () => {
   const [loading, setLoading] = useState(true);
   const [trendData, setTrendData] = useState<CustomerTrendDataPoint[]>([]);
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   
   // Filters
-  const [financialYear, setFinancialYear] = useState('FY24-25');
+  const [financialYear, setFinancialYear] = useState('');
   const [abcCategories, setAbcCategories] = useState<string[]>(['Overall', 'A', 'B', 'C']);
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
+
+  // Fetch available years on mount
+  useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const response = await customerTrendApi.getAvailableYears();
+        const years = response.data.financial_years;
+        setAvailableYears(years);
+        // Auto-select the first (latest) year
+        if (years.length > 0 && !financialYear) {
+          setFinancialYear(years[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching available years:', error);
+        setAvailableYears([]);
+      }
+    };
+    fetchAvailableYears();
+  }, []);
 
   // Handle checkbox changes
   const handleAbcChange = (category: string) => {
@@ -132,6 +152,8 @@ const CustomerTrend = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!financialYear) return; // Don't fetch if year not selected yet
+      
       setLoading(true);
       try {
         const abcString = abcCategories.join(',');
@@ -221,10 +243,11 @@ const CustomerTrend = () => {
               label="Financial Year"
               onChange={(e: SelectChangeEvent) => setFinancialYear(e.target.value)}
               size="small"
+              disabled={availableYears.length === 0}
             >
-              <MenuItem value="FY23-24">FY23-24</MenuItem>
-              <MenuItem value="FY24-25">FY24-25</MenuItem>
-              <MenuItem value="FY25-26">FY25-26</MenuItem>
+              {availableYears.map(year => (
+                <MenuItem key={year} value={year}>{year}</MenuItem>
+              ))}
             </Select>
           </FormControl>
 

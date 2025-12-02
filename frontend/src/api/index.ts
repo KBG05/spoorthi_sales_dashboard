@@ -61,6 +61,9 @@ export const abcApi = {
 
 // Customer Trend API
 export const customerTrendApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>('/customer-trend/available-years');
+  },
   getTrend: async (financialYear: string, abcCategories: string, metric: string) => {
     return await apiClient.get<CustomerTrendDataPoint[]>('/customer-trend/trend', {
       params: {
@@ -74,6 +77,9 @@ export const customerTrendApi = {
 
 // Customer Behaviour API
 export const customerBehaviourApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>('/customer-behaviour/available-years');
+  },
   getCustomers: async (financialYear: string, abcClasses: string) => {
     const response = await apiClient.get<CustomerListItem[]>('/customer-behaviour/customers', {
       params: {
@@ -112,6 +118,9 @@ export const customerBehaviourApi = {
 
 // Product Behaviour API
 export const productBehaviourApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>('/product-behaviour/available-years');
+  },
   getProducts: async (financialYear: string, abcClass: string) => {
     const response = await apiClient.get<ProductListItem[]>('/product-behaviour/products', {
       params: {
@@ -175,6 +184,9 @@ export const ticketSizeApi = {
 
 // Forecast API
 export const forecastApi = {
+  getAvailableMonths: async () => {
+    return await apiClient.get<{ months: { table_name: string, display: string, year: string, month: string }[] }>('/forecast/available-months');
+  },
   getDemandForecast: async () => {
     const response = await apiClient.get<ForecastResponse>('/forecast/demand');
     return response.data;

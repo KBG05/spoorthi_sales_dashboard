@@ -7,3 +7,5 @@ htmlcov
 .cache
 .venv
 .github
+.env
+.env.*

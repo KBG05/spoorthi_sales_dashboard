@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: kbg
+      POSTGRES_PASSWORD: kbg
+      POSTGRES_DB: priya_textile
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+  
+  backend:
+    image: kbg/textile-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    ports:
+      - "8000:8000"
+    environment:
+      DB_PORT: 5432
+      DB_USER: kbg
+      DB_PASSWORD: kbg
+      DB_NAME: priya_textile
+      DB_HOST: db
+    depends_on:
+      - db
+  
+  frontend:
+    image: kbg/textile-frontend:latest
+
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

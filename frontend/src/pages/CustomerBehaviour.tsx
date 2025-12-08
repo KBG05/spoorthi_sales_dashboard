@@ -19,6 +19,7 @@ import {
 import { LineChart } from '@mui/x-charts/LineChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { customerBehaviourApi } from '../api';
+import { ABC_COLORS } from '../constants/constants';
 import type { CustomerListItem, ProductListItem, CustomerBehaviourDataPoint } from '../api/types';
 
 const CustomerBehaviour: React.FC = () => {
@@ -28,21 +29,32 @@ const CustomerBehaviour: React.FC = () => {
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [selectedCustomers, setSelectedCustomers] = useState<number[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<number | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
-  const [showLabels, setShowLabels] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
   const [data, setData] = useState<CustomerBehaviourDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
-  // Neon/glowing color palette (avoiding ABC colors: green, yellow, red, blue)
-  const CUSTOMER_COLORS = {
-    customer1Overall: '#ff006e', // Neon pink/magenta
-    customer1Product: '#00ffff', // Neon cyan
-    customer2Overall: '#ff00ff', // Neon purple/magenta
-    customer2Product: '#ff8800', // Neon orange
+  // Color logic: Overall uses ABC class color, Product uses fixed color
+  const getCustomerColors = () => {
+    let overallColor: string = ABC_COLORS.Overall; // Default blue
+    
+    if (abcClasses.length === 1) {
+      const classKey = abcClasses[0] as 'A' | 'B' | 'C';
+      if (classKey in ABC_COLORS) {
+        overallColor = ABC_COLORS[classKey];
+      }
+    }
+    
+    return {
+      customerOverall: overallColor,
+      customerProduct: '#ff006e', // Pink/magenta for product
+    };
   };
+  
+  const CUSTOMER_COLORS = getCustomerColors();
 
   // Fetch available years on mount
   useEffect(() => {
@@ -75,9 +87,10 @@ const CustomerBehaviour: React.FC = () => {
           abcClasses.join(',')
         );
         setCustomers(result);
-        // Keep existing selections that are still valid
-        const validCustomerIds = result.map(c => c.customer_id);
-        setSelectedCustomers(prev => prev.filter(id => validCustomerIds.includes(id)));
+        // Keep existing selection if still valid
+        if (selectedCustomer && !result.some(c => c.customer_id === selectedCustomer)) {
+          setSelectedCustomer(null);
+        }
       } catch (error) {
         console.error('Error fetching customers:', error);
       } finally {
@@ -89,9 +102,9 @@ const CustomerBehaviour: React.FC = () => {
     }
   }, [financialYear, abcClasses]);
 
-  // Fetch products when customers are selected
+  // Fetch products when customer is selected
   useEffect(() => {
-    if (selectedCustomers.length === 0) {
+    if (!selectedCustomer) {
       setProducts([]);
       setSelectedProduct(null);
       return;
@@ -102,7 +115,7 @@ const CustomerBehaviour: React.FC = () => {
       try {
         const result = await customerBehaviourApi.getProducts(
           financialYear,
-          selectedCustomers.join(',')
+          selectedCustomer.toString()
         );
         setProducts(result);
         // Reset product selection if it's not in the new product list
@@ -116,11 +129,11 @@ const CustomerBehaviour: React.FC = () => {
       }
     };
     fetchProducts();
-  }, [financialYear, selectedCustomers]);
+  }, [financialYear, selectedCustomer]);
 
-  // Fetch trend data when products are selected
+  // Fetch trend data when product is selected
   useEffect(() => {
-    if (selectedCustomers.length === 0 || selectedProduct === null) {
+    if (!selectedCustomer || selectedProduct === null) {
       setData([]);
       return;
     }
@@ -130,7 +143,7 @@ const CustomerBehaviour: React.FC = () => {
       try {
         const result = await customerBehaviourApi.getTrend(
           financialYear,
-          selectedCustomers.join(','),
+          selectedCustomer.toString(),
           selectedProduct.toString(),
           metric
         );
@@ -148,7 +161,7 @@ const CustomerBehaviour: React.FC = () => {
       }
     };
     fetchData();
-  }, [financialYear, selectedCustomers, selectedProduct, metric]);
+  }, [financialYear, selectedCustomer, selectedProduct, metric]);
 
   return (
     <Box display="flex" flexDirection="column" height="100%" p={2.5}>
@@ -220,30 +233,20 @@ const CustomerBehaviour: React.FC = () => {
         <Box display="flex" flexDirection="column" gap={1}>
           <Box display="flex" gap={1} alignItems="flex-start">
             <Autocomplete
-              multiple
               size="small"
               sx={{ minWidth: 300, flex: 1 }}
               options={customers}
               getOptionLabel={(option) => `Customer ${option.customer_id}`}
-              value={customers.filter(c => selectedCustomers.includes(c.customer_id))}
+              value={customers.find(c => c.customer_id === selectedCustomer) || null}
               onChange={(_, newValue) => {
-                // Limit to 2 customers - auto-deselect oldest when selecting 3rd
-                if (newValue.length > 2) {
-                  // Keep only the 2 most recently selected (remove the first one)
-                  const recentTwo = newValue.slice(-2);
-                  setSelectedCustomers(recentTwo.map(v => v.customer_id));
-                } else {
-                  setSelectedCustomers(newValue.map(v => v.customer_id));
-                }
+                setSelectedCustomer(newValue?.customer_id || null);
               }}
               loading={loadingCustomers}
-              limitTags={2}
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Select Customers (Max 2)"
+                  label="Select Customer"
                   placeholder="Search customers..."
-                  helperText={selectedCustomers.length >= 2 ? "Maximum 2 customers selected" : ""}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -259,8 +262,8 @@ const CustomerBehaviour: React.FC = () => {
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setSelectedCustomers([])}
-              disabled={selectedCustomers.length === 0}
+              onClick={() => setSelectedCustomer(null)}
+              disabled={!selectedCustomer}
               sx={{ mt: '4px' }}
             >
               Clear
@@ -278,7 +281,7 @@ const CustomerBehaviour: React.FC = () => {
               value={products.find(p => p.product_id === selectedProduct) || null}
               onChange={(_, newValue) => setSelectedProduct(newValue?.product_id || null)}
               loading={loadingProducts}
-              disabled={selectedCustomers.length === 0}
+              disabled={!selectedCustomer}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -323,10 +326,10 @@ const CustomerBehaviour: React.FC = () => {
         <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
           <CircularProgress />
         </Box>
-      ) : selectedCustomers.length === 0 ? (
+      ) : !selectedCustomer ? (
         <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
           <Typography color="text.secondary">
-            Select up to 2 customers to compare their behavior
+            Select a customer to view behavior
           </Typography>
         </Box>
       ) : selectedProduct === null ? (
@@ -490,11 +493,11 @@ const CustomerBehaviour: React.FC = () => {
               
               const allSeries: any[] = [];
               
-              // Create series for each customer
-              customerIds.forEach((customerId, index) => {
-                // Determine colors based on customer index (0 or 1)
-                const overallColor = index === 0 ? CUSTOMER_COLORS.customer1Overall : CUSTOMER_COLORS.customer2Overall;
-                const productColor = index === 0 ? CUSTOMER_COLORS.customer1Product : CUSTOMER_COLORS.customer2Product;
+              // Create series for the customer
+              customerIds.forEach((customerId) => {
+                // Use colors for single customer
+                const overallColor = CUSTOMER_COLORS.customerOverall;
+                const productColor = CUSTOMER_COLORS.customerProduct;
                 
                 // Overall series (left axis)
                 const overallData = data.filter(d => 

@@ -25,7 +25,7 @@ export const BASE_DATE = new Date('2021-01-01');
 
 // Drawer widths
 export const DRAWER_WIDTH = {
-  EXPANDED: 240,
+  EXPANDED: 280,
   COLLAPSED: 60,
 } as const;
 

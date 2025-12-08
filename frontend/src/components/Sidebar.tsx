@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
   { path: '/abc-analysis', label: 'Trend Analysis', icon: <CategoryIcon /> },
   { path: '/customer-trend', label: 'Customer Trends', icon: <TrendingUpIcon /> },
   { path: '/customer-behaviour', label: 'Customer Behavior', icon: <PeopleIcon /> },
-  { path: '/cba', label: 'CBA', icon: <AnalyticsIcon /> },
+  { path: '/cba', label: 'Customer Behaviour Analysis', icon: <AnalyticsIcon /> },
   { path: '/customer-class-comparison', label: 'Class Comparison', icon: <CompareIcon /> },
   { path: '/ticket-size', label: 'Ticket Size Analysis', icon: <ReceiptIcon /> },
   { path: '/product-behaviour', label: 'Product Behavior', icon: <InventoryIcon /> },
@@ -65,15 +65,12 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
       sx={{
         width: open ? DRAWER_WIDTH.EXPANDED : DRAWER_WIDTH.COLLAPSED,
         flexShrink: 0,
-        transition: 'width 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
+        transition: 'width 250ms ease-in-out',
         '& .MuiDrawer-paper': {
           width: open ? DRAWER_WIDTH.EXPANDED : DRAWER_WIDTH.COLLAPSED,
           boxSizing: 'border-box',
-          transition: 'width 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
+          transition: 'width 250ms ease-in-out',
           overflowX: 'hidden',
-          willChange: 'width',
-          transform: 'translateZ(0)',
-          backfaceVisibility: 'hidden',
         },
       }}
     >
@@ -85,7 +82,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
           justifyContent: open ? 'flex-end' : 'center',
           p: 1,
           minHeight: 64,
-          transition: 'justify-content 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
+          transition: 'justify-content 250ms ease-in-out',
         }}
       >
         <IconButton onClick={onToggle} size="small">
@@ -122,7 +119,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                       backgroundColor: isActive ? '#8B5CF6' : 'transparent',
                       color: isActive ? '#FFFFFF' : 'inherit',
                       border: isActive ? '1.5px solid #8B5CF6' : '1px solid transparent',
-                      transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+                      transition: 'all 250ms ease-in-out',
                       '&:hover, &:active, &:focus': {
                         backgroundColor: isActive ? '#8B5CF6' : 'rgba(255, 255, 255, 0.05)',
                         borderColor: isActive ? '#8B5CF6' : 'rgba(255, 255, 255, 0.1)',
@@ -135,7 +132,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                         mr: open ? 2 : 'auto',
                         justifyContent: 'center',
                         color: isActive ? '#FFFFFF' : 'inherit',
-                        transition: 'margin 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
+                        transition: 'margin 250ms ease-in-out',
                       }}
                     >
                       {item.icon}
@@ -145,7 +142,9 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                       sx={{
                         opacity: open ? 1 : 0,
                         whiteSpace: 'nowrap',
-                        transition: 'opacity 120ms cubic-bezier(0.4, 0, 1, 1) 0ms',
+                        transition: open 
+                          ? 'opacity 250ms ease-in-out 50ms' 
+                          : 'opacity 150ms ease-in-out 0ms',
                         '& .MuiTypography-root': {
                           fontWeight: isActive ? 600 : 400,
                           fontSize: '0.9rem',

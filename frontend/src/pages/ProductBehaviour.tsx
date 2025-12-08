@@ -28,7 +28,7 @@ const ProductBehaviour: React.FC = () => {
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [products, setProducts] = useState<ProductListItem[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
-  const [showLabels, setShowLabels] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
   const [data, setData] = useState<ProductBehaviourDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -243,11 +243,12 @@ const ProductBehaviour: React.FC = () => {
                 label: metric === 'Revenue' ? 'Class Total (M)' : 'Class Total',
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
-                    // Short format for tick labels with unit suffix
+                    // Keep format short - max 4 chars
                     if (metric === 'Revenue') {
                       const mValue = value / 1000000;
-                      if (mValue >= 1000) return `₹${(mValue / 1000).toFixed(0)}K`;
-                      return `₹${mValue.toFixed(0)}M`;
+                      if (mValue >= 1000) return `${(mValue / 1000).toFixed(0)}B`;
+                      if (mValue >= 10) return `${mValue.toFixed(0)}M`;
+                      return `${mValue.toFixed(1)}M`;
                     }
                     // For quantity with unit suffix
                     if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
@@ -261,6 +262,10 @@ const ProductBehaviour: React.FC = () => {
                   return value.toLocaleString('en-IN');
                 },
                 min: 0,
+                tickLabelStyle: {
+                  fontSize: 11,
+                  textAnchor: 'end',
+                },
                 tickMinStep: (() => {
                   // Calculate dynamic tick step based on data range
                   const classData = data.filter(d => d.type.startsWith('Class')).map(d => d.value);
@@ -282,17 +287,18 @@ const ProductBehaviour: React.FC = () => {
                 label: metric === 'Revenue' ? 'Product (M)' : 'Product',
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
-                    // Short format for tick labels with decimals and unit
+                    // Keep format short - max 4 chars total
                     if (metric === 'Revenue') {
                       const mValue = value / 1000000;
-                      if (mValue >= 1000) return `₹${(mValue / 1000).toFixed(0)}K`; // No decimals for K
-                      if (mValue >= 1) return `₹${mValue.toFixed(1)}M`;
-                      if (mValue >= 0.01) return `₹${mValue.toFixed(2)}M`; // 2 decimals for 0.01-0.99
-                      return `₹${mValue.toFixed(3)}M`; // 3 decimals only for very small values
+                      if (mValue >= 1000) return `${(mValue / 1000).toFixed(0)}B`;
+                      if (mValue >= 10) return `${mValue.toFixed(0)}M`;
+                      if (mValue >= 1) return `${mValue.toFixed(1)}M`;
+                      // For < 1M, show as decimal but keep short
+                      return `${mValue.toFixed(1)}M`;
                     }
                     // For quantity with unit suffix
-                    if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`; // No decimals for M
-                    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`; // No decimals for K
+                    if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
+                    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
                     return `${value.toFixed(0)}`
                   }
                   // Full format for tooltips
@@ -303,7 +309,8 @@ const ProductBehaviour: React.FC = () => {
                 },
                 min: 0,
                 tickLabelStyle: {
-                  fontSize: 12,
+                  fontSize: 11,
+                  textAnchor: 'start',
                 },
                 tickMinStep: (() => {
                   // Calculate dynamic tick step based on data range
@@ -359,7 +366,7 @@ const ProductBehaviour: React.FC = () => {
                 };
               });
             })()}
-            margin={{ top: 10, right: 200, bottom: 50, left: 120 }}
+            margin={{ top: 20, right: 100, bottom: 50, left: 100 }}
             grid={{ vertical: false, horizontal: true }}
             slotProps={{
               legend: {

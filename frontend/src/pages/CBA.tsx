@@ -423,78 +423,105 @@ const CBA = () => {
       <Typography variant="h5" gutterBottom sx={{ mt: 4, mb: 2 }}>
         Customer Segmentation
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        <Paper sx={{ flex: '1 1 calc(50% - 16px)', minWidth: 600, p: 2, height: 400 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <Paper sx={{ width: '100%', p: 3, height: 450 }}>
           <Typography variant="h6" gutterBottom>
             Customer Count by Segment
           </Typography>
-          <BarChart
-            layout="horizontal"
-            dataset={sortedSegments}
-            yAxis={[
-              {
-                scaleType: 'band',
-                dataKey: 'segment',
-                tickLabelStyle: {
-                  fontSize: 13,
+          <Box sx={{ width: '100%', height: 370 }}>
+            <BarChart
+              dataset={sortedSegments}
+              xAxis={[
+                {
+                  scaleType: 'band',
+                  dataKey: 'segment',
                 },
-              },
-            ]}
-            xAxis={[{ label: 'Number of Customers' }]}
-            series={[
-              {
-                dataKey: 'customer_count',
-                label: 'Customers',
-                valueFormatter: (value) => value?.toString() || '0',
-              },
-            ]}
-            colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}
-            height={320}
-            margin={{ left: 100, bottom: 50, right: 10, top: 10 }}
-            grid={{ vertical: true, horizontal: true }}
-          />
+              ]}
+              yAxis={[{ label: 'Number of Customers' }]}
+              series={[
+                {
+                  dataKey: 'customer_count',
+                  label: 'Customers',
+                  valueFormatter: (value) => value?.toString() || '0',
+                },
+              ]}
+              colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}
+              height={370}
+              margin={{ left: 70, bottom: 80, right: 20, top: 50 }}
+              grid={{ vertical: false, horizontal: true }}
+              barLabel="value"
+              slotProps={{
+                barLabel: {
+                  placement: 'outside',
+                  style: {
+                    fontSize: 12,
+                    fontWeight: 600,
+                  },
+                },
+              }}
+              borderRadius={4}
+              skipAnimation={false}
+              sx={{
+                '& .MuiBarElement-root': {
+                  rx: 4,
+                },
+              }}
+            />
+          </Box>
         </Paper>
-        <Paper sx={{ flex: '1 1 calc(50% - 16px)', minWidth: 600, p: 2, height: 400 }}>
+        <Paper sx={{ width: '100%', p: 3, height: 450 }}>
           <Typography variant="h6" gutterBottom>
-            Revenue by Segment (M)
+            Revenue by Segment (M ₹)
           </Typography>
-          <BarChart
-            layout="horizontal"
-            dataset={sortedSegments.map((s) => ({
-              ...s,
-              revenue_millions: s.total_revenue / 1_000_000,
-            }))}
-            yAxis={[
-              {
-                scaleType: 'band',
-                dataKey: 'segment',
-                tickLabelStyle: {
-                  fontSize: 13,
+          <Box sx={{ width: '100%', height: 370 }}>
+            <BarChart
+              dataset={sortedSegments.map((s) => ({
+                ...s,
+                revenue_millions: s.total_revenue / 1_000_000,
+              }))}
+              xAxis={[
+                {
+                  scaleType: 'band',
+                  dataKey: 'segment',
                 },
-              },
-            ]}
-            xAxis={[{ 
-              label: 'Total Revenue',
-              valueFormatter: (value: number | null, context: AxisValueFormatterContext) => {
-                if (value === null) return '0M';
-                if (context.location === 'tick') {
-                  return `${value.toFixed(0)}M`;
-                }
-                return `${value.toFixed(1)}M`;
-              }
-            }]}
-            series={[
-              {
-                dataKey: 'revenue_millions',
-                label: 'Revenue (M ₹)',
-                valueFormatter: (value) => `₹${value?.toFixed(2) || '0'}M`,
-              },
-            ]}
-            colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}
-            height={320}
-            margin={{ left: 100, bottom: 50, right: 10, top: 10 }}
-            grid={{ vertical: true, horizontal: true }}
-          />
+              ]}
+              yAxis={[{ 
+                label: 'Total Revenue (M ₹)',
+                valueFormatter: (value: number | null) => {
+                  if (value === null) return '0';
+                  return `${value.toFixed(1)}`;
+                },
+              }]}
+              series={[
+                {
+                  dataKey: 'revenue_millions',
+                  label: 'Revenue',
+                  valueFormatter: (value) => `₹${value?.toFixed(2) || '0'}M`,
+                },
+              ]}
+              colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}
+              height={370}
+              margin={{ left: 70, bottom: 80, right: 20, top: 50 }}
+              grid={{ vertical: false, horizontal: true }}
+              barLabel="value"
+              slotProps={{
+                barLabel: {
+                  placement: 'outside',
+                  style: {
+                    fontSize: 12,
+                    fontWeight: 600,
+                  },
+                },
+              }}
+              borderRadius={4}
+              skipAnimation={false}
+              sx={{
+                '& .MuiBarElement-root': {
+                  rx: 4,
+                },
+              }}
+            />
+          </Box>
         </Paper>
       </Box>
     </Box>

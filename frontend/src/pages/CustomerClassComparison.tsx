@@ -44,7 +44,7 @@ const CustomerClassComparison = () => {
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<number | ''>('');
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
-  const [showLabels, setShowLabels] = useState(false);
+  const [showLabels, setShowLabels] = useState(true);
   
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
   const [trendData, setTrendData] = useState<ClassComparisonDataPoint[]>([]);
@@ -56,7 +56,7 @@ const CustomerClassComparison = () => {
       try {
         const response = await customerClassComparisonApi.getAvailableYears();
         setAvailableYears(response.financial_years);
-        setSelectedYears(response.financial_years.slice(0, 2));
+        setSelectedYears(response.financial_years.slice(0, 1));
       } catch (err) {
         console.error('Error fetching available years:', err);
         setError('Failed to load available financial years');
@@ -182,7 +182,12 @@ const CustomerClassComparison = () => {
                 label: metric === 'Revenue' ? 'Class Total (M)' : 'Class Total',
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
-                    if (metric === 'Revenue') return value >= 1000 ? `₹${(value / 1000).toFixed(0)}B` : `₹${value.toFixed(0)}M`;
+                    if (metric === 'Revenue') {
+                      // Keep format short and consistent
+                      if (value >= 1000) return `${(value / 1000).toFixed(0)}B`;
+                      if (value >= 10) return `${value.toFixed(0)}M`;
+                      return `${value.toFixed(1)}M`;
+                    }
                     if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
                     if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
                     return `${value.toFixed(0)}`;
@@ -190,6 +195,10 @@ const CustomerClassComparison = () => {
                   return metric === 'Revenue' ? `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}M` : value.toLocaleString('en-IN');
                 },
                 min: 0,
+                tickLabelStyle: { 
+                  fontSize: 11,
+                  textAnchor: 'end',
+                },
               },
               {
                 id: 'customerAxis',
@@ -199,10 +208,11 @@ const CustomerClassComparison = () => {
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     if (metric === 'Revenue') {
-                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}B`;
-                      if (value >= 1) return `₹${value.toFixed(1)}M`;
-                      if (value >= 0.01) return `₹${value.toFixed(2)}M`;
-                      return `₹${value.toFixed(3)}M`;
+                      // Keep format short - max 4 chars including unit
+                      if (value >= 1000) return `${(value / 1000).toFixed(0)}B`;
+                      if (value >= 10) return `${value.toFixed(0)}M`;
+                      if (value >= 1) return `${value.toFixed(1)}M`;
+                      return `${value.toFixed(1)}M`;
                     }
                     if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
                     if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
@@ -211,7 +221,10 @@ const CustomerClassComparison = () => {
                   return metric === 'Revenue' ? `₹${value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}M` : value.toLocaleString('en-IN');
                 },
                 min: 0,
-                tickLabelStyle: { fontSize: 12 },
+                tickLabelStyle: { 
+                  fontSize: 11,
+                  textAnchor: 'start',
+                },
               },
             ]}
             series={(() => {
@@ -230,7 +243,7 @@ const CustomerClassComparison = () => {
                 };
               });
             })()}
-            margin={{ top: 10, right: 200, bottom: 50, left: 120 }}
+            margin={{ top: 20, right: 100, bottom: 50, left: 100 }}
             grid={{ vertical: false, horizontal: true }}
             slotProps={{ legend: { direction: "horizontal", position: { vertical: 'top', horizontal: "center" } } }}
             hideLegend={chartData.data.length > 50}

@@ -56,10 +56,9 @@ const TrendChart = memo(({
         yAxis={[{
           valueFormatter: (value: number, context: AxisValueFormatterContext) => {
             if (context.location === 'tick') {
-              // Short format for tick labels
+              // Short format for tick labels with M suffix for Revenue
               if (metric === 'Revenue') {
-                if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
-                return `${value.toFixed(0)}`;
+                return `${value.toFixed(1)}M`;
               }
               // For quantity, use K for thousands
               if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
@@ -175,8 +174,14 @@ const ABCAnalysis = () => {
     });
     
     // Prepare series for line chart - only include categories with data
+    // Sort to ensure Overall is drawn first (behind other lines)
     const chartSeries = availableCategories
       .filter(cat => ['A', 'B', 'C', 'Overall'].includes(cat))
+      .sort((a, b) => {
+        if (a === 'Overall') return -1;
+        if (b === 'Overall') return 1;
+        return a.localeCompare(b);
+      })
       .map(cat => {
         const categoryData = trendData.data.filter(d => d.abc_category === cat);
         

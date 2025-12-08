@@ -56,7 +56,7 @@ MONTH_LABELS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep",
 
 
 @router.get("/trend", response_model=List[CustomerTrendDataPoint])
-async def get_customer_trend(
+def get_customer_trend(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
     abc_categories: str = Query("Overall,A,B,C", description="Comma-separated categories"),
     metric: str = Query("Revenue", description="'Revenue' or 'Quantity'")
@@ -176,5 +176,6 @@ async def get_customer_trend(
                     category=cat,
                     value=round(category_data[cat].get(time_id, 0.0), 2)
                 ))
-    
+    print(sql)
     return result
+

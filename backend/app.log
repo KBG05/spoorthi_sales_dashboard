@@ -2541,3 +2541,981 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2025-12-08 13:55:10,378 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
 2025-12-08 13:55:25,538 - INFO - ✅ Database pool closed
 2025-12-08 13:55:25,538 - INFO - Application shutdown complete - Database pool closed
+2025-12-10 06:53:35,465 - INFO - ✅ Database pool initialized
+2025-12-10 06:53:35,466 - INFO - Application startup complete - Database pool initialized
+2025-12-10 06:53:51,515 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2025-12-10 06:53:51,516 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2025-12-10 06:53:51,516 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1
+2025-12-10 06:53:51,517 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1
+2025-12-10 06:53:51,523 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 06:53:51,536 - INFO - Response: GET /auth/me returned 401 to 127.0.0.1
+2025-12-10 06:53:51,541 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 06:53:51,542 - INFO - Response: GET /auth/me returned 401 to 127.0.0.1
+2025-12-10 06:53:56,920 - INFO - Request: POST /auth/login from 127.0.0.1
+2025-12-10 06:53:57,194 - INFO - Response: POST /auth/login returned 200 to 127.0.0.1
+2025-12-10 06:53:57,203 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 06:53:57,204 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1
+2025-12-10 06:53:57,404 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2025-12-10 06:53:57,405 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 06:53:57,410 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 06:53:57,410 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,414 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 06:53:57,414 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,432 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 06:53:57,433 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,439 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 06:53:57,439 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 06:53:57,459 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 06:53:57,459 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 06:53:57,459 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 06:53:57,459 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 06:53:57,459 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 06:53:57,460 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,462 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,462 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,463 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,473 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 06:53:57,474 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,478 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 06:53:57,479 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 06:53:57,480 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 06:53:57,483 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 06:53:57,484 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 06:53:57,484 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,497 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,499 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 06:53:57,501 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 06:53:57,528 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 06:53:57,531 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,533 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 06:53:57,533 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,534 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,537 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 06:53:57,540 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,541 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,542 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 06:53:57,544 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 06:53:57,547 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,549 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 06:53:57,571 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 06:53:57,573 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,574 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 06:53:57,576 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:00:55,927 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:00:55,928 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:00:55,929 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:00:55,930 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:00:55,936 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:00:55,949 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:00:55,950 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:00:55,961 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:00:58,982 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:00:58,982 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:00:58,986 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:00:59,008 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:00,574 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:00,574 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:00,581 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:00,594 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:01,823 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:01,823 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:01,831 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:01,842 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:02,389 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:02,389 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:02,395 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:02,405 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:03,004 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:03,004 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:03,010 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:03,021 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:04,401 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:04,417 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:05,078 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:05,089 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:05,618 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:05,618 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:05,623 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:05,633 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:08,844 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:08,845 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:08,850 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:08,863 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:09,657 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:09,657 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:09,664 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:09,674 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:11,129 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:11,129 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:11,136 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:11,152 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:12,524 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:12,524 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:12,532 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:12,539 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:01:15,049 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:15,055 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:01:16,518 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:16,518 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:16,524 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:16,532 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:20,547 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:20,555 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:01:21,304 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:21,315 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:22,016 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:22,017 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:22,024 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:22,040 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:23,355 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:23,364 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:24,600 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:24,610 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:25,440 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:25,445 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:26,010 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:26,026 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:26,980 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:26,980 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:26,986 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:26,997 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:28,028 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:01:28,028 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:28,036 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:28,052 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:29,408 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:29,420 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:31,943 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:31,955 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:37,514 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:37,521 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:43,179 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:43,190 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:43,803 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:43,811 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:01:44,646 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:44,651 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:01:50,417 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:01:50,424 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:03,517 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:03,527 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:04,794 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:04,805 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:06,739 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:06,748 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:07,858 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:07,858 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:07,866 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:07,879 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:09,762 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:09,762 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:09,769 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:09,778 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:11,315 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:11,326 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:12,767 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:12,778 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:14,342 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:14,362 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:15,031 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:15,042 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:15,698 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:15,714 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:16,372 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:16,392 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:18,371 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:18,371 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:18,376 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:18,388 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:20,843 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:20,843 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:20,849 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:20,859 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:22,347 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:22,348 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:22,353 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:22,366 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:23,032 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:23,033 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:23,040 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:23,050 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:24,256 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:24,257 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:24,262 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:24,273 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:25,122 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:25,122 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:25,129 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:25,140 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:26,038 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:26,038 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:26,044 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:26,054 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:28,134 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:28,135 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:28,140 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:28,147 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:02:28,979 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:28,986 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:29,527 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:29,528 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:29,535 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:29,544 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:32,826 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:32,826 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:32,831 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:32,840 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:34,338 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:34,338 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:34,344 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:34,353 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:39,736 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:39,737 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:39,745 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:39,752 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:40,796 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:40,797 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:40,806 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:40,820 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:41,357 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:41,358 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:41,365 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:41,373 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:56,002 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:56,003 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:56,009 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:56,014 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:02:57,792 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:57,793 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:57,800 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:57,804 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:02:58,670 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:02:58,671 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:02:58,677 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:02:58,684 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:00,703 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:00,703 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:00,708 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:00,715 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:01,228 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:01,229 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:01,235 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:01,243 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:03,441 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:03,450 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:04,010 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:04,017 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:06,126 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:06,132 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:06,563 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:06,564 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:06,569 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:06,576 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:07,324 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:07,325 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:07,332 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:07,341 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:07,722 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:07,722 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:07,727 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:07,740 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:08,571 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:08,583 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:09,048 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:09,055 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:11,020 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:11,026 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:12,612 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:12,616 - INFO - Response: GET /abc/trend returned 404 to 127.0.0.1
+2025-12-10 07:03:13,821 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:13,821 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:13,828 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:13,835 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:14,149 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:14,149 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:14,156 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:14,165 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:14,811 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:14,811 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:14,816 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:14,825 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:15,373 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:15,374 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:15,380 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:15,389 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:16,230 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:16,231 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:16,237 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:16,246 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:16,712 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:16,724 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:17,992 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:18,006 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:18,798 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:03:18,798 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:18,806 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:03:18,814 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:58,169 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:03:58,169 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:03:58,171 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:03:58,172 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:03:58,174 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:03:58,183 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:03:58,183 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:03:58,188 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:03:58,196 - INFO - Request: OPTIONS /customer-trend/trend from 127.0.0.1
+2025-12-10 07:03:58,197 - INFO - Response: OPTIONS /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:03:58,200 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2025-12-10 07:03:58,209 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:04,066 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:04,067 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:04,067 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:04,069 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:04,079 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:04,082 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:04,083 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:04,088 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:04,155 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:04:04,156 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:04,163 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:04:04,166 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:05,548 - INFO - Request: OPTIONS /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:04:05,548 - INFO - Response: OPTIONS /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:04:05,554 - INFO - Request: GET /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:04:05,561 - INFO - Response: GET /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:04:06,505 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:04:06,505 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:06,510 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:04:06,518 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:16,953 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:04:16,953 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:04:16,959 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:04:16,961 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:04:16,979 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:04:16,979 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:04:16,979 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:04:16,979 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:04:16,980 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:04:16,980 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:04:17,481 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:04:17,481 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:04:17,481 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:04:17,482 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:04:17,482 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:04:17,482 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:04:17,497 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:04:17,713 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:04:17,714 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:04:18,185 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:04:18,186 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:04:18,186 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:04:18,186 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:04:18,384 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:04:26,294 - INFO - Request: OPTIONS /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:04:26,295 - INFO - Request: OPTIONS /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:04:26,295 - INFO - Response: OPTIONS /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:26,296 - INFO - Response: OPTIONS /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:26,302 - INFO - Request: GET /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:04:26,305 - INFO - Response: GET /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:26,306 - INFO - Request: GET /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:04:26,309 - INFO - Response: GET /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:26,361 - INFO - Request: OPTIONS /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:04:26,362 - INFO - Response: OPTIONS /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:26,367 - INFO - Request: GET /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:04:26,372 - INFO - Response: GET /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:26,373 - INFO - Request: GET /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:04:26,378 - INFO - Response: GET /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:28,987 - INFO - Request: OPTIONS /customer-class-comparison/trend from 127.0.0.1
+2025-12-10 07:04:28,987 - INFO - Response: OPTIONS /customer-class-comparison/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:29,002 - INFO - Request: GET /customer-class-comparison/trend from 127.0.0.1
+2025-12-10 07:04:29,021 - INFO - Response: GET /customer-class-comparison/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:38,625 - INFO - Request: OPTIONS /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:04:38,625 - INFO - Response: OPTIONS /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:38,630 - INFO - Request: GET /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:04:38,634 - INFO - Request: OPTIONS /customer-class-comparison/trend from 127.0.0.1
+2025-12-10 07:04:38,634 - INFO - Response: GET /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:38,634 - INFO - Response: OPTIONS /customer-class-comparison/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:38,640 - INFO - Request: GET /customer-class-comparison/trend from 127.0.0.1
+2025-12-10 07:04:38,653 - INFO - Response: GET /customer-class-comparison/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:39,638 - INFO - Request: GET /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:04:39,645 - INFO - Request: GET /customer-class-comparison/trend from 127.0.0.1
+2025-12-10 07:04:39,656 - INFO - Response: GET /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:04:39,657 - INFO - Response: GET /customer-class-comparison/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:42,183 - INFO - Request: OPTIONS /ticket-size/bands from 127.0.0.1
+2025-12-10 07:04:42,186 - INFO - Response: OPTIONS /ticket-size/bands returned 200 to 127.0.0.1
+2025-12-10 07:04:42,189 - INFO - Request: OPTIONS /ticket-size/bands from 127.0.0.1
+2025-12-10 07:04:42,190 - INFO - Response: OPTIONS /ticket-size/bands returned 200 to 127.0.0.1
+2025-12-10 07:04:42,193 - INFO - Request: GET /ticket-size/bands from 127.0.0.1
+2025-12-10 07:04:42,200 - INFO - Response: GET /ticket-size/bands returned 200 to 127.0.0.1
+2025-12-10 07:04:42,201 - INFO - Request: GET /ticket-size/bands from 127.0.0.1
+2025-12-10 07:04:42,213 - INFO - Response: GET /ticket-size/bands returned 200 to 127.0.0.1
+2025-12-10 07:04:43,933 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:43,934 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:43,934 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:43,936 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:43,940 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:43,944 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:43,946 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:04:43,949 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:04:44,000 - INFO - Request: OPTIONS /product-behaviour/products from 127.0.0.1
+2025-12-10 07:04:44,001 - INFO - Response: OPTIONS /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:04:44,006 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2025-12-10 07:04:44,010 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:04:45,237 - INFO - Request: OPTIONS /product-behaviour/trend from 127.0.0.1
+2025-12-10 07:04:45,238 - INFO - Response: OPTIONS /product-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:45,241 - INFO - Request: GET /product-behaviour/trend from 127.0.0.1
+2025-12-10 07:04:45,258 - INFO - Response: GET /product-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:04:51,669 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2025-12-10 07:04:51,670 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1
+2025-12-10 07:04:51,671 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2025-12-10 07:04:51,671 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1
+2025-12-10 07:04:51,674 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2025-12-10 07:04:51,687 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1
+2025-12-10 07:04:51,688 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2025-12-10 07:04:51,697 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1
+2025-12-10 07:04:52,692 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2025-12-10 07:04:52,693 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:04:52,696 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2025-12-10 07:04:52,696 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:04:52,701 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2025-12-10 07:04:52,707 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:04:52,709 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2025-12-10 07:04:52,719 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:04:53,652 - INFO - Request: OPTIONS /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:04:53,653 - INFO - Request: OPTIONS /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:04:53,653 - INFO - Response: OPTIONS /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:04:53,654 - INFO - Response: OPTIONS /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:04:53,659 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:04:53,669 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:04:53,670 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:04:53,685 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:04:55,025 - INFO - Request: OPTIONS /cross-sell/recommendations from 127.0.0.1
+2025-12-10 07:04:55,025 - INFO - Request: OPTIONS /cross-sell/recommendations from 127.0.0.1
+2025-12-10 07:04:55,025 - INFO - Response: OPTIONS /cross-sell/recommendations returned 200 to 127.0.0.1
+2025-12-10 07:04:55,026 - INFO - Response: OPTIONS /cross-sell/recommendations returned 200 to 127.0.0.1
+2025-12-10 07:04:55,030 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2025-12-10 07:04:57,708 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1
+2025-12-10 07:04:57,709 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2025-12-10 07:05:00,545 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1
+2025-12-10 07:05:46,226 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2025-12-10 07:05:46,227 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:05:46,229 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:05:46,229 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,235 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:05:46,235 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:05:46,236 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,236 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,242 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:05:46,252 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:05:46,252 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:05:46,252 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:05:46,253 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:05:46,253 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:05:46,253 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:05:46,253 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,254 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,254 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,255 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,256 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:05:46,257 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,259 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,269 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:05:46,269 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,273 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:05:46,274 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:05:46,274 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:05:46,274 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:05:46,286 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:05:46,286 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:05:46,286 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,288 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:05:46,291 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,292 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:05:46,294 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,296 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:05:46,298 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:05:46,304 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,307 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,308 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,316 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,318 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:05:46,321 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:05:46,322 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:05:46,324 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:05:46,326 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:15:44,175 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:15:44,175 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:15:44,179 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:15:44,179 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:15:44,180 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:15:44,180 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:15:44,184 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:15:44,184 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:15:44,193 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:15:44,389 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:15:44,389 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:15:44,390 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:15:44,390 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:15:44,834 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:15:44,834 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:15:44,835 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:15:44,835 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:15:44,835 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:15:44,849 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:15:45,134 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:15:45,135 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:15:45,634 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:15:45,634 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:15:45,635 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:26:20,626 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2025-12-10 07:26:20,626 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:26:20,629 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:26:20,629 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,633 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:26:20,634 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,636 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:26:20,636 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,643 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:26:20,658 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:26:20,659 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:26:20,659 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:26:20,659 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:26:20,659 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:26:20,659 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:26:20,660 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,660 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,660 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,660 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,661 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,662 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:26:20,663 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,678 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:26:20,678 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,679 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:26:20,679 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:26:20,682 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:26:20,682 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:26:20,682 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:26:20,693 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:26:20,696 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:26:20,697 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,701 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,702 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:26:20,705 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:26:20,708 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,710 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:26:20,712 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,714 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,715 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:26:20,721 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,723 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:26:20,727 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,728 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:26:20,730 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:26:20,732 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:26:26,717 - INFO - Request: OPTIONS /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:26:26,719 - INFO - Request: OPTIONS /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:26:26,719 - INFO - Response: OPTIONS /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:26:26,720 - INFO - Response: OPTIONS /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:26:26,733 - INFO - Request: GET /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:26:26,744 - INFO - Response: GET /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:26:26,746 - INFO - Request: GET /customer-class-comparison/available-years from 127.0.0.1
+2025-12-10 07:26:26,751 - INFO - Response: GET /customer-class-comparison/available-years returned 200 to 127.0.0.1
+2025-12-10 07:26:26,841 - INFO - Request: OPTIONS /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:26:26,841 - INFO - Response: OPTIONS /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:26:26,845 - INFO - Request: GET /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:26:26,850 - INFO - Response: GET /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:26:26,851 - INFO - Request: GET /customer-class-comparison/customers from 127.0.0.1
+2025-12-10 07:26:26,856 - INFO - Response: GET /customer-class-comparison/customers returned 200 to 127.0.0.1
+2025-12-10 07:26:29,374 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:26:29,375 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:26:29,378 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:26:29,379 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:26:29,382 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:26:29,383 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:26:29,389 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:26:29,624 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:26:29,625 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:26:29,625 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:26:29,625 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:26:29,625 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:26:29,625 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:26:30,068 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:26:30,068 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:26:30,069 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:26:30,070 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:26:30,070 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:26:30,091 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:26:30,341 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:26:30,342 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:26:30,851 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:26:30,851 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:26:30,852 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:26:36,159 - INFO - Request: OPTIONS /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:26:36,160 - INFO - Response: OPTIONS /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:26:36,161 - INFO - Request: OPTIONS /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:26:36,161 - INFO - Response: OPTIONS /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:26:36,164 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:26:36,174 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:26:36,176 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:26:36,189 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:32:32,992 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:32:32,992 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:32:33,003 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:32:33,004 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:32:33,005 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:32:33,010 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:32:33,015 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:32:33,021 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:32:33,226 - INFO - Request: OPTIONS /product-behaviour/products from 127.0.0.1
+2025-12-10 07:32:33,226 - INFO - Response: OPTIONS /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:32:33,231 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2025-12-10 07:32:33,235 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:32:39,232 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2025-12-10 07:32:39,232 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1
+2025-12-10 07:32:39,234 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2025-12-10 07:32:39,235 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1
+2025-12-10 07:32:39,242 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 07:32:39,245 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1
+2025-12-10 07:32:39,249 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 07:32:39,251 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1
+2025-12-10 07:32:39,980 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:32:39,986 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:32:39,987 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:32:39,993 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:32:40,262 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2025-12-10 07:32:40,268 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:33:02,906 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:33:02,906 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:33:02,917 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:33:02,918 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:33:02,919 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:33:02,924 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:33:02,926 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:33:02,929 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:33:03,125 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:33:03,126 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:33:03,134 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:33:03,139 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:33:04,172 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:33:04,413 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:33:04,413 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:33:04,594 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:33:04,811 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:33:04,812 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:33:04,813 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:33:05,050 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:33:05,241 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:33:05,242 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:33:05,626 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:33:05,627 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:33:08,260 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2025-12-10 07:33:08,260 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:33:08,262 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2025-12-10 07:33:08,263 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:33:08,266 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2025-12-10 07:33:08,273 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:33:08,275 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2025-12-10 07:33:08,279 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1
+2025-12-10 07:33:12,933 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:33:12,950 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:33:12,952 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:33:12,967 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:33:34,014 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 07:33:34,016 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1
+2025-12-10 07:33:34,021 - INFO - Request: GET /auth/me from 127.0.0.1
+2025-12-10 07:33:34,023 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1
+2025-12-10 07:33:34,267 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:33:34,276 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:33:34,278 - INFO - Request: GET /top-performance/top-performers from 127.0.0.1
+2025-12-10 07:33:34,289 - INFO - Response: GET /top-performance/top-performers returned 200 to 127.0.0.1
+2025-12-10 07:33:54,304 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:33:54,315 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:33:54,316 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:33:54,319 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:33:54,321 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:33:54,324 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:33:54,324 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:33:54,338 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:33:54,341 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:33:54,344 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:33:54,344 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:33:54,347 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:33:54,352 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:33:54,352 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:33:54,360 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:33:54,361 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:33:54,363 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:33:54,371 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:33:54,372 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:33:54,377 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:33:54,378 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:33:54,393 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:33:54,397 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:33:54,402 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:34:02,334 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:34:02,335 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:02,337 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:34:02,338 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:02,345 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:34:02,360 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:02,361 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:34:02,375 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:16,669 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:34:16,670 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:34:16,670 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:34:16,671 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:34:16,677 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:34:16,681 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:34:16,683 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:34:16,687 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:34:16,692 - INFO - Request: OPTIONS /customer-trend/trend from 127.0.0.1
+2025-12-10 07:34:16,693 - INFO - Response: OPTIONS /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:16,697 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2025-12-10 07:34:16,705 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:18,367 - INFO - Request: OPTIONS /customer-trend/trend from 127.0.0.1
+2025-12-10 07:34:18,367 - INFO - Response: OPTIONS /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:18,373 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2025-12-10 07:34:18,381 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:19,679 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:34:19,684 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:34:19,686 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:34:19,690 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:34:19,767 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:34:19,770 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:34:20,869 - INFO - Request: OPTIONS /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:34:20,870 - INFO - Response: OPTIONS /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:34:20,882 - INFO - Request: GET /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:34:20,893 - INFO - Response: GET /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:34:21,384 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:34:21,385 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:21,389 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:34:21,400 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:34:56,959 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:34:56,969 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:34:56,971 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:34:56,972 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:34:56,974 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:34:56,976 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:34:56,979 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:34:56,983 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:34:56,992 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:34:56,993 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:34:56,995 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:34:56,998 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:34:57,001 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:34:57,006 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:34:57,008 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:34:57,010 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:34:57,012 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:34:57,015 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:34:57,016 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:34:57,024 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:34:57,027 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:34:57,029 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:34:57,034 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:34:57,052 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:38:00,558 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:38:00,567 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:38:00,572 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:38:00,580 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:38:10,255 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:38:10,258 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:38:10,263 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:38:10,268 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:38:10,270 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2025-12-10 07:38:10,279 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:40:14,782 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2025-12-10 07:40:14,783 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:40:14,787 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:40:14,787 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,796 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:40:14,796 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,806 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:40:14,807 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,813 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:40:14,813 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:40:14,813 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:40:14,824 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:40:14,824 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:40:14,825 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:40:14,825 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,826 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,826 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:40:14,827 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,831 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,831 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,832 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:40:14,833 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,855 - INFO - Request: OPTIONS /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:40:14,855 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:40:14,859 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:40:14,860 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:40:14,860 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:40:14,861 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2025-12-10 07:40:14,883 - INFO - Response: OPTIONS /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,892 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1
+2025-12-10 07:40:14,894 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:40:14,934 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,934 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,935 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,935 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,937 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2025-12-10 07:40:14,939 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,941 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,947 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2025-12-10 07:40:14,949 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2025-12-10 07:40:14,950 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2025-12-10 07:40:14,950 - INFO - Request: GET /dashboard/abc-xyz-count from 127.0.0.1
+2025-12-10 07:40:14,962 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1
+2025-12-10 07:40:14,969 - INFO - Response: GET /dashboard/abc-xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,970 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1
+2025-12-10 07:40:14,985 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1
+2025-12-10 07:45:26,954 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:45:26,955 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:45:26,956 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:26,957 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:26,965 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:45:26,972 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:26,979 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:45:26,988 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:26,998 - INFO - Request: OPTIONS /customer-trend/trend from 127.0.0.1
+2025-12-10 07:45:26,998 - INFO - Response: OPTIONS /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:27,006 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2025-12-10 07:45:27,021 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:28,666 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:45:28,667 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2025-12-10 07:45:28,667 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:28,668 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:28,678 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:45:28,690 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:28,691 - INFO - Request: GET /abc/trend from 127.0.0.1
+2025-12-10 07:45:28,705 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:39,781 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:45:39,783 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:39,786 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2025-12-10 07:45:39,789 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:39,799 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2025-12-10 07:45:39,805 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:42,921 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:45:42,921 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:45:42,922 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:42,923 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:42,926 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:45:42,932 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:42,933 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:45:42,938 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:45:42,999 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:45:42,999 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:45:43,006 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:45:43,010 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:45:44,392 - INFO - Request: OPTIONS /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:45:44,393 - INFO - Response: OPTIONS /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:45:44,401 - INFO - Request: GET /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:45:44,409 - INFO - Response: GET /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:45:45,096 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:45:45,096 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:45,101 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:45:45,110 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:47,215 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:45:47,216 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:47,220 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:45:47,228 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:49,743 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:45:49,744 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:45:49,747 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:45:49,759 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:46:33,602 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:33,602 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:33,608 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:33,612 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:34,604 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:34,605 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:34,609 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:34,612 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:35,770 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:35,771 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:35,779 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:35,784 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:36,261 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:36,264 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:44,683 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:44,686 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:45,696 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:45,703 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:47,921 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:47,925 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:48,449 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:48,453 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:50,984 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:50,991 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:46:52,364 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:46:52,367 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:48:33,060 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:48:33,061 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:48:33,062 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:48:33,063 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:48:33,068 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:48:33,068 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:48:33,072 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:48:33,073 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:48:33,077 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:48:33,301 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:48:33,466 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:48:33,466 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2025-12-10 07:48:33,466 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2025-12-10 07:48:33,466 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:48:33,708 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:48:33,709 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:48:33,709 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:48:33,709 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:48:33,725 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:48:33,944 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:48:33,944 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:48:33,944 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:48:34,320 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:48:34,320 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:48:48,988 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:48:48,993 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:48:48,997 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2025-12-10 07:48:49,001 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:48:49,067 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2025-12-10 07:48:49,070 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1
+2025-12-10 07:49:04,292 - INFO - Request: OPTIONS /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:49:04,292 - INFO - Response: OPTIONS /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:49:04,299 - INFO - Request: GET /customer-behaviour/products from 127.0.0.1
+2025-12-10 07:49:04,306 - INFO - Response: GET /customer-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:49:05,148 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:49:05,148 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:49:05,155 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2025-12-10 07:49:05,166 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:49:13,737 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:49:13,931 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:49:13,931 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:49:14,164 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:49:14,387 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:49:14,387 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2025-12-10 07:49:14,388 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:49:14,567 - INFO - Request: GET /cba/summary from 127.0.0.1
+2025-12-10 07:49:14,568 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1
+2025-12-10 07:49:14,777 - INFO - Request: GET /cba/segments from 127.0.0.1
+2025-12-10 07:49:14,778 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1
+2025-12-10 07:49:15,012 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1
+2025-12-10 07:49:18,876 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:49:18,876 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:49:18,877 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:49:18,878 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:49:18,881 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:49:18,885 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:49:18,886 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2025-12-10 07:49:18,891 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1
+2025-12-10 07:49:18,939 - INFO - Request: OPTIONS /product-behaviour/products from 127.0.0.1
+2025-12-10 07:49:18,940 - INFO - Response: OPTIONS /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:49:18,945 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2025-12-10 07:49:18,948 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1
+2025-12-10 07:49:20,467 - INFO - Request: OPTIONS /product-behaviour/trend from 127.0.0.1
+2025-12-10 07:49:20,467 - INFO - Response: OPTIONS /product-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:49:20,474 - INFO - Request: GET /product-behaviour/trend from 127.0.0.1
+2025-12-10 07:49:20,505 - INFO - Response: GET /product-behaviour/trend returned 200 to 127.0.0.1
+2025-12-10 07:51:20,478 - INFO - ✅ Database pool closed
+2025-12-10 07:51:20,479 - INFO - Application shutdown complete - Database pool closed

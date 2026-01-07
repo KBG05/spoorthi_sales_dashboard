@@ -219,6 +219,19 @@ class UserInDB(User):
     """User model with hashed password"""
     hashed_password: str
 
+class UserCreate(BaseModel):
+    """User creation request"""
+    username: str
+    password: str
+    role: str = "user"  # Default role is "user"
+
+class UserResponse(BaseModel):
+    """User response after creation"""
+    id: int
+    username: str
+    role: str
+    message: str
+
 class PasswordChange(BaseModel):
     """Password change request"""
     current_password: str

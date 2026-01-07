@@ -176,6 +176,6 @@ def get_customer_trend(
                     category=cat,
                     value=round(category_data[cat].get(time_id, 0.0), 2)
                 ))
-    print(sql)
+
     return result
 

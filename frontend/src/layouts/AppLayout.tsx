@@ -24,8 +24,9 @@ import Logo1 from '../../public/logo1.png';
 import Sidebar from '../components/Sidebar';
 import { useThemeMode } from '../theme/ThemeProvider';
 import { useAuth } from '../contexts/AuthContext';
+import { API_BASE_URL } from '../constants/constants';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

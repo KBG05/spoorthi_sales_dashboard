@@ -18,7 +18,9 @@ export const ABC_COLORS = {
 } as const;
 
 // API Base URL
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+//export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+
+export const API_BASE_URL='http://'+window.location.hostname +':8000'
 
 // Base date for TimeID calculations (matching backend)
 export const BASE_DATE = new Date('2021-01-01');

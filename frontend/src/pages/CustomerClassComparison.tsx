@@ -18,22 +18,15 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { customerClassComparisonApi } from '../api';
 import type { CustomerListItem, ClassComparisonDataPoint } from '../api/types';
+import { COMPARISON_COLORS } from '../constants/constants';
 
 const ABC_CLASSES = ['A', 'B', 'C'];
-
-// Neon/glowing color palette matching CustomerBehaviour
-const NEON_COLORS = {
-  customer1Overall: '#ff006e',
-  customer1Product: '#00ffff',
-  customer2Overall: '#ff00ff',
-  customer2Product: '#ff8800',
-};
 
 const getColorForFY = (fy: string, fyList: string[], type: 'class' | 'customer') => {
   const fyIndex = fyList.indexOf(fy);
   const baseColors = {
-    class: [NEON_COLORS.customer1Overall, NEON_COLORS.customer1Product, NEON_COLORS.customer2Overall, NEON_COLORS.customer2Product],
-    customer: [NEON_COLORS.customer2Overall, NEON_COLORS.customer2Product, NEON_COLORS.customer1Overall, NEON_COLORS.customer1Product],
+    class: [COMPARISON_COLORS.fy1Class, COMPARISON_COLORS.fy1Value, COMPARISON_COLORS.fy2Class, COMPARISON_COLORS.fy2Value],
+    customer: [COMPARISON_COLORS.fy2Class, COMPARISON_COLORS.fy2Value, COMPARISON_COLORS.fy1Class, COMPARISON_COLORS.fy1Value],
   };
   return baseColors[type][fyIndex % baseColors[type].length];
 };
@@ -180,6 +173,7 @@ const CustomerClassComparison = () => {
                 scaleType: 'linear',
                 position: 'left',
                 label: metric === 'Revenue' ? 'Class Total (M)' : 'Class Total',
+                width: 80,
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     if (metric === 'Revenue') {
@@ -205,6 +199,7 @@ const CustomerClassComparison = () => {
                 scaleType: 'linear',
                 position: 'right',
                 label: metric === 'Revenue' ? 'Customer (M)' : 'Customer',
+                width: 80,
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     if (metric === 'Revenue') {

@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  Category as CategoryIcon,
   TrendingUp as TrendingUpIcon,
   People as PeopleIcon,
   ShoppingCart as ShoppingCartIcon,
@@ -27,7 +26,6 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Analytics as AnalyticsIcon,
-  Compare as CompareIcon,
 } from '@mui/icons-material';
 import { DRAWER_WIDTH } from '../constants/constants';
 
@@ -39,13 +37,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-  { path: '/abc-analysis', label: 'Trend Analysis', icon: <CategoryIcon /> },
-  { path: '/customer-trend', label: 'Customer Trends', icon: <TrendingUpIcon /> },
+  { path: '/trend-analysis', label: 'Trend Analysis', icon: <TrendingUpIcon /> },
   { path: '/customer-behaviour', label: 'Customer Behavior', icon: <PeopleIcon /> },
-  { path: '/cba', label: 'Customer Behaviour Analysis', icon: <AnalyticsIcon /> },
-  { path: '/customer-class-comparison', label: 'Class Comparison', icon: <CompareIcon /> },
-  { path: '/ticket-size', label: 'Ticket Size Analysis', icon: <ReceiptIcon /> },
   { path: '/product-behaviour', label: 'Product Behavior', icon: <InventoryIcon /> },
+  { path: '/cba', label: 'Customer Behaviour Analysis', icon: <AnalyticsIcon /> },
+  // { path: '/customer-class-comparison', label: 'Class Comparison', icon: <CompareIcon /> }, // Hidden for now
+  { path: '/ticket-size', label: 'Ticket Size Analysis', icon: <ReceiptIcon /> },
   { path: '/transition-analysis', label: 'Transition Analysis', icon: <SwapHorizIcon /> },
   { path: '/forecast', label: 'Demand Forecast', icon: <ShowChartIcon /> },
   { path: '/top-performance', label: 'Top Performers', icon: <StarIcon /> },

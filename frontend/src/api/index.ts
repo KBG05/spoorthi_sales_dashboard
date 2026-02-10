@@ -16,6 +16,8 @@ import type {
   RFMSummary,
   SegmentData,
   ClassComparisonDataPoint,
+  CategoryBreakupItem,
+  ABCXYZMatrixCell,
 } from './types.js';
 
 // No longer needed - types and API merged into this file
@@ -24,8 +26,10 @@ import type {
 
 // Dashboard API
 export const dashboardApi = {
-  getKPIs: async () => {
-    return await apiClient.get<KPIResponse>('/dashboard/kpis');
+  getKPIs: async (timeId?: number) => {
+    return await apiClient.get<KPIResponse>('/dashboard/kpis', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
   },
   getABCCount: async () => {
     return await apiClient.get('/dashboard/abc-count');
@@ -41,6 +45,14 @@ export const dashboardApi = {
   },
   getABCXYZCount: async () => {
     return await apiClient.get('/dashboard/abc-xyz-count');
+  },
+  getCategoryBreakup: async (timeId?: number) => {
+    return await apiClient.get<CategoryBreakupItem[]>('/dashboard/category-breakup', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
+  },
+  getABCXYZMatrix: async () => {
+    return await apiClient.get<ABCXYZMatrixCell[]>('/dashboard/abc-xyz-matrix');
   },
 };
 
@@ -130,11 +142,22 @@ export const productBehaviourApi = {
     });
     return response.data;
   },
+  getCustomers: async (financialYear: string, productId: number, abcClasses: string) => {
+    const response = await apiClient.get<CustomerListItem[]>('/product-behaviour/customers', {
+      params: {
+        financial_year: financialYear,
+        product_id: productId,
+        abc_classes: abcClasses,
+      },
+    });
+    return response.data;
+  },
   getTrend: async (
     financialYear: string,
     abcClass: string,
     productId: number,
-    metric: string
+    metric: string,
+    customerIds?: string
   ) => {
     const response = await apiClient.get<ProductBehaviourDataPoint[]>('/product-behaviour/trend', {
       params: {
@@ -142,6 +165,7 @@ export const productBehaviourApi = {
         abc_class: abcClass,
         product_id: productId,
         metric: metric,
+        customer_ids: customerIds || '',
       },
     });
     return response.data;
@@ -299,6 +323,18 @@ export const customerClassComparisonApi = {
         },
       }
     );
+    return response.data;
+  },
+};
+
+// Masters API
+export const mastersApi = {
+  getProducts: async () => {
+    const response = await apiClient.get<Record<string, string>>('/masters/products');
+    return response.data;
+  },
+  getCustomers: async () => {
+    const response = await apiClient.get<Record<string, string>>('/masters/customers');
     return response.data;
   },
 };

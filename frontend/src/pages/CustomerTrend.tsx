@@ -54,13 +54,16 @@ const TrendChart = memo(({
           },
         }]}
         yAxis={[{
+          width: 80,
           valueFormatter: (value: number, context: AxisValueFormatterContext) => {
             if (context.location === 'tick') {
               // Short format for tick labels
               if (metric === 'Revenue') {
-                if (value >= 1000000) return `₹${(value / 1000000).toFixed(0)}M`;
-                if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
-                return `₹${value.toFixed(0)}`;
+                // Convert to Cr (divide by 10,000,000)
+                const crValue = value / 10000000;
+                if (crValue >= 100) return `₹${crValue.toFixed(0)}Cr`;
+                if (crValue >= 1) return `₹${crValue.toFixed(1)}Cr`;
+                return `₹${crValue.toFixed(2)}Cr`;
               }
               // For quantity
               if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
@@ -69,7 +72,8 @@ const TrendChart = memo(({
             }
             // Full format for tooltips
             if (metric === 'Revenue') {
-              return `₹${value.toLocaleString('en-IN')}`;
+              const crValue = value / 10000000;
+              return `₹${crValue.toLocaleString('en-IN', { maximumFractionDigits: 2 })} Cr`;
             }
             return value.toLocaleString('en-IN');
           },
@@ -204,7 +208,8 @@ const CustomerTrend = () => {
           valueFormatter: (value: number | null) => {
             if (value === null || value === undefined) return '';
             if (metric === 'Revenue') {
-              return `₹${value.toLocaleString('en-IN')}`;
+              const crValue = value / 10000000;
+              return `₹${crValue.toLocaleString('en-IN', { maximumFractionDigits: 2 })} Cr`;
             }
             return value.toLocaleString('en-IN');
           },
@@ -324,7 +329,7 @@ const CustomerTrend = () => {
           Customer {metric} Trend by Category
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, flexShrink: 0 }}>
-          {metric === 'Revenue' ? 'Values in millions (M)' : 'Article quantities'} • Financial Year: {financialYear}
+          {metric === 'Revenue' ? 'Values in crores (Cr)' : 'Article quantities'} • Financial Year: {financialYear}
         </Typography>
         
         {trendData && trendData.length > 0 ? (

@@ -82,15 +82,22 @@ async def get_customers_by_class(
     class_in = ",".join([f"'{cls}'" for cls in class_list])
     
     sql = f'''
-        SELECT DISTINCT "CustomerID"
-        FROM public."customer_ABC_{table_suffix}"
-        WHERE "Category" IN ({class_in})
-        ORDER BY "CustomerID"
+        SELECT DISTINCT c."CustomerID", cm.customer
+        FROM public."customer_ABC_{table_suffix}" c
+        LEFT JOIN priyatextile_customer_master cm ON CAST(c."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
+        WHERE c."Category" IN ({class_in})
+        ORDER BY c."CustomerID"
     '''
     
     rows = query_all(sql)  # type: ignore
     
-    return [CustomerListItem(customer_id=int(row["CustomerID"])) for row in rows]
+    return [
+        CustomerListItem(
+            customer_id=int(row["CustomerID"]),
+            customer_name=row.get("customer")
+        ) 
+        for row in rows
+    ]
 
 
 @router.get("/products", response_model=List[ProductListItem])
@@ -135,17 +142,24 @@ async def get_products_for_customers(
     cust_in = ",".join(cust_list)
     
     sql = f'''
-        SELECT DISTINCT "ProductID"
-        FROM public."Aggregated Data"
+        SELECT DISTINCT ad."ProductID", pm.commercial_name
+        FROM public."Aggregated Data" ad
+        LEFT JOIN priyatextile_product_master pm ON ad."ProductID" = pm.product_code
         WHERE
-            "TimeID" BETWEEN {start_time_id} AND {end_time_id}
-            AND "CustomerID" IN ({cust_in})
-        ORDER BY "ProductID"
+            ad."TimeID" BETWEEN {start_time_id} AND {end_time_id}
+            AND ad."CustomerID" IN ({cust_in})
+        ORDER BY ad."ProductID"
     '''
     
     rows = query_all(sql)  # type: ignore
     
-    return [ProductListItem(product_id=int(row["ProductID"])) for row in rows]
+    return [
+        ProductListItem(
+            product_id=int(row["ProductID"]),
+            product_name=row.get("commercial_name")
+        ) 
+        for row in rows
+    ]
 
 
 @router.get("/trend", response_model=List[CustomerBehaviourDataPoint])

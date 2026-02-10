@@ -72,17 +72,19 @@ async def get_top_performers(
         # Customers FY
         table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
         fy_sql = f'''
-            SELECT "CustomerID", "Revenue" 
-            FROM public."customer_ABC_{table_suffix}" 
-            ORDER BY "Revenue" DESC LIMIT 10
+            SELECT c."CustomerID", c."Revenue", cm.customer
+            FROM public."customer_ABC_{table_suffix}" c
+            LEFT JOIN priyatextile_customer_master cm ON CAST(c."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
+            ORDER BY c."Revenue" DESC LIMIT 10
         '''
         
         # Customers Latest
         latest_sql = f'''
-            SELECT "CustomerID", SUM("Revenue") AS "TotalRevenue" 
-            FROM public."Aggregated Data" 
-            WHERE "TimeID" = {latest_time_id} 
-            GROUP BY "CustomerID" 
+            SELECT ad."CustomerID", SUM(ad."Revenue") AS "TotalRevenue", cm.customer
+            FROM public."Aggregated Data" ad
+            LEFT JOIN priyatextile_customer_master cm ON CAST(ad."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
+            WHERE ad."TimeID" = {latest_time_id} 
+            GROUP BY ad."CustomerID", cm.customer
             ORDER BY "TotalRevenue" DESC LIMIT 10
         '''
         
@@ -90,12 +92,20 @@ async def get_top_performers(
         latest_rows = query_all(latest_sql)  # type: ignore
         
         top_fy = [
-            TopPerformerItem(id=int(row["CustomerID"]), revenue=float(row["Revenue"] or 0))
+            TopPerformerItem(
+                id=int(row["CustomerID"]), 
+                revenue=float(row["Revenue"] or 0),
+                name=row.get("customer")
+            )
             for row in fy_rows
         ]
         
         top_latest = [
-            TopPerformerItem(id=int(row["CustomerID"]), revenue=float(row["TotalRevenue"] or 0))
+            TopPerformerItem(
+                id=int(row["CustomerID"]), 
+                revenue=float(row["TotalRevenue"] or 0),
+                name=row.get("customer")
+            )
             for row in latest_rows
         ]
         
@@ -103,17 +113,19 @@ async def get_top_performers(
         # Products FY
         table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
         fy_sql = f'''
-            SELECT "ProductID", "Revenue" 
-            FROM public."product_ABC_XYZ_{table_suffix}" 
-            ORDER BY "Revenue" DESC LIMIT 10
+            SELECT p."ProductID", p."Revenue", pm.commercial_name
+            FROM public."product_ABC_XYZ_{table_suffix}" p
+            LEFT JOIN priyatextile_product_master pm ON p."ProductID" = pm.product_code
+            ORDER BY p."Revenue" DESC LIMIT 10
         '''
         
         # Products Latest
         latest_sql = f'''
-            SELECT "ProductID", SUM("Revenue") AS "TotalRevenue" 
-            FROM public."Aggregated Data" 
-            WHERE "TimeID" = {latest_time_id} 
-            GROUP BY "ProductID" 
+            SELECT ad."ProductID", SUM(ad."Revenue") AS "TotalRevenue", pm.commercial_name
+            FROM public."Aggregated Data" ad
+            LEFT JOIN priyatextile_product_master pm ON ad."ProductID" = pm.product_code
+            WHERE ad."TimeID" = {latest_time_id} 
+            GROUP BY ad."ProductID", pm.commercial_name
             ORDER BY "TotalRevenue" DESC LIMIT 10
         '''
         
@@ -121,12 +133,20 @@ async def get_top_performers(
         latest_rows = query_all(latest_sql)  # type: ignore
         
         top_fy = [
-            TopPerformerItem(id=int(row["ProductID"]), revenue=float(row["Revenue"] or 0))
+            TopPerformerItem(
+                id=int(row["ProductID"]), 
+                revenue=float(row["Revenue"] or 0),
+                name=row.get("commercial_name")
+            )
             for row in fy_rows
         ]
         
         top_latest = [
-            TopPerformerItem(id=int(row["ProductID"]), revenue=float(row["TotalRevenue"] or 0))
+            TopPerformerItem(
+                id=int(row["ProductID"]), 
+                revenue=float(row["TotalRevenue"] or 0),
+                name=row.get("commercial_name")
+            )
             for row in latest_rows
         ]
     

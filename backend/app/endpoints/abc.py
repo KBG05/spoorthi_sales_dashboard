@@ -91,8 +91,9 @@ async def get_abc_trend(
     abc_in = ",".join([f"'{cat}'" for cat in abc_list])
     xyz_in = ",".join([f"'{cat}'" for cat in xyz_list])
     
-    # Build query
-    sql = f'''
+    # Build query - two queries: one for filtered data, one for overall
+    # Filtered query for ABC/XYZ combinations
+    sql_filtered = f'''
         SELECT
             t1."TimeID",
             t2."ABC_Category",
@@ -110,22 +111,48 @@ async def get_abc_trend(
         ORDER BY t1."TimeID"
     '''
     
-    rows = query_all(sql)  # type: ignore
+    # Overall query - no filters on ABC/XYZ
+    sql_overall = f'''
+        SELECT
+            t1."TimeID",
+            SUM(t1."Quantity") AS "TotalQuantity",
+            SUM(t1."Revenue") AS "TotalValue"
+        FROM public."Aggregated Data" AS t1
+        WHERE t1."TimeID" BETWEEN {start_time_id} AND {end_time_id}
+        GROUP BY t1."TimeID"
+        ORDER BY t1."TimeID"
+    '''
     
-    if not rows:
+    rows = query_all(sql_filtered)  # type: ignore
+    overall_rows = query_all(sql_overall)  # type: ignore
+    
+    # Process overall data first
+    overall = {}
+    metric_col = "TotalValue" if metric == "Revenue" else "TotalQuantity"
+    
+    for row in overall_rows:
+        time_id = row["TimeID"]
+        value = float(row[metric_col] or 0)
+        
+        # Convert to millions if Revenue
+        if metric == "Revenue":
+            value = value / 1_000_000
+        
+        overall[time_id] = value
+    
+    # If no filtered data but we have overall data, return just overall
+    # If no data at all, raise 404
+    if not rows and not overall_rows:
         raise HTTPException(
             status_code=404,
             detail="No data found for the selected filters"
         )
     
-    # Process data: aggregate by TimeID and ABC_Category
+    # Process filtered data: aggregate by TimeID and ABC_Category
     from collections import defaultdict
     
     # Group by TimeID and ABC_Category
     grouped = defaultdict(lambda: defaultdict(float))
-    overall = defaultdict(float)
-    
-    metric_col = "TotalValue" if metric == "Revenue" else "TotalQuantity"
     
     for row in rows:
         time_id = row["TimeID"]
@@ -137,12 +164,14 @@ async def get_abc_trend(
             value = value / 1_000_000
         
         grouped[time_id][abc_cat] += value
-        overall[time_id] += value
     
     # Build response data
     data_points = []
     
-    for time_id in sorted(grouped.keys()):
+    # Get all unique TimeIDs from both queries
+    all_time_ids = set(list(grouped.keys()) + list(overall.keys()))
+    
+    for time_id in sorted(all_time_ids):
         # Calculate proper month/year from TimeID
         # TimeID 1 = Jan 2021, so we add (time_id - 1) months to BASE_DATE
         months_offset = time_id - 1
@@ -151,20 +180,22 @@ async def get_abc_trend(
         month_date = datetime(year, month, 1)
         month_str = month_date.strftime("%Y-%m-%d")
         
-        # Add individual ABC categories
-        for abc_cat in sorted(grouped[time_id].keys()):
+        # Add individual ABC categories (only if they have data)
+        if time_id in grouped:
+            for abc_cat in sorted(grouped[time_id].keys()):
+                data_points.append(ABCTrendDataPoint(
+                    month_date=month_str,
+                    abc_category=abc_cat,
+                    value=round(grouped[time_id][abc_cat], 2)
+                ))
+        
+        # Add Overall (always from overall query)
+        if time_id in overall:
             data_points.append(ABCTrendDataPoint(
                 month_date=month_str,
-                abc_category=abc_cat,
-                value=round(grouped[time_id][abc_cat], 2)
+                abc_category="Overall",
+                value=round(overall[time_id], 2)
             ))
-        
-        # Add Overall
-        data_points.append(ABCTrendDataPoint(
-            month_date=month_str,
-            abc_category="Overall",
-            value=round(overall[time_id], 2)
-        ))
     
     return ABCTrendResponse(
         data=data_points,

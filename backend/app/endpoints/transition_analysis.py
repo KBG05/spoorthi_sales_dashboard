@@ -88,33 +88,62 @@ async def get_transitions(
             
             col_name = f"Category_{formatted_month.replace(' ', '_')}"
             
-            # Query data
+            # Query data - get both ABC and XYZ categories
             sql = f'''
                 SELECT 
                     CAST("article_no" AS VARCHAR) AS "ProductID", 
-                    "abc_category" AS category
+                    "abc_category" AS abc_category,
+                    "xyz_category" AS xyz_category
                 FROM public."{table_name}"
             '''
             
             rows = query_all(sql)  # type: ignore
             
-            month_data[col_name] = {}
+            # Combine ABC and XYZ into single column
+            abc_xyz_col_name = f"ABC_XYZ_{formatted_month.replace(' ', '_')}"
+            
+            month_data[abc_xyz_col_name] = {}
+            
             for row in rows:
                 product_id = str(row["ProductID"])
                 all_products.add(product_id)
-                month_data[col_name][product_id] = row["category"] or "N/A"
+                abc_cat = row.get("abc_category") or "N/A"
+                xyz_cat = row.get("xyz_category") or "N/A"
+                # Combine ABC and XYZ (e.g., "A" + "X" = "AX")
+                if abc_cat != "N/A" and xyz_cat != "N/A":
+                    combined = f"{abc_cat}{xyz_cat}"
+                else:
+                    combined = "N/A"
+                month_data[abc_xyz_col_name][product_id] = combined
         
         # Build response data
+        # First, get all product names grouped by product_code
+        product_names_query = '''
+            SELECT 
+                CAST(product_code AS TEXT) as product_code,
+                ARRAY_AGG(DISTINCT commercial_name) FILTER (WHERE commercial_name IS NOT NULL) as product_names
+            FROM priyatextile_product_master
+            GROUP BY product_code
+        '''
+        product_names_rows = query_all(product_names_query)  # type: ignore
+        product_names_map = {row["product_code"]: row.get("product_names", []) for row in product_names_rows}
+        
         data = []
         for product_id in sorted(all_products, key=lambda x: int(x) if x.isdigit() else 0):
-            row_data = {"ProductID": int(product_id) if product_id.isdigit() else product_id}
+            product_names_list = product_names_map.get(product_id, [])
+            product_names_str = ', '.join(product_names_list) if product_names_list else '-'
+            
+            row_data = {
+                "ProductID": int(product_id) if product_id.isdigit() else product_id,
+                "Product Names": product_names_str
+            }
             
             for col_name in sorted(month_data.keys()):
                 row_data[col_name] = month_data[col_name].get(product_id, "N/A")
             
             data.append(row_data)
         
-        column_headers = ["ProductID"] + sorted(month_data.keys())
+        column_headers = ["ProductID", "Product Names"] + sorted(month_data.keys())
         
     else:  # Customers
         # Parse FY to get last 3 months

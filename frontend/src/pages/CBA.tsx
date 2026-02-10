@@ -19,17 +19,7 @@ import { ScatterChart } from '@mui/x-charts/ScatterChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { cbaApi } from '../api';
 import type { RFMMetrics, RFMSummary, SegmentData } from '../api/types';
-
-// Segment colors matching R code
-const SEGMENT_COLORS: Record<string, string> = {
-  Champions: '#2ecc71',
-  'Loyal Customers': '#3498db',
-  'New Customers': '#9b59b6',
-  'Potential Loyalists': '#1abc9c',
-  'At Risk': '#e67e22',
-  'Lost Customers': '#e74c3c',
-  'Regular Customers': '#95a5a6',
-};
+import { SEGMENT_COLORS, RFM_COLORS } from '../constants/constants';
 
 interface HistogramBin {
   label: string;
@@ -133,7 +123,7 @@ const CBA = () => {
     () =>
       rfmData.map((d) => ({
         x: d.recency,
-        y: d.monetary / 1_000_000,
+        y: d.monetary / 10_000_000,
         id: d.customer_id,
       })),
     [rfmData]
@@ -143,7 +133,7 @@ const CBA = () => {
     () =>
       rfmData.map((d) => ({
         x: d.frequency,
-        y: d.monetary / 1_000_000,
+        y: d.monetary / 10_000_000,
         id: d.customer_id,
       })),
     [rfmData]
@@ -301,7 +291,7 @@ const CBA = () => {
             dataset={recencyBins}
             xAxis={[{ scaleType: 'band', dataKey: 'label', label: 'Months Since Last Purchase' }]}
             yAxis={[{ label: 'Number of Customers' }]}
-            series={[{ dataKey: 'count', color: '#3498db', label: 'Count' }]}
+            series={[{ dataKey: 'count', color: RFM_COLORS.recency, label: 'Count' }]}
             height={320}
             grid={{ vertical: true, horizontal: true }}
           />
@@ -314,20 +304,20 @@ const CBA = () => {
             dataset={frequencyBins}
             xAxis={[{ scaleType: 'band', dataKey: 'label', label: 'Number of Purchase Periods' }]}
             yAxis={[{ label: 'Number of Customers' }]}
-            series={[{ dataKey: 'count', color: '#2ecc71', label: 'Count' }]}
+            series={[{ dataKey: 'count', color: RFM_COLORS.frequency, label: 'Count' }]}
             height={320}
             grid={{ vertical: true, horizontal: true }}
           />
         </Paper>
         <Paper sx={{ flex: '1 1 calc(33.33% - 16px)', minWidth: 300, p: 2, height: 400 }}>
           <Typography variant="h6" gutterBottom>
-            Monetary Distribution (M)
+            Monetary Distribution (Cr)
           </Typography>
           <BarChart
             dataset={monetaryBins}
             xAxis={[{ scaleType: 'band', dataKey: 'label', label: 'Total Revenue' }]}
             yAxis={[{ label: 'Number of Customers' }]}
-            series={[{ dataKey: 'count', color: '#e74c3c', label: 'Count' }]}
+            series={[{ dataKey: 'count', color: RFM_COLORS.monetary, label: 'Count' }]}
             height={320}
             grid={{ vertical: true, horizontal: true }}
           />
@@ -348,19 +338,22 @@ const CBA = () => {
               series={[
                 {
                   data: scatterRecencyMonetary,
-                  color: '#3498db',
+                  color: RFM_COLORS.recency,
                   label: 'Customers',
                 },
               ]}
               xAxis={[{ label: 'Months Since Last Purchase' }]}
               yAxis={[{ 
-                label: 'Total Revenue',
+                label: 'Total Revenue (Cr)',
+                width: 110,
                 valueFormatter: (value: number | null, context: AxisValueFormatterContext) => {
-                  if (value === null) return '₹0M';
+                  if (value === null) return '₹0Cr';
                   if (context.location === 'tick') {
-                    return `₹${value.toFixed(0)}M`;
+                    if (value >= 100) return `₹${value.toFixed(0)}Cr`;
+                    if (value >= 1) return `₹${value.toFixed(2)}Cr`;
+                    return `₹${value.toFixed(4)}Cr`;
                   }
-                  return `₹${value.toFixed(1)}M`;
+                  return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}Cr`;
                 }
               }]}
               height={320}
@@ -377,19 +370,22 @@ const CBA = () => {
               series={[
                 {
                   data: scatterFrequencyMonetary,
-                  color: '#2ecc71',
+                  color: RFM_COLORS.frequency,
                   label: 'Customers',
                 },
               ]}
               xAxis={[{ label: 'Number of Purchase Periods' }]}
               yAxis={[{ 
-                label: 'Total Revenue',
+                label: 'Total Revenue (Cr)',
+                width: 110,
                 valueFormatter: (value: number | null, context: AxisValueFormatterContext) => {
-                  if (value === null) return '₹0M';
+                  if (value === null) return '₹0Cr';
                   if (context.location === 'tick') {
-                    return `₹${value.toFixed(0)}M`;
+                    if (value >= 100) return `₹${value.toFixed(0)}Cr`;
+                    if (value >= 1) return `₹${value.toFixed(2)}Cr`;
+                    return `₹${value.toFixed(4)}Cr`;
                   }
-                  return `₹${value.toFixed(1)}M`;
+                  return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}Cr`;
                 }
               }]}
               height={320}
@@ -406,12 +402,12 @@ const CBA = () => {
               series={[
                 {
                   data: scatterRecencyFrequency,
-                  color: '#9b59b6',
+                  color: RFM_COLORS.recencyVsFrequency,
                   label: 'Customers',
                 },
               ]}
               xAxis={[{ label: 'Months Since Last Purchase' }]}
-              yAxis={[{ label: 'Number of Purchase Periods' }]}
+              yAxis={[{ label: 'Number of Purchase Periods', width: 80 }]}
               height={320}
               grid={{ vertical: true, horizontal: true }}
             />
@@ -437,7 +433,7 @@ const CBA = () => {
                   dataKey: 'segment',
                 },
               ]}
-              yAxis={[{ label: 'Number of Customers' }]}
+              yAxis={[{ label: 'Number of Customers', width: 80 }]}
               series={[
                 {
                   dataKey: 'customer_count',
@@ -471,13 +467,13 @@ const CBA = () => {
         </Paper>
         <Paper sx={{ width: '100%', p: 3, height: 450 }}>
           <Typography variant="h6" gutterBottom>
-            Revenue by Segment (M ₹)
+            Revenue by Segment (Cr ₹)
           </Typography>
           <Box sx={{ width: '100%', height: 370 }}>
             <BarChart
               dataset={sortedSegments.map((s) => ({
                 ...s,
-                revenue_millions: s.total_revenue / 1_000_000,
+                revenue_crores: s.total_revenue / 10_000_000,
               }))}
               xAxis={[
                 {
@@ -486,7 +482,8 @@ const CBA = () => {
                 },
               ]}
               yAxis={[{ 
-                label: 'Total Revenue (M ₹)',
+                label: 'Total Revenue (Cr ₹)',
+                width: 80,
                 valueFormatter: (value: number | null) => {
                   if (value === null) return '0';
                   return `${value.toFixed(1)}`;
@@ -494,9 +491,9 @@ const CBA = () => {
               }]}
               series={[
                 {
-                  dataKey: 'revenue_millions',
+                  dataKey: 'revenue_crores',
                   label: 'Revenue',
-                  valueFormatter: (value) => `₹${value?.toFixed(2) || '0'}M`,
+                  valueFormatter: (value) => `₹${value?.toFixed(2) || '0'} Cr`,
                 },
               ]}
               colors={sortedSegments.map((s) => SEGMENT_COLORS[s.segment])}

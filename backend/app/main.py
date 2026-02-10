@@ -21,7 +21,8 @@ from .endpoints import (
     forecast,
     transition_analysis,
     cba,
-    customer_class_comparison
+    customer_class_comparison,
+    masters
 )
 
 
@@ -64,6 +65,7 @@ app.add_middleware(LoggingMiddleware)
 
 # Include all routers
 app.include_router(auth.router)  # Auth router should be first (no auth required)
+app.include_router(masters.router)
 app.include_router(dashboard.router)
 app.include_router(abc.router)
 app.include_router(cross_sell.router)

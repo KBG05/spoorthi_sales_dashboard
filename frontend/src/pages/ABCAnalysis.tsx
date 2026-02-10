@@ -54,11 +54,16 @@ const TrendChart = memo(({
           },
         }]}
         yAxis={[{
+          width: 80,
           valueFormatter: (value: number, context: AxisValueFormatterContext) => {
             if (context.location === 'tick') {
-              // Short format for tick labels with M suffix for Revenue
+              // Short format for tick labels with Cr suffix for Revenue
               if (metric === 'Revenue') {
-                return `${value.toFixed(1)}M`;
+                // Value is in actual amount, convert to Cr (divide by 10,000,000)
+                const crValue = value / 10;
+                if (crValue >= 100) return `₹${crValue.toFixed(0)}Cr`;
+                if (crValue >= 1) return `₹${crValue.toFixed(1)}Cr`;
+                return `₹${crValue.toFixed(2)}Cr`;
               }
               // For quantity, use K for thousands
               if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
@@ -66,7 +71,8 @@ const TrendChart = memo(({
             }
             // Full format for tooltips
             if (metric === 'Revenue') {
-              return `₹${value.toFixed(2)}M`;
+              const crValue = value / 10;
+              return `₹${crValue.toFixed(2)} Cr`;
             }
             return value.toLocaleString();
           },
@@ -88,7 +94,7 @@ const TrendChart = memo(({
           })(),
         }]}
         series={chartConfig.chartSeries}
-        margin={{ top: 20, bottom: 50, left: 100, right: 30 }}
+        margin={{ top: 20, bottom: 50, left: 0, right: 30 }}
         grid={{ vertical: false, horizontal: true }}
         slotProps={{
           mark: {
@@ -137,22 +143,29 @@ const ABCAnalysis = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      // If no categories selected, clear data and don't fetch
+      if (abcCategories.length === 0 || xyzCategories.length === 0) {
+        setTrendData(null);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const abcString = abcCategories.join(',');
         const xyzString = xyzCategories.join(',');
         const response = await abcApi.getTrend(financialYear, abcString, xyzString, metric);
         setTrendData(response.data);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching ABC trend data:', error);
+        // Set trend data to null so we can show the no data message
+        setTrendData(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (abcCategories.length > 0 && xyzCategories.length > 0) {
-      fetchData();
-    }
+    fetchData();
   }, [financialYear, abcCategories, xyzCategories, metric]);
 
   // Memoize chart configuration - MUST be before any conditional returns
@@ -199,9 +212,9 @@ const ABCAnalysis = () => {
           valueFormatter: (value: number | null) => {
             if (value === null || value === undefined) return '';
             if (metric === 'Revenue') {
-              // Check if value is already in millions (< 1000) or needs conversion
-              const displayValue = value > 1000 ? value / 1000000 : value;
-              return `${displayValue.toFixed(2)}M`;
+              // Value is in millions, convert to Cr
+              const crValue = value / 10;
+              return `₹${crValue.toFixed(2)} Cr`;
             }
             return value.toLocaleString();
           },
@@ -363,7 +376,7 @@ const ABCAnalysis = () => {
           {metric} Trend by ABC Category
         </Typography>
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2, flexShrink: 0 }}>
-          {metric === 'Revenue' ? 'Values in millions (M)' : 'Article quantities'}
+          {metric === 'Revenue' ? 'Values in crores (Cr)' : 'Article quantities'}
         </Typography>
         
         {trendData && trendData.data.length > 0 ? (

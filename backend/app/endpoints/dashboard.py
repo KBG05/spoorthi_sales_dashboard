@@ -7,7 +7,7 @@ from ..database import (
     get_latest_rolling_table, get_latest_time_id,
     safe_table_name
 )
-from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse, User
+from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse, User, CategoryBreakupItem, ABCXYZMatrixCell
 from ..endpoints.auth import get_current_user
 from typing import Any, Dict, List, Optional
 import pandas as pd
@@ -42,13 +42,16 @@ def get_month_string_from_time_id(time_id: int) -> str:
 
 
 @router.get("/kpis")
-async def get_dashboard_kpis():
+async def get_dashboard_kpis(time_id: Optional[int] = None):
     """
-    Get KPIs for the single LATEST month.
+    Get KPIs for a specific month or the LATEST month.
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month.
     
     SQL Queries:
         1. SELECT MAX("TimeID") AS max_id FROM public."Aggregated Data"
-        2. SELECT SUM("Revenue"), SUM("Quantity") FROM ... WHERE "TimeID" = {latest_id}
+        2. SELECT SUM("Revenue"), SUM("Quantity") FROM ... WHERE "TimeID" = {time_id}
     
     Functions Used:
         - query_scalar() - get max TimeID
@@ -63,8 +66,10 @@ async def get_dashboard_kpis():
             "time_id": 55
         }
     """
-    max_id=get_latest_time_id()
-    if not max_id:
+    if time_id is None:
+        time_id = get_latest_time_id()
+    
+    if not time_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No data found for KPIs.",
@@ -77,18 +82,18 @@ async def get_dashboard_kpis():
         FROM public."Aggregated Data"
         WHERE "TimeID" = %s
     '''
-    kpi_data=query_one(sql, (max_id,))
+    kpi_data=query_one(sql, (time_id,))
 
     if not kpi_data:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No KPI data found for the latest month.",
+            detail="No KPI data found for the specified month.",
         )
     return KPIResponse(
         total_revenue=float(kpi_data['total_revenue'] or 0),
         total_quantity=int(kpi_data['total_quantity'] or 0),
-        month_name=get_month_string_from_time_id(max_id),
-        time_id=max_id
+        month_name=get_month_string_from_time_id(time_id),
+        time_id=time_id
     )
 
 @router.get("/abc-count", response_model=List[CategoryCountResponse])
@@ -539,3 +544,112 @@ async def export_cross_sell():
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=cross_sell_recommendations.csv"}
     )
+
+
+@router.get("/category-breakup", response_model=List[CategoryBreakupItem])
+async def get_category_breakup(time_id: Optional[int] = None):
+    """
+    Get revenue and quantity breakdown by product category (Monofilaments, Trading, MISC).
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month.
+    
+    Returns:
+        [
+            {"category": "Monofilaments", "revenue": 12345678.90, "quantity": 5000},
+            {"category": "Trading", "revenue": 9876543.21, "quantity": 3000},
+            {"category": "MISC", "revenue": 1234567.89, "quantity": 1000}
+        ]
+    """
+    if time_id is None:
+        time_id = get_latest_time_id()
+    
+    if not time_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No data found."
+        )
+    
+    sql = '''
+        SELECT 
+            CASE 
+                WHEN pm.category IN ('MCF', 'WMF', 'INH', 'INB', 'Happa') THEN 'Monofilaments'
+                WHEN pm.category IN ('MSN', 'TSN', 'PP Woven Sack', 'WMT', 'Bird Net', 'Knitted Fabric', 'Knotted Netting', 'Mulch Film', 'Others') THEN 'Trading'
+                ELSE 'MISC'
+            END as category,
+            SUM(ad."Revenue") as revenue,
+            SUM(ad."Quantity") as quantity
+        FROM public."Aggregated Data" ad
+        LEFT JOIN (
+            SELECT DISTINCT ON (product_code) product_code, category
+            FROM priyatextile_product_master
+        ) pm ON CAST(ad."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
+        WHERE ad."TimeID" = %s
+        GROUP BY category
+        ORDER BY revenue DESC
+    '''
+    
+    rows = query_all(sql, (time_id,))
+    
+    if not rows:
+        return []
+    
+    return [
+        CategoryBreakupItem(
+            category=row["category"] or "MISC",
+            revenue=float(row["revenue"] or 0),
+            quantity=int(row["quantity"] or 0)
+        )
+        for row in rows
+    ]
+
+
+@router.get("/abc-xyz-matrix", response_model=List[ABCXYZMatrixCell])
+async def get_abc_xyz_matrix():
+    """
+    Get 3×3 ABC×XYZ matrix with counts and revenue for each combination.
+    
+    Returns:
+        [
+            {"abc": "A", "xyz": "X", "count": 50, "revenue": 5000000.0},
+            {"abc": "A", "xyz": "Y", "count": 40, "revenue": 3000000.0},
+            ...
+        ]
+    """
+    table_name = get_latest_rolling_table()
+    
+    if not table_name:
+        raise HTTPException(
+            status_code=404,
+            detail="No rolling ABC/XYZ summary table found"
+        )
+    
+    table = safe_table_name(table_name)
+    
+    sql = f'''
+        SELECT 
+            abc_category,
+            xyz_category,
+            COUNT(*) as count,
+            SUM(total_revenue) as revenue
+        FROM {table}
+        WHERE abc_category IS NOT NULL AND xyz_category IS NOT NULL
+        GROUP BY abc_category, xyz_category
+        ORDER BY abc_category, xyz_category
+    '''
+    
+    rows = query_all(sql)
+    
+    if not rows:
+        return []
+    
+    return [
+        ABCXYZMatrixCell(
+            abc=row["abc_category"],
+            xyz=row["xyz_category"],
+            count=int(row["count"]),
+            revenue=float(row["revenue"] or 0)
+        )
+        for row in rows
+    ]
+

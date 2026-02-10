@@ -19,6 +19,7 @@ import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
 import { transitionAnalysisApi } from '../api';
 import type { TransitionAnalysisResponse } from '../api/types';
+import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS, withAlpha } from '../constants/constants';
 
 const TransitionAnalysis: React.FC = () => {
   const [analysisType, setAnalysisType] = useState<'Products' | 'Customers'>('Products');
@@ -54,15 +55,39 @@ const TransitionAnalysis: React.FC = () => {
       renderCell: (params) => {
         const value = params.value;
         let bgColor = 'inherit';
+        let textColor = 'inherit';
         
-        // Apply color coding for Category columns
-        if (header.startsWith('Category_')) {
-          if (value === 'A') {
-            bgColor = 'rgba(0, 210, 91, 0.1)';
-          } else if (value === 'B') {
-            bgColor = 'rgba(94, 114, 228, 0.1)';
-          } else if (value === 'C') {
-            bgColor = 'rgba(252, 171, 0, 0.1)';
+        // Apply color coding for Category columns (ABC, XYZ, or combined)
+        if (header.includes('Category') || header.includes('Class')) {
+          const strValue = String(value).toUpperCase();
+          
+          // Check for combined ABC-XYZ (e.g., AX, AY, AZ, etc.)
+          if (strValue.length === 2 && ABC_XYZ_COLORS[strValue]) {
+            const color = ABC_XYZ_COLORS[strValue];
+            bgColor = withAlpha(color, 0.15);
+            textColor = color;
+          }
+          // ABC categories
+          else if (strValue === 'A') {
+            bgColor = withAlpha(ABC_COLORS.A, 0.15);
+            textColor = ABC_COLORS.A;
+          } else if (strValue === 'B') {
+            bgColor = withAlpha(ABC_COLORS.B, 0.15);
+            textColor = ABC_COLORS.B;
+          } else if (strValue === 'C') {
+            bgColor = withAlpha(ABC_COLORS.C, 0.15);
+            textColor = ABC_COLORS.C;
+          }
+          // XYZ categories
+          else if (strValue === 'X') {
+            bgColor = withAlpha(XYZ_COLORS.X, 0.15);
+            textColor = XYZ_COLORS.X;
+          } else if (strValue === 'Y') {
+            bgColor = withAlpha(XYZ_COLORS.Y, 0.15);
+            textColor = XYZ_COLORS.Y;
+          } else if (strValue === 'Z') {
+            bgColor = withAlpha(XYZ_COLORS.Z, 0.15);
+            textColor = XYZ_COLORS.Z;
           }
         }
 
@@ -74,6 +99,8 @@ const TransitionAnalysis: React.FC = () => {
               display: 'flex',
               alignItems: 'center',
               backgroundColor: bgColor,
+              color: textColor,
+              fontWeight: textColor !== 'inherit' ? 600 : 'inherit',
               px: 1,
             }}
           >

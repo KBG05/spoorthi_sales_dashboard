@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
 from ..database import query_all
-from ..schemas import ProductListItem, ProductBehaviourDataPoint, User
+from ..schemas import ProductListItem, ProductBehaviourDataPoint, User, CustomerListItem
 from ..endpoints.auth import get_current_user
 
 router = APIRouter(prefix="/product-behaviour", tags=["Product Behaviour"], dependencies=[Depends(get_current_user)])
@@ -78,15 +78,83 @@ async def get_products_by_class(
     table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
     
     sql = f'''
-        SELECT DISTINCT "ProductID" AS product_code 
-        FROM public."product_ABC_XYZ_{table_suffix}" 
-        WHERE "ABC_Category" = '{abc_class.upper()}' 
+        SELECT DISTINCT p."ProductID" AS product_code, pm.commercial_name
+        FROM public."product_ABC_XYZ_{table_suffix}" p
+        LEFT JOIN priyatextile_product_master pm ON CAST(p."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
+        WHERE p."ABC_Category" = '{abc_class.upper()}' 
         ORDER BY product_code
     '''
     
     rows = query_all(sql)  # type: ignore
     
-    return [ProductListItem(product_id=int(row["product_code"])) for row in rows]
+    return [
+        ProductListItem(
+            product_id=int(row["product_code"]),
+            product_name=row.get("commercial_name")
+        ) 
+        for row in rows
+    ]
+
+
+@router.get("/customers", response_model=List[CustomerListItem])
+async def get_customers_for_product(
+    financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
+    product_id: int = Query(..., description="Product ID"),
+    abc_classes: str = Query("A,B,C", description="Comma-separated ABC classes")
+):
+    """
+    Get list of customers who purchased a specific product in a financial year.
+    Filters by customer ABC class.
+    
+    Returns:
+        [{"customer_id": 101, "customer_name": "ABC Corp", "abc_category": "A"}, ...]
+    """
+    # Parse FY to get table suffix and TimeID range
+    fy_parts = financial_year.replace("FY", "").split("-")
+    if len(fy_parts) != 2:
+        raise HTTPException(status_code=400, detail="Invalid financial year format")
+    
+    table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
+    start_year = int(f"20{fy_parts[0]}")
+    end_year = int(f"20{fy_parts[1]}")
+    
+    start_date = datetime(start_year, 4, 1)
+    end_date = datetime(end_year, 3, 31)
+    
+    start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
+                     (start_date.month - BASE_DATE.month) + 1)
+    end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
+                   (end_date.month - BASE_DATE.month) + 1)
+    
+    # Parse classes
+    class_list = [cls.strip().upper() for cls in abc_classes.split(",")]
+    class_in = ",".join([f"'{cls}'" for cls in class_list])
+    
+    sql = f'''
+        SELECT DISTINCT ad."CustomerID", cm.customer, c."Category" as abc_category
+        FROM public."Aggregated Data" ad
+        INNER JOIN (
+            SELECT DISTINCT ON ("CustomerID") "CustomerID", "Category"
+            FROM public."customer_ABC_{table_suffix}"
+        ) c ON CAST(ad."CustomerID" AS TEXT) = CAST(c."CustomerID" AS TEXT)
+        LEFT JOIN priyatextile_customer_master cm ON CAST(ad."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
+        WHERE
+            ad."TimeID" BETWEEN {start_time_id} AND {end_time_id}
+            AND ad."ProductID" = {product_id}
+            AND c."Category" IN ({class_in})
+        ORDER BY ad."CustomerID"
+    '''
+    
+    rows = query_all(sql)  # type: ignore
+    
+    return [
+        CustomerListItem(
+            customer_id=int(row["CustomerID"]),
+            customer_name=row.get("customer"),
+            abc_category=row.get("abc_category")
+        )
+        for row in rows
+    ]
 
 
 @router.get("/trend", response_model=List[ProductBehaviourDataPoint])
@@ -94,7 +162,8 @@ async def get_product_behaviour_trend(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
     abc_class: str = Query("A", description="ABC class (A, B, or C)"),
     product_id: int = Query(..., description="Selected product ID"),
-    metric: str = Query("Revenue", description="'Revenue' or 'Quantity'")
+    metric: str = Query("Revenue", description="'Revenue' or 'Quantity'"),
+    customer_ids: str = Query("", description="Optional comma-separated customer IDs")
 ):
     """
     Get product behaviour trend data with dual-axis support.
@@ -184,6 +253,41 @@ async def get_product_behaviour_trend(
         if prod_id == product_id:
             product_total[time_id] += value
     
+    # Parse customer IDs if provided
+    customer_list = []
+    customer_data = {}
+    if customer_ids:
+        customer_list = [int(cid.strip()) for cid in customer_ids.split(",") if cid.strip()]
+        
+        # Query customer-specific data
+        if customer_list:
+            cust_in = ",".join(str(cid) for cid in customer_list)
+            customer_sql = f'''
+                SELECT
+                    t1."TimeID",
+                    t1."CustomerID",
+                    t1."Quantity" AS quantity,
+                    t1."Revenue" AS value
+                FROM public."Aggregated Data" AS t1
+                WHERE
+                    t1."TimeID" BETWEEN {start_time_id} AND {end_time_id}
+                    AND t1."ProductID" = {product_id}
+                    AND t1."CustomerID" IN ({cust_in})
+                ORDER BY t1."TimeID", t1."CustomerID"
+            '''
+            
+            customer_rows = query_all(customer_sql)  # type: ignore
+            
+            # Organize by customer
+            for row in customer_rows:
+                cust_id = int(row["CustomerID"])
+                time_id = row["TimeID"]
+                value = float(row[metric_col] or 0)
+                
+                if cust_id not in customer_data:
+                    customer_data[cust_id] = defaultdict(float)
+                customer_data[cust_id][time_id] += value
+    
     # Calculate scaling factor for dual axis
     max_class = max(class_total.values()) if class_total else 1
     max_product = max(product_total.values()) if product_total else 1
@@ -220,5 +324,17 @@ async def get_product_behaviour_trend(
                 type=f"Product {product_id}",
                 product_id=product_id
             ))
+        
+        # Customer-specific data
+        for cust_id in customer_list:
+            if cust_id in customer_data and time_id in customer_data[cust_id]:
+                cust_value = customer_data[cust_id][time_id]
+                result.append(ProductBehaviourDataPoint(
+                    month=month_str,
+                    value=round(cust_value, 2),
+                    scaled_value=round(cust_value, 2),  # Not scaled for customers
+                    type=f"Customer {cust_id}",
+                    product_id=product_id
+                ))
     
     return result

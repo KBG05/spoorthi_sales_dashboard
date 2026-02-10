@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   FormControl,
@@ -15,12 +15,18 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  Grid,
+  Paper,
+  Chip,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { customerBehaviourApi } from '../api';
 import { ABC_COLORS } from '../constants/constants';
 import type { CustomerListItem, ProductListItem, CustomerBehaviourDataPoint } from '../api/types';
+
+// Colors for multi-product charts - distinctive colors that stand out from ABC colors
+const PRODUCT_COLORS = ['#FF6B9D', '#00D9FF', '#FFB800', '#A855F7'];
 
 const CustomerBehaviour: React.FC = () => {
   const [financialYear, setFinancialYear] = useState<string>('');
@@ -30,31 +36,23 @@ const CustomerBehaviour: React.FC = () => {
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
   const [products, setProducts] = useState<ProductListItem[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<number | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<number | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [showLabels, setShowLabels] = useState(true);
-  const [data, setData] = useState<CustomerBehaviourDataPoint[]>([]);
+  const [productData, setProductData] = useState<Map<number, CustomerBehaviourDataPoint[]>>(new Map());
   const [loading, setLoading] = useState(false);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
-  // Color logic: Overall uses ABC class color, Product uses fixed color
-  const getCustomerColors = () => {
-    let overallColor: string = ABC_COLORS.Overall; // Default blue
-    
+  // Color logic: Overall uses ABC class color
+  const getOverallColor = () => {
     if (abcClasses.length === 1) {
       const classKey = abcClasses[0] as 'A' | 'B' | 'C';
       if (classKey in ABC_COLORS) {
-        overallColor = ABC_COLORS[classKey];
+        return ABC_COLORS[classKey];
       }
     }
-    
-    return {
-      customerOverall: overallColor,
-      customerProduct: '#ff006e', // Pink/magenta for product
-    };
+    return ABC_COLORS.Overall; // Default blue
   };
-  
-  const CUSTOMER_COLORS = getCustomerColors();
 
   // Fetch available years on mount
   useEffect(() => {
@@ -106,7 +104,7 @@ const CustomerBehaviour: React.FC = () => {
   useEffect(() => {
     if (!selectedCustomer) {
       setProducts([]);
-      setSelectedProduct(null);
+      setSelectedProducts([]);
       return;
     }
 
@@ -118,10 +116,9 @@ const CustomerBehaviour: React.FC = () => {
           selectedCustomer.toString()
         );
         setProducts(result);
-        // Reset product selection if it's not in the new product list
-        if (selectedProduct !== null && !result.some(p => p.product_id === selectedProduct)) {
-          setSelectedProduct(null);
-        }
+        // Reset product selections if they're not in the new product list
+        const validIds = result.map(p => p.product_id);
+        setSelectedProducts(prev => prev.filter(id => validIds.includes(id)));
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -131,29 +128,61 @@ const CustomerBehaviour: React.FC = () => {
     fetchProducts();
   }, [financialYear, selectedCustomer]);
 
-  // Fetch trend data when product is selected
+  // Group products by product_id and combine their names
+  const groupedProducts = useMemo(() => {
+    const productMap = new Map<number, { product_id: number; product_names: string[] }>();
+    
+    products.forEach(product => {
+      if (productMap.has(product.product_id)) {
+        const existing = productMap.get(product.product_id)!;
+        if (product.product_name && !existing.product_names.includes(product.product_name)) {
+          existing.product_names.push(product.product_name);
+        }
+      } else {
+        productMap.set(product.product_id, {
+          product_id: product.product_id,
+          product_names: product.product_name ? [product.product_name] : []
+        });
+      }
+    });
+    
+    return Array.from(productMap.values());
+  }, [products]);
+
+  // Memoize selected products to prevent unnecessary re-renders
+  const selectedProductsKey = useMemo(() => JSON.stringify(selectedProducts.sort()), [selectedProducts]);
+
+  // Fetch trend data when products are selected
   useEffect(() => {
-    if (!selectedCustomer || selectedProduct === null) {
-      setData([]);
+    if (!selectedCustomer || selectedProducts.length === 0) {
+      setProductData(new Map());
       return;
     }
 
     const fetchData = async () => {
       setLoading(true);
       try {
-        const result = await customerBehaviourApi.getTrend(
-          financialYear,
-          selectedCustomer.toString(),
-          selectedProduct.toString(),
-          metric
-        );
-        // Convert month dates to month names
-        const dataWithMonths = result.map(item => ({
-          ...item,
-          month: new Date(item.month).toLocaleDateString('en-US', { month: 'short' })
-        }));
+        const newProductData = new Map<number, CustomerBehaviourDataPoint[]>();
         
-        setData(dataWithMonths);
+        // Fetch data for each selected product
+        await Promise.all(
+          selectedProducts.map(async (productId) => {
+            const result = await customerBehaviourApi.getTrend(
+              financialYear,
+              selectedCustomer.toString(),
+              productId.toString(),
+              metric
+            );
+            // Convert month dates to month names
+            const dataWithMonths = result.map(item => ({
+              ...item,
+              month: new Date(item.month).toLocaleDateString('en-US', { month: 'short' })
+            }));
+            newProductData.set(productId, dataWithMonths);
+          })
+        );
+        
+        setProductData(newProductData);
       } catch (error) {
         console.error('Error fetching customer behaviour:', error);
       } finally {
@@ -161,7 +190,7 @@ const CustomerBehaviour: React.FC = () => {
       }
     };
     fetchData();
-  }, [financialYear, selectedCustomer, selectedProduct, metric]);
+  }, [financialYear, selectedCustomer, selectedProductsKey, metric]);
 
   return (
     <Box display="flex" flexDirection="column" height="100%" p={2.5}>
@@ -236,7 +265,11 @@ const CustomerBehaviour: React.FC = () => {
               size="small"
               sx={{ minWidth: 300, flex: 1 }}
               options={customers}
-              getOptionLabel={(option) => `Customer ${option.customer_id}`}
+              getOptionLabel={(option) => 
+                option.customer_name 
+                  ? `${option.customer_id} - ${option.customer_name}` 
+                  : `Customer ${option.customer_id}`
+              }
               value={customers.find(c => c.customer_id === selectedCustomer) || null}
               onChange={(_, newValue) => {
                 setSelectedCustomer(newValue?.customer_id || null);
@@ -274,19 +307,50 @@ const CustomerBehaviour: React.FC = () => {
         <Box display="flex" flexDirection="column" gap={1}>
           <Box display="flex" gap={1} alignItems="center">
             <Autocomplete
+              multiple
               size="small"
-              sx={{ minWidth: 300, flex: 1 }}
-              options={products}
-              getOptionLabel={(option) => `Product ${option.product_id}`}
-              value={products.find(p => p.product_id === selectedProduct) || null}
-              onChange={(_, newValue) => setSelectedProduct(newValue?.product_id || null)}
+              sx={{ minWidth: 350, flex: 1 }}
+              options={groupedProducts}
+              getOptionLabel={(option) => {
+                const names = option.product_names.length > 0 
+                  ? option.product_names.join(', ') 
+                  : 'No Name';
+                return `${option.product_id} - ${names}`;
+              }}
+              value={groupedProducts.filter(p => selectedProducts.includes(p.product_id))}
+              onChange={(_, newValue) => {
+                // Deduplicate by product_id
+                const uniqueProducts = new Map(newValue.map(p => [p.product_id, p]));
+                const uniqueIds = Array.from(uniqueProducts.keys());
+                setSelectedProducts(uniqueIds.slice(0, 4));
+              }}
               loading={loadingProducts}
               disabled={!selectedCustomer}
+              limitTags={2}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => {
+                  const label = option.product_names.length > 0 
+                    ? option.product_names.join(', ') 
+                    : `Product ${option.product_id}`;
+                  return (
+                    <Chip
+                      {...getTagProps({ index })}
+                      key={option.product_id}
+                      label={label}
+                      size="small"
+                      sx={{
+                        backgroundColor: PRODUCT_COLORS[selectedProducts.indexOf(option.product_id) % PRODUCT_COLORS.length],
+                        color: 'white',
+                      }}
+                    />
+                  );
+                })
+              }
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Select Product"
-                  placeholder="Search products..."
+                  label="Select Products (max 4)"
+                  placeholder={selectedProducts.length >= 4 ? 'Max 4 reached' : 'Search products...'}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -302,8 +366,8 @@ const CustomerBehaviour: React.FC = () => {
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setSelectedProduct(null)}
-              disabled={selectedProduct === null}
+              onClick={() => setSelectedProducts([])}
+              disabled={selectedProducts.length === 0}
             >
               Clear
             </Button>
@@ -332,241 +396,173 @@ const CustomerBehaviour: React.FC = () => {
             Select a customer to view behavior
           </Typography>
         </Box>
-      ) : selectedProduct === null ? (
+      ) : selectedProducts.length === 0 ? (
         <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
           <Typography color="text.secondary">
-            Select a product to view detailed comparison
+            Select up to 4 products to view detailed comparison
           </Typography>
         </Box>
-      ) : data.length === 0 ? (
-        <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
-          <Typography color="text.secondary">No data available</Typography>
-        </Box>
       ) : (
-  <Box flex={1} minHeight={0} sx={{ bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1, p: 2 }}>
-          <LineChart
-            xAxis={[{
-              scaleType: 'band',
-              data: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
-              valueFormatter: (value: string) => value,
-            }]}
-            yAxis={[
-              // Left Y-axis: Overall customer revenue/quantity (all products)
-              {
-                id: 'overallAxis',
-                label: metric === 'Revenue' ? 'Total Customer Revenue (M)' : 'Total Quantity',
-                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
-                  if (context.location === 'tick') {
-                    if (metric === 'Revenue') {
-                      if (value >= 1000000) {
-                        const mValue = value / 1000000;
-                        return mValue % 1 === 0 ? `₹${mValue.toFixed(0)}M` : `₹${mValue.toFixed(1)}M`;
-                      }
-                      if (value >= 1000) {
-                        const kValue = value / 1000;
-                        return kValue % 1 === 0 ? `₹${kValue.toFixed(0)}K` : `₹${kValue.toFixed(1)}K`;
-                      }
-                      return `₹${value.toFixed(0)}`;
-                    }
-                    if (value >= 1000000) {
-                      const mValue = value / 1000000;
-                      return mValue % 1 === 0 ? `${mValue.toFixed(0)}M` : `${mValue.toFixed(1)}M`;
-                    }
-                    if (value >= 1000) {
-                      const kValue = value / 1000;
-                      return kValue % 1 === 0 ? `${kValue.toFixed(0)}K` : `${kValue.toFixed(1)}K`;
-                    }
-                    return value.toFixed(0);
-                  }
-                  if (metric === 'Revenue') {
-                    return `₹${value.toLocaleString('en-IN')}`;
-                  }
-                  return value.toLocaleString('en-IN');
-                },
-                min: 0,
-                tickMinStep: (() => {
-                  const overallData = data.filter(d => d.type.includes('Overall'));
-                  const allValues = overallData.map(d => d.value || 0);
-                  if (allValues.length === 0) return 1;
-                  const maxVal = Math.max(...allValues);
-                  const minVal = Math.min(...allValues);
-                  const range = maxVal - minVal;
-                  
-                  // For quantity, ensure we always have visible ticks
-                  if (metric === 'Quantity') {
-                    // Calculate tick step to ensure 4-6 ticks on the axis
-                    const idealTickCount = 5;
-                    const roughStep = range / idealTickCount;
-                    
-                    // Round to nearest sensible value
-                    if (roughStep === 0) return 1;
-                    
-                    const magnitude = Math.floor(Math.log10(roughStep));
-                    const normalized = roughStep / Math.pow(10, magnitude);
-                    let roundedNormalized = 1;
-                    
-                    if (normalized > 5) roundedNormalized = 10;
-                    else if (normalized > 2) roundedNormalized = 5;
-                    else if (normalized > 1) roundedNormalized = 2;
-                    
-                    return roundedNormalized * Math.pow(10, magnitude);
-                  }
-                  
-                  // For revenue, use original logic
-                  if (range < 10) return 1;
-                  if (range < 50) return 5;
-                  if (range < 100) return 10;
-                  if (range < 500) return 50;
-                  if (range < 1000) return 100;
-                  if (range < 10000) return 1000;
-                  if (range < 100000) return 10000;
-                  return Math.ceil(range / 5 / 10000) * 10000;
-                })(),
-              },
-              // Right Y-axis: Selected product revenue/quantity
-              {
-                id: 'productAxis',
-                position: 'right' as const,
-                label: metric === 'Revenue' ? 'Product Revenue (M)' : 'Product Quantity',
-                valueFormatter: (value: number, context: AxisValueFormatterContext) => {
-                  if (context.location === 'tick') {
-                    if (metric === 'Revenue') {
-                      if (value >= 1000000) {
-                        const mValue = value / 1000000;
-                        return mValue % 1 === 0 ? `₹${mValue.toFixed(0)}M` : `₹${mValue.toFixed(1)}M`;
-                      }
-                      if (value >= 1000) {
-                        const kValue = value / 1000;
-                        return kValue % 1 === 0 ? `₹${kValue.toFixed(0)}K` : `₹${kValue.toFixed(1)}K`;
-                      }
-                      return `₹${value.toFixed(0)}`;
-                    }
-                    if (value >= 1000000) {
-                      const mValue = value / 1000000;
-                      return mValue % 1 === 0 ? `${mValue.toFixed(0)}M` : `${mValue.toFixed(1)}M`;
-                    }
-                    if (value >= 1000) {
-                      const kValue = value / 1000;
-                      return kValue % 1 === 0 ? `${kValue.toFixed(0)}K` : `${kValue.toFixed(1)}K`;
-                    }
-                    return value.toFixed(0);
-                  }
-                  if (metric === 'Revenue') {
-                    return `₹${value.toLocaleString('en-IN')}`;
-                  }
-                  return value.toLocaleString('en-IN');
-                },
-                min: 0,
-                tickMinStep: (() => {
-                  const productData = data.filter(d => d.type.includes('Product'));
-                  const allValues = productData.map(d => d.value || 0);
-                  if (allValues.length === 0) return 1;
-                  const maxVal = Math.max(...allValues);
-                  const minVal = Math.min(...allValues);
-                  const range = maxVal - minVal;
-                  
-                  if (range < 10) return 1;
-                  if (range < 50) return 5;
-                  if (range < 100) return 10;
-                  if (range < 500) return 50;
-                  if (range < 1000) return 100;
-                  if (range < 10000) return 1000;
-                  if (range < 100000) return 10000;
-                  return Math.ceil(range / 5 / 10000) * 10000;
-                })(),
-              }
-            ]}
-            series={(() => {
-              // Financial year order: Apr to Mar
-              const months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+        <Box flex={1} minHeight={0}>
+          <Grid container spacing={2}>
+            {selectedProducts.map((productId, index) => {
+              const data = productData.get(productId) || [];
+              const productColor = PRODUCT_COLORS[index % PRODUCT_COLORS.length];
+              const overallColor = getOverallColor();
+              const productInfo = groupedProducts.find(p => p.product_id === productId);
+              const productLabel = productInfo?.product_names.length ? productInfo.product_names.join(', ') : `Product ${productId}`;
               
-              // Get unique customer IDs from data
-              const customerIds = [...new Set(
-                data
-                  .filter(d => d.type.includes('Overall'))
-                  .map(d => {
-                    const match = d.type.match(/Customer (\d+)/);
-                    return match ? parseInt(match[1]) : null;
-                  })
-                  .filter(id => id !== null)
-              )] as number[];
-              
-              const allSeries: any[] = [];
-              
-              // Create series for the customer
-              customerIds.forEach((customerId) => {
-                // Use colors for single customer
-                const overallColor = CUSTOMER_COLORS.customerOverall;
-                const productColor = CUSTOMER_COLORS.customerProduct;
-                
-                // Overall series (left axis)
-                const overallData = data.filter(d => 
-                  d.type.includes(`Customer ${customerId} Overall`)
-                );
-                if (overallData.length > 0) {
-                  const monthValueMap = new Map(overallData.map(d => [d.month, d.value]));
-                  const alignedData = months.map(month => monthValueMap.get(month) || null);
-                  
-                  allSeries.push({
-                    data: alignedData,
-                    label: `Customer ${customerId} (All Products)`,
-                    curve: 'linear' as const,
-                    showMark: showLabels,
-                    color: overallColor,
-                    strokeWidth: 3,
-                    connectNulls: true,
-                    yAxisId: 'overallAxis',
-                    valueFormatter: (value: number | null) =>
-                      metric === 'Revenue'
-                        ? `₹${(value || 0).toLocaleString('en-IN')}`
-                        : (value?.toLocaleString('en-IN') || '0'),
-                  });
-                }
-                
-                // Product-specific series (right axis)
-                const productData = data.filter(d => 
-                  d.type.includes(`Customer ${customerId} Product`)
-                );
-                if (productData.length > 0) {
-                  const monthValueMap = new Map(productData.map(d => [d.month, d.value]));
-                  const alignedData = months.map(month => monthValueMap.get(month) || null);
-                  
-                  // Extract product ID from type
-                  const productMatch = productData[0].type.match(/Product (\d+)/);
-                  const productId = productMatch ? productMatch[1] : selectedProduct;
-                  
-                  allSeries.push({
-                    data: alignedData,
-                    label: `Customer ${customerId} (Product ${productId})`,
-                    curve: 'linear' as const,
-                    showMark: showLabels,
-                    color: productColor,
-                    strokeWidth: 2,
-                    strokeDasharray: '5 5', // Dashed line for product-specific
-                    connectNulls: true,
-                    yAxisId: 'productAxis',
-                    valueFormatter: (value: number | null) =>
-                      metric === 'Revenue'
-                        ? `₹${(value || 0).toLocaleString('en-IN')}`
-                        : (value?.toLocaleString('en-IN') || '0'),
-                  });
-                }
-              });
-              
-              return allSeries;
-            })()}
-            margin={{ top: 10, right: 120, bottom: 50, left: 80 }}
-            grid={{ vertical: false, horizontal: true }}
-            slotProps={{
-              legend: {
-                direction: "horizontal",
-                position: {
-                  vertical: 'top',
-                  horizontal: "center"
-                }
-              }
-            }}
-          />
+              return (
+                <Grid size={{ xs: 12, md: selectedProducts.length === 1 ? 12 : 6 }} key={productId}>
+                  <Paper sx={{ p: 2, height: selectedProducts.length === 1 ? 500 : 350 }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: productColor }}>
+                      {productId} - {productLabel}
+                    </Typography>
+                    {data.length === 0 ? (
+                      <Box display="flex" justifyContent="center" alignItems="center" height="80%">
+                        <Typography color="text.secondary">No data available</Typography>
+                      </Box>
+                    ) : (
+                      <LineChart
+                        xAxis={[{
+                          scaleType: 'band',
+                          data: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+                        }]}
+                        yAxis={[
+                          {
+                            id: 'totalAxis',
+                            label: metric === 'Revenue' ? 'Customer Total' : 'Customer Total',
+                            width: 110,
+                            valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                              if (context.location === 'tick') {
+                                if (metric === 'Revenue') {
+                                  // Keep in lakhs/thousands, not crores
+                                  if (value >= 10000000) return `₹${(value / 10000000).toFixed(0)}Cr`;
+                                  if (value >= 100000) return `₹${(value / 100000).toFixed(0)}L`;
+                                  if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+                                  return `₹${value.toFixed(0)}`;
+                                }
+                                if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
+                                if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                                return `${value.toFixed(0)}`;
+                              }
+                              if (metric === 'Revenue') {
+                                // Tooltip shows full value in appropriate unit
+                                if (value >= 10000000) return `₹${(value / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`;
+                                if (value >= 100000) return `₹${(value / 100000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+                                return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                              }
+                              return value.toLocaleString('en-IN');
+                            },
+                            min: 0,
+                          },
+                          {
+                            id: 'productAxis',
+                            label: metric === 'Revenue' ? 'Product' : 'Product',
+                            width: 110,
+                            position: 'right',
+                            valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                              if (context.location === 'tick') {
+                                if (metric === 'Revenue') {
+                                  // Keep in lakhs/thousands, not crores
+                                  if (value >= 10000000) return `₹${(value / 10000000).toFixed(0)}Cr`;
+                                  if (value >= 100000) return `₹${(value / 100000).toFixed(0)}L`;
+                                  if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
+                                  return `₹${value.toFixed(0)}`;
+                                }
+                                if (value >= 1000000) return `${(value / 1000000).toFixed(0)}M`;
+                                if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                                return `${value.toFixed(0)}`;
+                              }
+                              if (metric === 'Revenue') {
+                                // Tooltip shows full value in appropriate unit
+                                if (value >= 10000000) return `₹${(value / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`;
+                                if (value >= 100000) return `₹${(value / 100000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+                                return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                              }
+                              return value.toLocaleString('en-IN');
+                            },
+                            min: 0,
+                          }
+                        ]}
+                        series={(() => {
+                          const months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'];
+                          const allSeries: any[] = [];
+                          
+                          // Overall series (customer total)
+                          const overallData = data.filter(d => d.type.includes('Overall'));
+                          if (overallData.length > 0) {
+                            const monthValueMap = new Map(overallData.map(d => [d.month, d.value]));
+                            const alignedData = months.map(month => monthValueMap.get(month) || null);
+                            
+                            allSeries.push({
+                              data: alignedData,
+                              label: 'Customer Total',
+                              curve: 'linear' as const,
+                              showMark: showLabels,
+                              color: overallColor,
+                              strokeWidth: 2,
+                              connectNulls: true,
+                              yAxisId: 'totalAxis',
+                              valueFormatter: (value: number | null) => {
+                                if (value === null || value === undefined) return '';
+                                if (metric === 'Revenue') {
+                                  // Customer Total - use lakhs/thousands
+                                  if (value >= 10000000) return `₹${(value / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`;
+                                  if (value >= 100000) return `₹${(value / 100000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+                                  return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                                }
+                                return value.toLocaleString('en-IN');
+                              },
+                            });
+                          }
+                          
+                          // Product-specific series
+                          const productDataFiltered = data.filter(d => d.type.includes('Product'));
+                          if (productDataFiltered.length > 0) {
+                            const monthValueMap = new Map(productDataFiltered.map(d => [d.month, d.value]));
+                            const alignedData = months.map(month => monthValueMap.get(month) || null);
+                            
+                            allSeries.push({
+                              data: alignedData,
+                              label: productLabel,
+                              curve: 'linear' as const,
+                              showMark: showLabels,
+                              color: productColor,
+                              strokeWidth: 2,
+                              strokeDasharray: '5 5',
+                              connectNulls: true,
+                              yAxisId: 'productAxis',
+                              valueFormatter: (value: number | null) => {
+                                if (value === null || value === undefined) return '';
+                                if (metric === 'Revenue') {
+                                  // Product axis - use lakhs/thousands
+                                  if (value >= 10000000) return `₹${(value / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`;
+                                  if (value >= 100000) return `₹${(value / 100000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`;
+                                  return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                                }
+                                return value.toLocaleString('en-IN');
+                              },
+                            });
+                          }
+                          
+                          return allSeries;
+                        })()}
+                        margin={{ top: 10, right: 0, bottom: 40, left: 0 }}
+                        grid={{ vertical: false, horizontal: true }}
+                        slotProps={{
+                          legend: {
+                            direction: "horizontal",
+                            position: { vertical: 'top', horizontal: "center" }
+                          }
+                        }}
+                      />
+                    )}
+                  </Paper>
+                </Grid>
+              );
+            })}
+          </Grid>
         </Box>
       )}
     </Box>

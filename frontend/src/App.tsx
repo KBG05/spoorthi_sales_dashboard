@@ -5,8 +5,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import { AppLayout } from './layouts/AppLayout';
 import Dashboard from './pages/Dashboard';
-import ABCAnalysis from './pages/ABCAnalysis';
-import CustomerTrend from './pages/CustomerTrend';
+import TrendAnalysis from './pages/TrendAnalysis';
 import CustomerBehaviour from './pages/CustomerBehaviour';
 import ProductBehaviour from './pages/ProductBehaviour';
 import CrossSell from './pages/CrossSell';
@@ -34,8 +33,10 @@ function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
-        <Route path="abc-analysis" element={<ABCAnalysis />} />
-        <Route path="customer-trend" element={<CustomerTrend />} />
+        <Route path="trend-analysis" element={<TrendAnalysis />} />
+        {/* Redirects for old routes */}
+        <Route path="abc-analysis" element={<Navigate to="/trend-analysis" replace />} />
+        <Route path="customer-trend" element={<Navigate to="/trend-analysis" replace />} />
         <Route path="customer-behaviour" element={<CustomerBehaviour />} />
         <Route path="cba" element={<CBA />} />
         <Route path="customer-class-comparison" element={<CustomerClassComparison />} />

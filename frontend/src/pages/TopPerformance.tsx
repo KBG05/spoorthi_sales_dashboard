@@ -15,6 +15,7 @@ import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { topPerformanceApi } from '../api';
 import type { TopPerformersResponse } from '../api/types';
+import { TOP_PERFORMER_COLORS } from '../constants/constants';
 
 const TopPerformance: React.FC = () => {
   const theme = useTheme();
@@ -39,18 +40,22 @@ const TopPerformance: React.FC = () => {
   }, [financialYear, entityType]);
 
   const fyChartData = useMemo(() => {
-    if (!data?.top_fy) return { ids: [], revenues: [] };
+    if (!data?.top_fy) return { labels: [], revenues: [] };
     return {
-      ids: data.top_fy.map(item => `${entityType === 'Customers' ? 'C' : 'P'}${item.id}`),
-      revenues: data.top_fy.map(item => item.revenue / 1_000_000),
+      labels: data.top_fy.map(item => 
+        item.name || `${entityType === 'Customers' ? 'Customer' : 'Product'} ${item.id}`
+      ),
+      revenues: data.top_fy.map(item => item.revenue / 10_000_000), // Convert to Crores
     };
   }, [data, entityType]);
 
   const latestChartData = useMemo(() => {
-    if (!data?.top_latest) return { ids: [], revenues: [] };
+    if (!data?.top_latest) return { labels: [], revenues: [] };
     return {
-      ids: data.top_latest.map(item => `${entityType === 'Customers' ? 'C' : 'P'}${item.id}`),
-      revenues: data.top_latest.map(item => item.revenue / 1_000_000),
+      labels: data.top_latest.map(item => 
+        item.name || `${entityType === 'Customers' ? 'Customer' : 'Product'} ${item.id}`
+      ),
+      revenues: data.top_latest.map(item => item.revenue / 10_000_000), // Convert to Crores
     };
   }, [data, entityType]);
 
@@ -105,60 +110,49 @@ const TopPerformance: React.FC = () => {
         </ToggleButtonGroup>
       </Box>
 
-      {/* Charts Section */}
-      <Box display="flex" gap={2} flex={1} minHeight={0}>
+      {/* Charts Section - Horizontal Bar Charts */}
+      <Box display="flex" gap={2} flex={1} minHeight={0} flexDirection="column">
         <Box flex={1} display="flex" flexDirection="column" minWidth={0}>
           <Typography variant="h6" gutterBottom>
             Top 10 {entityType} - {financialYear}
           </Typography>
-          <Box flex={1} minHeight={0}>
+          <Box flex={1} minHeight={400}>
             <BarChart
-              xAxis={[{ scaleType: 'band', data: fyChartData.ids }]}
+              layout="horizontal"
               yAxis={[{ 
+                scaleType: 'band', 
+                data: fyChartData.labels, 
+                tickLabelStyle: { fontSize: 12 },
+                width: 200
+              }]}
+              xAxis={[{ 
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
-                    // Short format for tick labels
-                    if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
-                    return `₹${value.toFixed(0)}`;
+                    if (value >= 100) return `₹${value.toFixed(0)}Cr`;
+                    if (value >= 10) return `₹${value.toFixed(1)}Cr`;
+                    return `₹${value.toFixed(2)}Cr`;
                   }
-                  // Full format for tooltips
-                  return `₹${value.toFixed(2)}M`;
+                  return `₹${value.toFixed(2)} Cr`;
                 },
                 min: 0,
-                tickMinStep: (() => {
-                  // Calculate dynamic tick step based on data range
-                  if (fyChartData.revenues.length === 0) return 1;
-                  const maxVal = Math.max(...fyChartData.revenues);
-                  const minVal = Math.min(...fyChartData.revenues);
-                  const range = maxVal - minVal;
-                  
-                  // Adaptive step to prevent duplicate ticks
-                  if (range < 5) return 1;
-                  if (range < 20) return 5;
-                  if (range < 100) return 10;
-                  if (range < 500) return 50;
-                  return Math.ceil(range / 5 / 100) * 100;
-                })(),
               }]}
               series={[
                 {
                   data: fyChartData.revenues,
-                  label: 'Revenue (M)',
-                  color: '#9b59b6',
-                  valueFormatter: (value) => `₹${value?.toFixed(2)}M`,
+                  label: 'Revenue of Articles (Cr)',
+                  color: TOP_PERFORMER_COLORS.fy,
+                  valueFormatter: (value) => `₹${value?.toFixed(2)} Cr`,
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 100 }}
-              grid={{ vertical: false, horizontal: true }}
-              barLabel={(item) => `₹${item.value?.toFixed(1)}M`}
+              margin={{ top: 20, right: 80, bottom: 40, left: 150 }}
+              grid={{ vertical: true, horizontal: false }}
+              barLabel={(item) => `₹${item.value?.toFixed(2)} Cr`}
               slotProps={{
                 barLabel: {
-                  placement: 'outside',
                   style: {
                     fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
-                    fontSize: 14,
-                    transform: 'translateY(-8px)',
+                    fontSize: 12,
                   },
                 },
               }}
@@ -170,54 +164,43 @@ const TopPerformance: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Top 10 {entityType} - Latest Month
           </Typography>
-          <Box flex={1} minHeight={0}>
+          <Box flex={1} minHeight={400}>
             <BarChart
-              xAxis={[{ scaleType: 'band', data: latestChartData.ids }]}
+              layout="horizontal"
               yAxis={[{ 
+                scaleType: 'band', 
+                data: latestChartData.labels, 
+                tickLabelStyle: { fontSize: 12 },
+                width: 200
+              }]}
+              xAxis={[{ 
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
-                    // Short format for tick labels
-                    if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
-                    return `₹${value.toFixed(0)}`;
+                    if (value >= 100) return `₹${value.toFixed(0)}Cr`;
+                    if (value >= 10) return `₹${value.toFixed(1)}Cr`;
+                    return `₹${value.toFixed(2)}Cr`;
                   }
-                  // Full format for tooltips
-                  return `₹${value.toFixed(2)}M`;
+                  return `₹${value.toFixed(2)} Cr`;
                 },
                 min: 0,
-                tickMinStep: (() => {
-                  // Calculate dynamic tick step based on data range
-                  if (latestChartData.revenues.length === 0) return 1;
-                  const maxVal = Math.max(...latestChartData.revenues);
-                  const minVal = Math.min(...latestChartData.revenues);
-                  const range = maxVal - minVal;
-                  
-                  // Adaptive step to prevent duplicate ticks
-                  if (range < 5) return 1;
-                  if (range < 20) return 5;
-                  if (range < 100) return 10;
-                  if (range < 500) return 50;
-                  return Math.ceil(range / 5 / 100) * 100;
-                })(),
               }]}
               series={[
                 {
                   data: latestChartData.revenues,
-                  label: 'Revenue (M)',
-                  color: '#16a085',
-                  valueFormatter: (value) => `₹${value?.toFixed(2)}M`,
+                  label: 'Revenue of Articles (Cr)',
+                  color: TOP_PERFORMER_COLORS.latest,
+                  valueFormatter: (value) => `₹${value?.toFixed(2)} Cr`,
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 100 }}
-              grid={{ vertical: false, horizontal: true }}
-              barLabel={(item) => `₹${item.value?.toFixed(1)}M`}
+              margin={{ top: 20, right: 80, bottom: 40, left: 150 }}
+              grid={{ vertical: true, horizontal: false }}
+              barLabel={(item) => `₹${item.value?.toFixed(2)} Cr`}
               slotProps={{
                 barLabel: {
-                  placement: 'outside',
                   style: {
                     fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
                     fontWeight: 600,
-                    fontSize: 14,
-                    transform: 'translateY(-8px)',
+                    fontSize: 12,
                   },
                 },
               }}

@@ -121,6 +121,7 @@ const TicketSize: React.FC = () => {
             <BarChart
               xAxis={[{ scaleType: 'band', data: countData.bands }]}
               yAxis={[{
+                width: 70,
                 min: 0,
                 tickMinStep: (() => {
                   if (countData.values.length === 0) return 1;
@@ -170,6 +171,7 @@ const TicketSize: React.FC = () => {
             <BarChart
               xAxis={[{ scaleType: 'band', data: revenueData.bands }]}
               yAxis={[{
+                width: 70,
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     // Short format for tick labels

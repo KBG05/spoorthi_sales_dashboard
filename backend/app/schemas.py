@@ -25,6 +25,17 @@ class ComboCountResponse(BaseModel):
     abc_xyz: str
     count: int
 
+class CategoryBreakupItem(BaseModel):
+    category: str  # "Monofilaments", "Trading", "MISC"
+    revenue: float
+    quantity: int
+
+class ABCXYZMatrixCell(BaseModel):
+    abc: str  # "A", "B", or "C"
+    xyz: str  # "X", "Y", or "Z"
+    count: int
+    revenue: float
+
 
 # -----------------------
 # abc_server.R
@@ -48,8 +59,11 @@ class ABCTrendResponse(BaseModel):
 class CrossSellRecommendation(BaseModel):
     """Cross-sell recommendation for a distributor"""
     customer: str  # Distributor_Code
+    customer_name: Optional[str] = None
     products_purchased: str  # Comma-separated list
+    product_names_purchased: Optional[str] = None  # Comma-separated names
     recommendations: str  # Comma-separated list
+    recommendation_names: Optional[str] = None  # Comma-separated names
 
 
 # -----------------------
@@ -58,10 +72,13 @@ class CrossSellRecommendation(BaseModel):
 class CustomerListItem(BaseModel):
     """Customer ID for dropdown"""
     customer_id: int
+    customer_name: Optional[str] = None
+    abc_category: Optional[str] = None  # For filtering customers by class
 
 class ProductListItem(BaseModel):
     """Product ID for dropdown"""
     product_id: int
+    product_name: Optional[str] = None
 
 class CustomerBehaviourDataPoint(BaseModel):
     """Single data point for customer behaviour plot"""
@@ -100,6 +117,7 @@ class TopPerformerItem(BaseModel):
     """Top performer (customer or product)"""
     id: int  # CustomerID or ProductID
     revenue: float  # Total revenue
+    name: Optional[str] = None  # Customer or Product name
 
 class TopPerformersResponse(BaseModel):
     """Response containing top performers"""
@@ -140,14 +158,24 @@ class TransitionAnalysisResponse(BaseModel):
 class ForecastRow(BaseModel):
     """Single forecast row"""
     product_id: int
+    product_names: Optional[List[str]] = None  # All product names for this product code
+    category: Optional[str] = None  # ABC-XYZ combined category
     forecast_month: str
     predicted_quantity: float
+    unique_customers: Optional[int] = None
+    last_3_months_quantity: Optional[float] = None  # Total quantity for last 3 months
+    month_1_quantity: Optional[float] = None  # Most recent month quantity
+    month_2_quantity: Optional[float] = None  # 2nd most recent month quantity
+    month_3_quantity: Optional[float] = None  # 3rd most recent month quantity
 
 class ForecastResponse(BaseModel):
     """Response for forecast data"""
     table_name: str
     display_month: str
     data: List[ForecastRow]
+    month_1_name: Optional[str] = None  # Most recent month name
+    month_2_name: Optional[str] = None  # 2nd most recent month name
+    month_3_name: Optional[str] = None  # 3rd most recent month name
 
 
 # -----------------------

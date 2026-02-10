@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Paper, CircularProgress } from '@mui/material';
+import { Box, Typography, Card, CardContent, Paper, CircularProgress, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { ShoppingCart } from '@mui/icons-material';
 import { BarChart } from '@mui/x-charts/BarChart';
+import { PieChart } from '@mui/x-charts/PieChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { dashboardApi } from '../api';
-import type { KPIResponse } from '../api/types';
-import { ABC_COLORS } from '../constants/constants';
+import type { KPIResponse, CategoryBreakupItem, ABCXYZMatrixCell } from '../api/types';
+import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS } from '../constants/constants';
 
 // Custom Rupee Icon Component
 const RupeeIcon = () => (
@@ -21,31 +22,65 @@ interface CategoryData {
   revenue?: number;
 }
 
-interface ComboData {
-  abc_category: string;
-  xyz_category: string;
-  abc_xyz: string;
-  count: number;
-}
-
 const Dashboard = () => {
   const theme = useTheme();
+  const [selectedMonth, setSelectedMonth] = useState<number | ''>(12);
+  const [availableMonths] = useState<Array<{id: number, name: string}>>([
+    { id: 4, name: 'April 2025' },
+    { id: 5, name: 'May 2025' },
+    { id: 6, name: 'June 2025' },
+    { id: 7, name: 'July 2025' },
+    { id: 8, name: 'August 2025' },
+    { id: 9, name: 'September 2025' },
+    { id: 10, name: 'October 2025' },
+    { id: 11, name: 'November 2025' },
+    { id: 12, name: 'December 2025' },
+    { id: 1, name: 'January 2026' },
+    { id: 2, name: 'February 2026' },
+    { id: 3, name: 'March 2026' },
+  ]);
   const [kpiData, setKpiData] = useState<KPIResponse | null>(null);
+  const [categoryBreakup, setCategoryBreakup] = useState<CategoryBreakupItem[]>([]);
+  const [abcXyzMatrix, setAbcXyzMatrix] = useState<ABCXYZMatrixCell[]>([]);
   const [abcCount, setAbcCount] = useState<CategoryData[]>([]);
   const [abcRevenue, setAbcRevenue] = useState<CategoryData[]>([]);
   const [xyzCount, setXyzCount] = useState<CategoryData[]>([]);
   const [xyzRevenue, setXyzRevenue] = useState<CategoryData[]>([]);
-  const [comboCount, setComboCount] = useState<ComboData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       
+      // Convert month selection to TimeID
+      // TimeID calculation: (year - 2021) * 12 + month
+      // April 2025 (id=4) -> TimeID = (2025-2021)*12 + 4 = 52
+      // December 2025 (id=12) -> TimeID = (2025-2021)*12 + 12 = 60
+      // January 2026 (id=1) -> TimeID = (2026-2021)*12 + 1 = 61
+      // March 2026 (id=3) -> TimeID = (2026-2021)*12 + 3 = 63
+      let timeId: number | undefined = undefined;
+      if (selectedMonth !== '') {
+        if (selectedMonth >= 4 && selectedMonth <= 12) {
+          // April to December 2025
+          timeId = (2025 - 2021) * 12 + selectedMonth;
+        } else if (selectedMonth >= 1 && selectedMonth <= 3) {
+          // January to March 2026
+          timeId = (2026 - 2021) * 12 + selectedMonth;
+        }
+      }
+      
       // Fetch each dataset independently to prevent one failure from stopping others
-      const fetchKPIs = dashboardApi.getKPIs()
+      const fetchKPIs = dashboardApi.getKPIs(timeId)
         .then(res => setKpiData(res.data))
         .catch(err => console.error('Error fetching KPIs:', err));
+      
+      const fetchCategoryBreakup = dashboardApi.getCategoryBreakup(timeId)
+        .then(res => setCategoryBreakup(res.data))
+        .catch(err => console.error('Error fetching category breakup:', err));
+      
+      const fetchABCXYZMatrix = dashboardApi.getABCXYZMatrix()
+        .then(res => setAbcXyzMatrix(res.data))
+        .catch(err => console.error('Error fetching ABC×XYZ matrix:', err));
       
       const fetchABCCount = dashboardApi.getABCCount()
         .then(res => setAbcCount(res.data))
@@ -63,25 +98,22 @@ const Dashboard = () => {
         .then(res => setXyzRevenue(res.data))
         .catch(err => console.error('Error fetching XYZ revenue:', err));
       
-      const fetchCombo = dashboardApi.getABCXYZCount()
-        .then(res => setComboCount(res.data))
-        .catch(err => console.error('Error fetching ABC-XYZ combo:', err));
-      
       // Wait for all to complete (success or failure)
       await Promise.allSettled([
         fetchKPIs,
+        fetchCategoryBreakup,
+        fetchABCXYZMatrix,
         fetchABCCount,
         fetchABCRevenue,
         fetchXYZCount,
         fetchXYZRevenue,
-        fetchCombo,
       ]);
       
       setLoading(false);
     };
 
     fetchData();
-  }, []);
+  }, [selectedMonth]);
 
   if (loading) {
     return (
@@ -112,22 +144,39 @@ const Dashboard = () => {
       value: kpiData ? formatCurrency(kpiData.total_revenue) : '₹0', 
       subtitle: kpiData?.month_name || 'N/A',
       icon: <RupeeIcon />,
-      color: '#00D25B'
+      color: ABC_COLORS.B, // Green
     },
     { 
       title: 'Total Quantity', 
       value: kpiData ? formatNumber(kpiData.total_quantity) : '0',
       subtitle: kpiData?.month_name || 'N/A',
       icon: <ShoppingCart />,
-      color: '#00D25B'
+      color: ABC_COLORS.B, // Green
     },
   ];
 
   return (
     <Box sx={{ width: '100%', boxSizing: 'border-box' }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, fontWeight: 600 }}>
-        Monthly Performance Dashboard
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" sx={{ fontWeight: 600 }}>
+          Monthly Performance Dashboard
+        </Typography>
+        <FormControl sx={{ minWidth: 200 }}>
+          <InputLabel>Month Filter</InputLabel>
+          <Select
+            value={selectedMonth}
+            label="Month Filter"
+            onChange={(e) => setSelectedMonth(e.target.value as number | '')}
+          >
+            <MenuItem value="">All Months</MenuItem>
+            {availableMonths.map((month) => (
+              <MenuItem key={month.id} value={month.id}>
+                {month.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       {/* KPI Cards Row */}
       <Box
@@ -135,7 +184,7 @@ const Dashboard = () => {
           display: 'flex',
           flexWrap: 'wrap',
           gap: 2,
-          mb: 4,
+          mb: 2,
         }}
       >
         {kpis.map((kpi, index) => (
@@ -211,13 +260,177 @@ const Dashboard = () => {
         ))}
       </Box>
 
+      {/* Pie Chart and ABC×XYZ Matrices Row */}
+      <Box sx={{ mb: 1, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        {/* Pie Chart */}
+        <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
+          <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+              Category Breakup
+            </Typography>
+              {categoryBreakup.length > 0 ? (
+                <PieChart
+                  series={[
+                    {
+                      data: Object.entries(
+                        categoryBreakup.reduce((acc, cat) => {
+                          const category = cat.category || 'MISC';
+                          acc[category] = (acc[category] || 0) + (cat.revenue / 10000000);
+                          return acc;
+                        }, {} as Record<string, number>)
+                      ).map(([category, value], index) => ({
+                        id: index,
+                        value: value,
+                        label: category,
+                      })),
+                      highlightScope: { fade: 'global', highlight: 'item' },
+                      valueFormatter: (item) => `₹${item.value.toFixed(2)} Cr`,
+                    },
+                  ]}
+                  height={340}
+                  slotProps={{
+                    legend: {
+                      position: { vertical: 'bottom', horizontal: 'center' },
+                      padding: 0,
+                    } as any,
+                  }}
+                />
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 340 }}>
+                  <Typography color="text.secondary">No data</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Box>
+          
+          {/* ABC×XYZ Revenue Matrix */}
+          <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
+            <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.95rem' }}>
+                ABC×XYZ Revenue Matrix
+              </Typography>
+              {abcXyzMatrix.length > 0 ? (
+                <Box sx={{ display: 'grid', gridTemplateColumns: '50px repeat(3, 1fr)', gap: 2, mt: 0.5 }}>
+                  <Box></Box>
+                  <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>X</Box>
+                  <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>Y</Box>
+                  <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>Z</Box>
+                  
+                  {['A', 'B', 'C'].map((abc) => (
+                    <>
+                      <Box key={`label-${abc}`} sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', fontSize: '1rem', p: 0.5 }}>
+                        {abc}
+                      </Box>
+                      {['X', 'Y', 'Z'].map((xyz) => {
+                        const cell = abcXyzMatrix.find(
+                          (c) => c.abc === abc && c.xyz === xyz
+                        );
+                        const bgColor = ABC_XYZ_COLORS[`${abc}${xyz}`] || '#ccc';
+                        
+                        return (
+                          <Card
+                            key={`${abc}${xyz}`}
+                            elevation={1}
+                            sx={{
+                              bgcolor: `${bgColor}30`,
+                              minHeight: 80,
+                              maxHeight: 80,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              p: 1,
+                              border: `1px solid ${bgColor}`,
+                            }}
+                          >
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                              ₹{cell ? (cell.revenue / 10000000).toFixed(1) : '0.0'}
+                            </Typography>
+                            <Typography variant="caption" sx={{ fontSize: '0.75rem' }} color="text.secondary">
+                              Cr
+                            </Typography>
+                          </Card>
+                        );
+                      })}
+                    </>
+                  ))}
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 340 }}>
+                  <Typography color="text.secondary">No data</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Box>
+          
+          {/* ABC×XYZ Quantity Matrix */}
+          <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
+            <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.95rem' }}>
+                ABC×XYZ Quantity Matrix
+              </Typography>
+              {abcXyzMatrix.length > 0 ? (
+                <Box sx={{ display: 'grid', gridTemplateColumns: '50px repeat(3, 1fr)', gap: 2, mt: 0.5 }}>
+                  <Box></Box>
+                  <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>X</Box>
+                  <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>Y</Box>
+                  <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>Z</Box>
+                  
+                  {['A', 'B', 'C'].map((abc) => (
+                    <>
+                      <Box key={`label-${abc}`} sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', fontSize: '1rem', p: 0.5 }}>
+                        {abc}
+                      </Box>
+                      {['X', 'Y', 'Z'].map((xyz) => {
+                        const cell = abcXyzMatrix.find(
+                          (c) => c.abc === abc && c.xyz === xyz
+                        );
+                        const bgColor = ABC_XYZ_COLORS[`${abc}${xyz}`] || '#ccc';
+                        
+                        return (
+                          <Card
+                            key={`${abc}${xyz}`}
+                            elevation={1}
+                            sx={{
+                              bgcolor: `${bgColor}30`,
+                              minHeight: 80,
+                              maxHeight: 80,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              p: 1,
+                              border: `1px solid ${bgColor}`,
+                            }}
+                          >
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                              {cell ? cell.count : 0}
+                            </Typography>
+                            <Typography variant="caption" sx={{ fontSize: '0.75rem' }} color="text.secondary">
+                              Products
+                            </Typography>
+                          </Card>
+                        );
+                      })}
+                    </>
+                  ))}
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 340 }}>
+                  <Typography color="text.secondary">No data</Typography>
+                </Box>
+              )}
+            </Paper>
+          </Box>
+        </Box>
+
       {/* ABC Charts */}
-      <Typography variant="h6" gutterBottom sx={{ mb: 2, fontWeight: 600 }}>
+      <Typography variant="h6" gutterBottom sx={{ mb: 1, mt: 1, fontWeight: 600 }}>
         ABC Analysis
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap', transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap', transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
         <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 300, transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
-          <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
+          <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
               Article Count by ABC Category
             </Typography>
@@ -255,10 +468,11 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: abcCount.map(d => d.count || 0),
-                  label: 'Product Count',
+                  label: 'Count of Articles',
+                  valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
-                  height={380}
-                margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
+                  height={310}
+                margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -283,12 +497,12 @@ const Dashboard = () => {
         </Box>
 
         <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 300, transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
-          <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-              Revenue by ABC Category
+          <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+              Revenue of Articles by ABC Category
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-              Values in millions (M)
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              Values in Crores (Cr)
             </Typography>
             {abcRevenue.length > 0 ? (
               <BarChart
@@ -336,13 +550,16 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: abcRevenue.map(d => d.revenue || 0),
-                  label: 'Revenue (M)',
-                  valueFormatter: (value: number | null) => value ? `₹${value.toFixed(2)}M` : '₹0M',
+                  label: 'Revenue of Articles (Cr)',
+                  valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0 Cr',
                 }]}
-                  height={380}
-                margin={{ top: 50, bottom: 50, left: 100, right: 10 }}
+                  height={295}
+                margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
-                barLabel="value"
+                barLabel={(item) => {
+                  const value = item.value as number;
+                  return `₹${(value / 10).toFixed(1)} Cr`;
+                }}
                 slotProps={{
                   barLabel: {
                     placement: 'outside',
@@ -365,12 +582,12 @@ const Dashboard = () => {
       </Box>
 
       {/* XYZ Charts */}
-      <Typography variant="h6" gutterBottom sx={{ mb: 2, fontWeight: 600 }}>
+      <Typography variant="h6" gutterBottom sx={{ mb: 1, mt: 1, fontWeight: 600 }}>
         XYZ Analysis
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap', transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 1, flexWrap: 'wrap', transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
         <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 300, transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
-          <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
+          <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
               Article Count by XYZ Category
             </Typography>
@@ -388,6 +605,7 @@ const Dashboard = () => {
                   tickLabelStyle: {
                     fontSize: 12,
                   },
+                  width: 70,
                   min: 0,
                   max: Math.ceil(Math.max(...xyzCount.map(d => d.count || 0)) * 1.1),
                   tickMinStep: (() => {
@@ -403,12 +621,12 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: xyzCount.map(d => d.count || 0), 
-                  color: '#FCAB00',
-                  label: 'Count',
-                  valueFormatter: (value) => value?.toLocaleString() || '0',
+                  color: XYZ_COLORS.Y, // Orange
+                  label: 'Count of Articles',
+                  valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
-                  height={380}
-                margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
+                  height={330}
+                margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -432,12 +650,12 @@ const Dashboard = () => {
         </Box>
 
         <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 300, transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
-          <Paper elevation={1} sx={{ p: 3, height: '100%' }}>
-            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-              Revenue by XYZ Category
+          <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+              Revenue of Articles by XYZ Category
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-              Values in millions (M)
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              Values in Crores (Cr)
             </Typography>
             {xyzRevenue.length > 0 ? (
               <BarChart
@@ -480,15 +698,19 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: xyzRevenue.map(d => d.revenue || 0), 
-                  color: '#FF4747',
-                  label: 'Revenue (M)',
-                  valueFormatter: (value: number | null) => value ? `₹${value.toFixed(2)}M` : '₹0M',
+                  color: XYZ_COLORS.Z, // Red
+                  label: 'Revenue of Articles (Cr)',
+                  valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0 Cr',
                   barLabelPlacement:"outside"
                 }]}
-                  height={380}
-                margin={{ top: 65, bottom: 50, left: 100, right: 10 }}
+                  height={315}
+                  margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
+
                 grid={{ vertical: false, horizontal: true }}
-                barLabel="value"
+                barLabel={(item) => {
+                  const value = item.value as number;
+                  return `₹${(value / 10).toFixed(1)} Cr`;
+                }}
                 slotProps={{
                   barLabel: {
                     placement: 'outside',
@@ -510,81 +732,7 @@ const Dashboard = () => {
         </Box>
       </Box>
 
-      {/* ABC-XYZ Combination Chart */}
-      <Typography variant="h6" gutterBottom sx={{ mb: 2, fontWeight: 600 }}>
-        ABC-XYZ Combination Analysis
-      </Typography>
-      <Box sx={{ mb: 4, transition: 'all 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms' }}>
-        <Paper elevation={1} sx={{ p: 3 }}>
-          <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-            Article Count by ABC-XYZ Combination
-          </Typography>
-          {comboCount.length > 0 ? (
-            <BarChart
-              xAxis={[{ 
-                scaleType: 'band', 
-                data: comboCount.map(d => d.abc_xyz),
-                tickLabelStyle: {
-                  fontSize: 14,
-                  fontWeight: 500,
-                },
-                colorMap: {
-                  type: 'ordinal',
-                  colors: comboCount.map(d => {
-                    const abcCategory = d.abc_xyz.charAt(0);
-                    if (abcCategory === 'A') return '#00D25B';
-                    if (abcCategory === 'B') return '#FCAB00';
-                    if (abcCategory === 'C') return '#FF4747';
-                    return '#8B5CF6';
-                  }),
-                  values: comboCount.map(d => d.abc_xyz),
-                },
-              }]}
-              yAxis={[{
-                tickLabelStyle: {
-                  fontSize: 12,
-                },
-                min: 0,
-                max: Math.ceil(Math.max(...comboCount.map(d => d.count || 0)) * 1.1),
-                tickMinStep: (() => {
-                  const counts = comboCount.map(d => d.count || 0);
-                  const maxVal = Math.max(...counts);
-                  const range = maxVal;
-                  if (range < 10) return 1;
-                  if (range < 50) return 5;
-                  if (range < 100) return 10;
-                  if (range < 500) return 50;
-                  return Math.ceil(range / 5 / 100) * 100;
-                })(),
-              }]}
-              series={[{ 
-                data: comboCount.map(d => d.count), 
-                label: 'Count',
-                valueFormatter: (value) => value?.toLocaleString() || '0',
-              }]}
-                height={500}
-              margin={{ top: 50, bottom: 50, left: 60, right: 10 }}
-              grid={{ vertical: false, horizontal: true }}
-              barLabel="value"
-              slotProps={{
-                barLabel: {
-                  placement: 'outside',
-                  style: {
-                    fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                    fontWeight: 600,
-                    fontSize: 14,
-                    transform: 'translateY(-8px)',
-                  },
-                },
-              }}
-            />
-          ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}>
-              <Typography color="text.secondary">No data available</Typography>
-            </Box>
-          )}
-        </Paper>
-      </Box>
+
     </Box>
   );
 };

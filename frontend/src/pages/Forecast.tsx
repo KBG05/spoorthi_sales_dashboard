@@ -18,6 +18,8 @@ import type { GridColDef } from '@mui/x-data-grid';
 import { forecastApi } from '../api';
 import type { ForecastResponse } from '../api/types';
 
+import { ABC_COLORS } from '../constants/constants';
+
 const Forecast: React.FC = () => {
   const [data, setData] = useState<ForecastResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +31,8 @@ const Forecast: React.FC = () => {
       setLoading(true);
       try {
         const result = await forecastApi.getDemandForecast();
+        console.log('Forecast data received:', result);
+        console.log('Month names:', result.month_1_name, result.month_2_name, result.month_3_name);
         setData(result);
       } catch (error) {
         console.error('Error fetching forecast:', error);
@@ -39,35 +43,123 @@ const Forecast: React.FC = () => {
     fetchData();
   }, []);
 
-  const columns: GridColDef[] = [
+  const columns: GridColDef[] = useMemo(() => [
     {
       field: 'product_id',
       headerName: 'Product ID',
-      width: 225,
-      minWidth: 180,
+      width: 140,
+      minWidth: 120,
     },
     {
-      field: 'forecast_month',
-      headerName: 'Forecast Month',
-      width: 300,
-      minWidth: 225,
+      field: 'product_names',
+      headerName: 'Product Names',
+      width: 250,
+      minWidth: 200,
+      valueFormatter: (value: string[]) => value?.join(', ') ?? '-',
+    },
+    {
+      field: 'category',
+      headerName: 'Category',
+      width: 100,
+      minWidth: 80,
+      renderCell: (params) => {
+        const value = String(params.value || '').toUpperCase();
+        let color = ABC_COLORS.Unknown;
+        // AZ is red (danger), CX is orange (low risk), others green
+        if (value === 'AZ') color = ABC_COLORS.A;
+        else if (value === 'CX') color = ABC_COLORS.C;
+        else if (value && value.length === 2) color = ABC_COLORS.B;
+        return (
+          <Box sx={{ fontWeight: 600, color }}>
+            {params.value || '-'}
+          </Box>
+        );
+      },
+    },
+    {
+      field: 'unique_customers',
+      headerName: 'Unique Customers',
+      width: 140,
+      minWidth: 120,
+      type: 'number',
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value: number) => value?.toLocaleString() ?? '-',
+    },
+    {
+      field: 'last_3_months_quantity',
+      headerName: 'Last 3M Qty',
+      width: 130,
+      minWidth: 110,
+      type: 'number',
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value: number) => 
+        value !== undefined && value !== null 
+          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          : '-',
+    },
+    {
+      field: 'month_1_quantity',
+      headerName: data?.month_1_name ? `${data.month_1_name} Qty` : 'Month 1 Qty',
+      width: 130,
+      minWidth: 110,
+      type: 'number',
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value: number) => 
+        value !== undefined && value !== null 
+          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          : '-',
+    },
+    {
+      field: 'month_2_quantity',
+      headerName: data?.month_2_name ? `${data.month_2_name} Qty` : 'Month 2 Qty',
+      width: 130,
+      minWidth: 110,
+      type: 'number',
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value: number) => 
+        value !== undefined && value !== null 
+          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          : '-',
+    },
+    {
+      field: 'month_3_quantity',
+      headerName: data?.month_3_name ? `${data.month_3_name} Qty` : 'Month 3 Qty',
+      width: 130,
+      minWidth: 110,
+      type: 'number',
+      align: 'right',
+      headerAlign: 'right',
+      valueFormatter: (value: number) => 
+        value !== undefined && value !== null 
+          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          : '-',
     },
     {
       field: 'predicted_quantity',
       headerName: 'Predicted Quantity',
-      width: 270,
-      minWidth: 225,
+      width: 150,
+      minWidth: 130,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
       valueFormatter: (value: number) => value?.toLocaleString(),
     },
-  ];
+  ], [data]);
 
   const rows = data?.data.map((row, index) => ({
     id: index,
     product_id: row.product_id,
-    forecast_month: row.forecast_month,
+    product_names: row.product_names,
+    category: row.category || '-',
+    unique_customers: row.unique_customers,
+    last_3_months_quantity: row.last_3_months_quantity,
+    month_1_quantity: row.month_1_quantity,
+    month_2_quantity: row.month_2_quantity,
+    month_3_quantity: row.month_3_quantity,
     predicted_quantity: row.predicted_quantity,
   })) || [];
 
@@ -86,9 +178,10 @@ const Forecast: React.FC = () => {
     return [...new Set(values)].sort();
   };
 
+  // Only filter by Product ID (removed Forecast Month filter)
   const filterableColumns = [
     { field: 'product_id', label: 'Product ID' },
-    { field: 'forecast_month', label: 'Forecast Month' },
+    { field: 'category', label: 'Category' },
   ];
 
   if (loading) {
@@ -198,7 +291,7 @@ const Forecast: React.FC = () => {
         })}
       </Box>
       
-      <Paper elevation={1} sx={{ flex: 1, width: '100%', maxWidth: 900, mx: 'auto', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <Paper elevation={1} sx={{ width: '100%', height: 'calc(100vh - 280px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}

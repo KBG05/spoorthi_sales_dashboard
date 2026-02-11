@@ -212,16 +212,31 @@ async def get_transitions(
                 month_data[col_name][customer_id] = category
         
         # Build response data
+        # First, get all customer names
+        customer_names_query = '''
+            SELECT 
+                CAST(customer_code AS TEXT) as customer_code,
+                customer
+            FROM priyatextile_customer_master
+        '''
+        customer_names_rows = query_all(customer_names_query)  # type: ignore
+        customer_names_map = {row["customer_code"]: row.get("customer", '-') for row in customer_names_rows}
+        
         data = []
         for customer_id in sorted(all_customers, key=lambda x: int(x) if x.isdigit() else 0):
-            row_data = {"CustomerID": int(customer_id) if customer_id.isdigit() else customer_id}
+            customer_name = customer_names_map.get(customer_id, '-')
+            
+            row_data = {
+                "CustomerID": int(customer_id) if customer_id.isdigit() else customer_id,
+                "Customer Name": customer_name
+            }
             
             for col_name in sorted(month_data.keys()):
                 row_data[col_name] = month_data[col_name].get(customer_id, "N/A")
             
             data.append(row_data)
         
-        column_headers = ["CustomerID"] + sorted(month_data.keys())
+        column_headers = ["CustomerID", "Customer Name"] + sorted(month_data.keys())
     
     return TransitionAnalysisResponse(
         data=data,

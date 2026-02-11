@@ -25,6 +25,37 @@ const CrossSell = () => {
   const [recommendations, setRecommendations] = useState<CrossSellRecommendation[]>([]);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [searchTexts, setSearchTexts] = useState<Record<string, string>>({});
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
+  const toggleRowExpansion = (rowId: number) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(rowId)) {
+        newSet.delete(rowId);
+      } else {
+        newSet.add(rowId);
+      }
+      return newSet;
+    });
+  };
+
+  const limitValues = (value: string, rowId: number, limit: number = 5): { displayValue: string; hasMore: boolean; totalCount: number } => {
+    if (!value) return { displayValue: '', hasMore: false, totalCount: 0 };
+    
+    const items = value.split(',').map(item => item.trim()).filter(item => item);
+    const isExpanded = expandedRows.has(rowId);
+    
+    if (isExpanded || items.length <= limit) {
+      return { displayValue: items.join(', '), hasMore: false, totalCount: items.length };
+    }
+    
+    const limited = items.slice(0, limit);
+    return { 
+      displayValue: limited.join(', '), 
+      hasMore: true, 
+      totalCount: items.length 
+    };
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,64 +112,140 @@ const CrossSell = () => {
       headerName: 'Products Purchased (Codes)',
       flex: 1,
       minWidth: 200,
-      renderCell: (params) => (
-        <Box sx={{ 
-          whiteSpace: 'normal', 
-          lineHeight: '1.5',
-          py: 1,
-        }}>
-          {params.value}
-        </Box>
-      ),
+      renderCell: (params) => {
+        const { displayValue, hasMore, totalCount } = limitValues(params.value, params.row.id);
+        return (
+          <Box 
+            sx={{ 
+              whiteSpace: 'normal', 
+              lineHeight: '1.5',
+              py: 1,
+              cursor: hasMore || expandedRows.has(params.row.id) ? 'pointer' : 'default',
+              '&:hover': hasMore || expandedRows.has(params.row.id) ? {
+                backgroundColor: 'action.hover',
+              } : {},
+            }}
+            onClick={() => {
+              if (hasMore || expandedRows.has(params.row.id)) {
+                toggleRowExpansion(params.row.id);
+              }
+            }}
+          >
+            {displayValue}
+            {hasMore && (
+              <Box component="span" sx={{ color: 'primary.main', fontWeight: 600, ml: 1 }}>
+                ...and {totalCount - 5} more
+              </Box>
+            )}
+          </Box>
+        );
+      },
     },
     {
       field: 'product_names_purchased',
       headerName: 'Products Purchased (Names)',
       flex: 1,
       minWidth: 250,
-      renderCell: (params) => (
-        <Box sx={{ 
-          whiteSpace: 'normal', 
-          lineHeight: '1.5',
-          py: 1,
-        }}>
-          {params.value || params.row.products_purchased}
-        </Box>
-      ),
+      renderCell: (params) => {
+        const value = params.value || params.row.products_purchased;
+        const { displayValue, hasMore, totalCount } = limitValues(value, params.row.id);
+        return (
+          <Box 
+            sx={{ 
+              whiteSpace: 'normal', 
+              lineHeight: '1.5',
+              py: 1,
+              cursor: hasMore || expandedRows.has(params.row.id) ? 'pointer' : 'default',
+              '&:hover': hasMore || expandedRows.has(params.row.id) ? {
+                backgroundColor: 'action.hover',
+              } : {},
+            }}
+            onClick={() => {
+              if (hasMore || expandedRows.has(params.row.id)) {
+                toggleRowExpansion(params.row.id);
+              }
+            }}
+          >
+            {displayValue}
+            {hasMore && (
+              <Box component="span" sx={{ color: 'primary.main', fontWeight: 600, ml: 1 }}>
+                ...and {totalCount - 5} more
+              </Box>
+            )}
+          </Box>
+        );
+      },
     },
     {
       field: 'recommendations',
       headerName: 'Recommendations (Codes)',
       flex: 1,
       minWidth: 200,
-      renderCell: (params) => (
-        <Box sx={{ 
-          whiteSpace: 'normal', 
-          lineHeight: '1.5',
-          py: 1,
-          fontWeight: 500, 
-          color: 'primary.main' 
-        }}>
-          {params.value}
-        </Box>
-      ),
+      renderCell: (params) => {
+        const { displayValue, hasMore, totalCount } = limitValues(params.value, params.row.id);
+        return (
+          <Box 
+            sx={{ 
+              whiteSpace: 'normal', 
+              lineHeight: '1.5',
+              py: 1,
+              cursor: hasMore || expandedRows.has(params.row.id) ? 'pointer' : 'default',
+              '&:hover': hasMore || expandedRows.has(params.row.id) ? {
+                backgroundColor: 'action.hover',
+              } : {},
+            }}
+            onClick={() => {
+              if (hasMore || expandedRows.has(params.row.id)) {
+                toggleRowExpansion(params.row.id);
+              }
+            }}
+          >
+            {displayValue}
+            {hasMore && (
+              <Box component="span" sx={{ color: 'primary.main', fontWeight: 600, ml: 1 }}>
+                ...and {totalCount - 5} more
+              </Box>
+            )}
+          </Box>
+        );
+      },
     },
     {
       field: 'recommendation_names',
       headerName: 'Recommendations (Names)',
       flex: 1,
       minWidth: 250,
-      renderCell: (params) => (
-        <Box sx={{ 
-          whiteSpace: 'normal', 
-          lineHeight: '1.5',
-          py: 1,
-          fontWeight: 500, 
-          color: 'primary.main' 
-        }}>
-          {params.value || params.row.recommendations}
-        </Box>
-      ),
+      renderCell: (params) => {
+        const value = params.value || params.row.recommendations;
+        const { displayValue, hasMore, totalCount } = limitValues(value, params.row.id);
+        return (
+          <Box 
+            sx={{ 
+              whiteSpace: 'normal', 
+              lineHeight: '1.5',
+              py: 1,
+              fontWeight: 500, 
+              color: 'primary.main',
+              cursor: hasMore || expandedRows.has(params.row.id) ? 'pointer' : 'default',
+              '&:hover': hasMore || expandedRows.has(params.row.id) ? {
+                backgroundColor: 'action.hover',
+              } : {},
+            }}
+            onClick={() => {
+              if (hasMore || expandedRows.has(params.row.id)) {
+                toggleRowExpansion(params.row.id);
+              }
+            }}
+          >
+            {displayValue}
+            {hasMore && (
+              <Box component="span" sx={{ fontWeight: 600, ml: 1 }}>
+                ...and {totalCount - 5} more
+              </Box>
+            )}
+          </Box>
+        );
+      },
     },
   ];
 

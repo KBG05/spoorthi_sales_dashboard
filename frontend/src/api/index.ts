@@ -18,6 +18,7 @@ import type {
   ClassComparisonDataPoint,
   CategoryBreakupItem,
   ABCXYZMatrixCell,
+  CategoryHierarchyResponse,
 } from './types.js';
 
 // No longer needed - types and API merged into this file
@@ -31,17 +32,25 @@ export const dashboardApi = {
       params: timeId ? { time_id: timeId } : undefined,
     });
   },
-  getABCCount: async () => {
-    return await apiClient.get('/dashboard/abc-count');
+  getABCCount: async (timeId?: number) => {
+    return await apiClient.get('/dashboard/abc-count', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
   },
-  getABCRevenue: async () => {
-    return await apiClient.get('/dashboard/abc-revenue');
+  getABCRevenue: async (timeId?: number) => {
+    return await apiClient.get('/dashboard/abc-revenue', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
   },
-  getXYZCount: async () => {
-    return await apiClient.get('/dashboard/xyz-count');
+  getXYZCount: async (timeId?: number) => {
+    return await apiClient.get('/dashboard/xyz-count', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
   },
-  getXYZRevenue: async () => {
-    return await apiClient.get('/dashboard/xyz-revenue');
+  getXYZRevenue: async (timeId?: number) => {
+    return await apiClient.get('/dashboard/xyz-revenue', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
   },
   getABCXYZCount: async () => {
     return await apiClient.get('/dashboard/abc-xyz-count');
@@ -51,8 +60,18 @@ export const dashboardApi = {
       params: timeId ? { time_id: timeId } : undefined,
     });
   },
-  getABCXYZMatrix: async () => {
-    return await apiClient.get<ABCXYZMatrixCell[]>('/dashboard/abc-xyz-matrix');
+  getABCXYZMatrix: async (timeId?: number) => {
+    return await apiClient.get<ABCXYZMatrixCell[]>('/dashboard/abc-xyz-matrix', {
+      params: timeId ? { time_id: timeId } : undefined,
+    });
+  },
+  getCategoryHierarchy: async (timeId?: number, metric: 'revenue' | 'quantity' = 'revenue') => {
+    return await apiClient.get<CategoryHierarchyResponse>('/dashboard/category-hierarchy', {
+      params: {
+        ...(timeId ? { time_id: timeId } : {}),
+        metric,
+      },
+    });
   },
 };
 

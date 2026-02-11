@@ -50,15 +50,25 @@ const TransitionAnalysis: React.FC = () => {
     return data.column_headers.map((header, index) => ({
       field: header,
       headerName: header,
-      width: index === 0 ? 225 : 180,
-      minWidth: index === 0 ? 180 : 150,
+      width: index === 0 ? 225 : (header.toLowerCase().includes('name') ? 400 : 180),
+      minWidth: index === 0 ? 180 : (header.toLowerCase().includes('name') ? 300 : 150),
       renderCell: (params) => {
         const value = params.value;
         let bgColor = 'inherit';
         let textColor = 'inherit';
         
+        // Apply color coding for ABC_XYZ combined category column
+        if (header.toLowerCase().includes('abc_xyz') || header.toLowerCase().includes('abc xyz')) {
+          const strValue = String(value).toUpperCase();
+          // Check for combined ABC-XYZ (e.g., AX, AY, AZ, BX, BY, BZ, CX, CY, CZ)
+          if (strValue.length === 2 && ABC_XYZ_COLORS[strValue]) {
+            const color = ABC_XYZ_COLORS[strValue];
+            bgColor = withAlpha(color, 0.15);
+            textColor = color;
+          }
+        }
         // Apply color coding for Category columns (ABC, XYZ, or combined)
-        if (header.includes('Category') || header.includes('Class')) {
+        else if (header.includes('Category') || header.includes('Class')) {
           const strValue = String(value).toUpperCase();
           
           // Check for combined ABC-XYZ (e.g., AX, AY, AZ, etc.)

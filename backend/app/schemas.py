@@ -36,6 +36,14 @@ class ABCXYZMatrixCell(BaseModel):
     count: int
     revenue: float
 
+class CategoryHierarchyItem(BaseModel):
+    """Item for dual-circle pie chart"""
+    id: str  # Unique identifier (category name or subcategory name)
+    label: str  # Display label
+    value: float  # Revenue or quantity
+    color: Optional[str] = None  # Optional color for subcategory
+    parent_category: Optional[str] = None  # For subcategories
+
 
 # -----------------------
 # abc_server.R

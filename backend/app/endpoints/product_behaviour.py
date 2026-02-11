@@ -296,9 +296,8 @@ async def get_product_behaviour_trend(
     # Build response
     result = []
     
-    all_time_ids = sorted(set(list(class_total.keys()) + list(product_total.keys())))
-    
-    for time_id in all_time_ids:
+    # Generate all months in the financial year range
+    for time_id in range(start_time_id, end_time_id + 1):
         # Calculate proper month/year from TimeID
         months_offset = time_id - 1
         year = BASE_DATE.year + (BASE_DATE.month + months_offset - 1) // 12
@@ -306,35 +305,37 @@ async def get_product_behaviour_trend(
         month_date = datetime(year, month, 1)
         month_str = month_date.strftime("%Y-%m-%d")
         
-        # Class total (not scaled)
+        # Class total (not scaled, always include even if zero)
+        class_value = class_total.get(time_id, 0.0)
         result.append(ProductBehaviourDataPoint(
             month=month_str,
-            value=round(class_total[time_id], 2),
-            scaled_value=round(class_total[time_id], 2),
+            value=round(class_value, 2),
+            scaled_value=round(class_value, 2),
             type=f"Class {abc_class} Total",
             product_id=None
         ))
         
-        # Individual product (scaled)
-        if time_id in product_total:
+        # Individual product (scaled, always include even if zero)
+        product_value = product_total.get(time_id, 0.0)
+        result.append(ProductBehaviourDataPoint(
+            month=month_str,
+            value=round(product_value, 2),
+            scaled_value=round(product_value * scale_factor, 2),
+            type=f"Product {product_id}",
+            product_id=product_id
+        ))
+        
+        # Customer-specific data (always include for each customer, even if zero)
+        for cust_id in customer_list:
+            cust_value = 0.0
+            if cust_id in customer_data:
+                cust_value = customer_data[cust_id].get(time_id, 0.0)
             result.append(ProductBehaviourDataPoint(
                 month=month_str,
-                value=round(product_total[time_id], 2),
-                scaled_value=round(product_total[time_id] * scale_factor, 2),
-                type=f"Product {product_id}",
+                value=round(cust_value, 2),
+                scaled_value=round(cust_value, 2),  # Not scaled for customers
+                type=f"Customer {cust_id}",
                 product_id=product_id
             ))
-        
-        # Customer-specific data
-        for cust_id in customer_list:
-            if cust_id in customer_data and time_id in customer_data[cust_id]:
-                cust_value = customer_data[cust_id][time_id]
-                result.append(ProductBehaviourDataPoint(
-                    month=month_str,
-                    value=round(cust_value, 2),
-                    scaled_value=round(cust_value, 2),  # Not scaled for customers
-                    type=f"Customer {cust_id}",
-                    product_id=product_id
-                ))
     
     return result

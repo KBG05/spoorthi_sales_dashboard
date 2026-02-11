@@ -261,7 +261,7 @@ async def get_demand_forecast():
             forecast_month=str(row["ForecastMonth"]),
             predicted_quantity=float(row["PredictedQuantity"] or 0),
             unique_customers=int(row.get("unique_customers", 0)),
-            last_3_months_quantity=float(row.get("last_3_months_quantity", 0)),
+            last_3_months_quantity=float(row.get("last_3_months_quantity", 0)) / 3,  # Average instead of total
             month_1_quantity=float(row.get("month_1_quantity", 0)),
             month_2_quantity=float(row.get("month_2_quantity", 0)),
             month_3_quantity=float(row.get("month_3_quantity", 0))

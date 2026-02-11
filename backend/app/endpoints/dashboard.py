@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 from ..database import (
     query_one, query_all, query_scalar,
-    get_latest_rolling_table, get_latest_time_id,
+    get_latest_rolling_table, get_latest_time_id, get_rolling_table_for_time_id,
     safe_table_name
 )
-from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse, User, CategoryBreakupItem, ABCXYZMatrixCell
+from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse, User, CategoryBreakupItem, ABCXYZMatrixCell, CategoryHierarchyItem
 from ..endpoints.auth import get_current_user
 from typing import Any, Dict, List, Optional
 import pandas as pd
@@ -97,9 +97,12 @@ async def get_dashboard_kpis(time_id: Optional[int] = None):
     )
 
 @router.get("/abc-count", response_model=List[CategoryCountResponse])
-def get_abc_count():
+def get_abc_count(time_id: Optional[int] = None):
     """
     Get article count by ABC category.
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month's rolling table.
     
     Matches: dashboard_server.R -> abc_count_chart renderPlot
     
@@ -121,7 +124,10 @@ def get_abc_count():
             {"category": "C", "count": 100}
         ]
     """
-    table_name = get_latest_rolling_table()
+    if time_id is None:
+        table_name = get_latest_rolling_table()
+    else:
+        table_name = get_rolling_table_for_time_id(time_id)
     
     if not table_name:
         raise HTTPException(
@@ -152,9 +158,12 @@ def get_abc_count():
 
 
 @router.get("/abc-revenue", response_model=List[CategoryRevenueResponse])
-def get_abc_revenue():
+def get_abc_revenue(time_id: Optional[int] = None):
     """
     Get revenue by ABC category (in millions).
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month's rolling table.
     
     Matches: dashboard_server.R -> abc_revenue_chart renderPlot
     
@@ -176,7 +185,10 @@ def get_abc_revenue():
             {"category": "C", "revenue": 23.10}
         ]
     """
-    table_name = get_latest_rolling_table()
+    if time_id is None:
+        table_name = get_latest_rolling_table()
+    else:
+        table_name = get_rolling_table_for_time_id(time_id)
     
     if not table_name:
         raise HTTPException(
@@ -207,9 +219,12 @@ def get_abc_revenue():
 
 
 @router.get("/xyz-count", response_model=List[CategoryCountResponse])
-def get_xyz_count():
+def get_xyz_count(time_id: Optional[int] = None):
     """
     Get article count by XYZ category.
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month's rolling table.
     
     Matches: dashboard_server.R -> xyz_count_chart renderPlot
     
@@ -231,7 +246,10 @@ def get_xyz_count():
             {"category": "Z", "count": 150}
         ]
     """
-    table_name = get_latest_rolling_table()
+    if time_id is None:
+        table_name = get_latest_rolling_table()
+    else:
+        table_name = get_rolling_table_for_time_id(time_id)
     
     if not table_name:
         raise HTTPException(
@@ -262,9 +280,12 @@ def get_xyz_count():
 
 
 @router.get("/xyz-revenue", response_model=List[CategoryRevenueResponse])
-def get_xyz_revenue():
+def get_xyz_revenue(time_id: Optional[int] = None):
     """
     Get revenue by XYZ category (in millions).
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month's rolling table.
     
     Matches: dashboard_server.R -> xyz_revenue_chart renderPlot
     
@@ -286,7 +307,10 @@ def get_xyz_revenue():
             {"category": "Z", "revenue": 52.65}
         ]
     """
-    table_name = get_latest_rolling_table()
+    if time_id is None:
+        table_name = get_latest_rolling_table()
+    else:
+        table_name = get_rolling_table_for_time_id(time_id)
     
     if not table_name:
         raise HTTPException(
@@ -605,9 +629,12 @@ async def get_category_breakup(time_id: Optional[int] = None):
 
 
 @router.get("/abc-xyz-matrix", response_model=List[ABCXYZMatrixCell])
-async def get_abc_xyz_matrix():
+async def get_abc_xyz_matrix(time_id: Optional[int] = None):
     """
     Get 3×3 ABC×XYZ matrix with counts and revenue for each combination.
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month's rolling table.
     
     Returns:
         [
@@ -616,12 +643,16 @@ async def get_abc_xyz_matrix():
             ...
         ]
     """
-    table_name = get_latest_rolling_table()
+    # Get the appropriate rolling table based on time_id
+    if time_id is None:
+        table_name = get_latest_rolling_table()
+    else:
+        table_name = get_rolling_table_for_time_id(time_id)
     
     if not table_name:
         raise HTTPException(
             status_code=404,
-            detail="No rolling ABC/XYZ summary table found"
+            detail="No rolling ABC/XYZ summary table found for the specified month"
         )
     
     table = safe_table_name(table_name)
@@ -652,4 +683,148 @@ async def get_abc_xyz_matrix():
         )
         for row in rows
     ]
+
+
+@router.get("/category-hierarchy", response_model=Dict[str, Any])
+async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "revenue"):
+    """
+    Get hierarchical category data for dual-circle pie chart.
+    
+    Args:
+        time_id: Optional TimeID. If not provided, uses latest month.
+        metric: "revenue" or "quantity"
+    
+    Returns:
+        {
+            "main_categories": [{"id": "Monofilaments", "label": "Monofilaments", "value": 12345678.90, "color": "#..."}],
+            "subcategories": [{"id": "MCF", "label": "MCF", "value": 5000000, "parent_category": "Monofilaments", "color": "#..."}]
+        }
+    """
+    if time_id is None:
+        time_id = get_latest_time_id()
+    
+    if not time_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No data found."
+        )
+    
+    # Main category colors
+    category_colors = {
+        "Monofilaments": "#4caf50",  # Green
+        "Trading": "#2196f3",  # Blue
+        "MISC": "#ff9800"  # Orange
+    }
+    
+    # Subcategory mapping with lighter/darker shades
+    subcategory_info = {
+        "MCF": {"parent": "Monofilaments", "opacity": 0.9},
+        "WMF": {"parent": "Monofilaments", "opacity": 0.7},
+        "INH": {"parent": "Monofilaments", "opacity": 0.5},
+        "INB": {"parent": "Monofilaments", "opacity": 0.3},
+        "Happa": {"parent": "Monofilaments", "opacity": 0.2},
+        "MSN": {"parent": "Trading", "opacity": 0.9},
+        "TSN": {"parent": "Trading", "opacity": 0.8},
+        "PP Woven Sack": {"parent": "Trading", "opacity": 0.7},
+        "WMT": {"parent": "Trading", "opacity": 0.6},
+        "Bird Net": {"parent": "Trading", "opacity": 0.5},
+        "Knitted Fabric": {"parent": "Trading", "opacity": 0.4},
+        "Knotted Netting": {"parent": "Trading", "opacity": 0.3},
+        "Mulch Film": {"parent": "Trading", "opacity": 0.2},
+        "Others": {"parent": "Trading", "opacity": 0.15},
+    }
+    
+    # Helper to convert hex to rgba
+    def hex_to_rgba(hex_color: str, opacity: float) -> str:
+        hex_color = hex_color.lstrip('#')
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        return f"rgba({r}, {g}, {b}, {opacity})"
+    
+    # Determine the column to aggregate
+    value_column = '"Revenue"' if metric.lower() == "revenue" else '"Quantity"'
+    
+    # Query for main categories - aggregate subcategories into main groups
+    main_sql = f'''
+        WITH categorized_data AS (
+            SELECT 
+                CASE 
+                    WHEN pm.category IN ('MCF', 'WMF', 'INH', 'INB', 'Happa') THEN 'Monofilaments'
+                    WHEN pm.category IN ('MSN', 'TSN', 'PP Woven Sack', 'WMT', 'Bird Net', 'Knitted Fabric', 'Knotted Netting', 'Mulch Film', 'Others') THEN 'Trading'
+                    ELSE 'MISC'
+                END as main_category,
+                ad.{value_column} as value
+            FROM public."Aggregated Data" ad
+            LEFT JOIN (
+                SELECT DISTINCT ON (product_code) product_code, category
+                FROM priyatextile_product_master
+            ) pm ON CAST(ad."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
+            WHERE ad."TimeID" = %s
+        )
+        SELECT 
+            main_category as category,
+            SUM(value) as value
+        FROM categorized_data
+        GROUP BY main_category
+        ORDER BY value DESC
+    '''
+    
+    main_rows = query_all(main_sql, (time_id,))
+    
+    # Query for subcategories
+    sub_sql = f'''
+        SELECT 
+            pm.category as subcategory,
+            SUM(ad.{value_column}) as value
+        FROM public."Aggregated Data" ad
+        INNER JOIN (
+            SELECT DISTINCT ON (product_code) product_code, category
+            FROM priyatextile_product_master
+        ) pm ON CAST(ad."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
+        WHERE ad."TimeID" = %s
+          AND pm.category IS NOT NULL
+        GROUP BY pm.category
+        ORDER BY value DESC
+    '''
+    
+    sub_rows = query_all(sub_sql, (time_id,))
+    
+    # Build main categories response
+    main_categories = [
+        CategoryHierarchyItem(
+            id=row["category"] or "MISC",
+            label=row["category"] or "MISC",
+            value=float(row["value"] or 0),
+            color=category_colors.get(row["category"] or "MISC", "#9e9e9e")
+        )
+        for row in main_rows
+    ]
+    
+    # Build subcategories response with color based on parent
+    subcategories = []
+    for row in sub_rows:
+        subcat = row["subcategory"]
+        if subcat in subcategory_info:
+            parent = subcategory_info[subcat]["parent"]
+            opacity = subcategory_info[subcat]["opacity"]
+            base_color = category_colors.get(parent, "#9e9e9e")
+            color = hex_to_rgba(base_color, opacity)
+        else:
+            # MISC subcategories
+            parent = "MISC"
+            color = hex_to_rgba(category_colors["MISC"], 0.5)
+        
+        subcategories.append(
+            CategoryHierarchyItem(
+                id=subcat,
+                label=subcat,
+                value=float(row["value"] or 0),
+                color=color,
+                parent_category=parent
+            )
+        )
+    
+    return {
+        "main_categories": [item.dict() for item in main_categories],
+        "subcategories": [item.dict() for item in subcategories]
+    }
 

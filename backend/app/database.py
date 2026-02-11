@@ -162,6 +162,43 @@ def get_latest_rolling_table() -> Optional[str]:
     return row['tablename'] if row else None
 
 
+def get_rolling_table_for_time_id(time_id: int) -> Optional[str]:
+    """
+    Get the rolling_abc_xyz_summary table name for a specific TimeID.
+    TimeID represents months since January 2021 (TimeID=1).
+    
+    Example:
+        time_id = 61 -> January 2026 -> 'rolling_abc_xyz_summary_2026_01'
+        time_id = 60 -> December 2025 -> 'rolling_abc_xyz_summary_2025_12'
+    
+    Args:
+        time_id: TimeID (1 = January 2021, 2 = February 2021, etc.)
+    
+    Returns:
+        Table name (e.g., 'rolling_abc_xyz_summary_2025_12') or None
+    """
+    from datetime import datetime, timedelta
+    
+    # TimeID 1 = January 2021
+    base_date = datetime(2021, 1, 1)
+    # Add (time_id - 1) months to the base date
+    year = base_date.year + ((base_date.month + time_id - 2) // 12)
+    month = ((base_date.month + time_id - 2) % 12) + 1
+    
+    # Format table name: rolling_abc_xyz_summary_YYYY_MM
+    table_name = f"rolling_abc_xyz_summary_{year:04d}_{month:02d}"
+    
+    # Check if table exists
+    sql = """
+        SELECT tablename
+        FROM pg_catalog.pg_tables
+        WHERE schemaname = 'public'
+          AND tablename = %s
+    """
+    row = query_one(sql, (table_name,))
+    return row['tablename'] if row else None
+
+
 def get_latest_time_id() -> Optional[int]:
     """
     Get the maximum TimeID from Aggregated Data table.

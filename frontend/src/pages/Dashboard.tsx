@@ -78,23 +78,23 @@ const Dashboard = () => {
         .then(res => setCategoryBreakup(res.data))
         .catch(err => console.error('Error fetching category breakup:', err));
       
-      const fetchABCXYZMatrix = dashboardApi.getABCXYZMatrix()
+      const fetchABCXYZMatrix = dashboardApi.getABCXYZMatrix(timeId)
         .then(res => setAbcXyzMatrix(res.data))
         .catch(err => console.error('Error fetching ABC×XYZ matrix:', err));
       
-      const fetchABCCount = dashboardApi.getABCCount()
+      const fetchABCCount = dashboardApi.getABCCount(timeId)
         .then(res => setAbcCount(res.data))
         .catch(err => console.error('Error fetching ABC count:', err));
       
-      const fetchABCRevenue = dashboardApi.getABCRevenue()
+      const fetchABCRevenue = dashboardApi.getABCRevenue(timeId)
         .then(res => setAbcRevenue(res.data))
         .catch(err => console.error('Error fetching ABC revenue:', err));
       
-      const fetchXYZCount = dashboardApi.getXYZCount()
+      const fetchXYZCount = dashboardApi.getXYZCount(timeId)
         .then(res => setXyzCount(res.data))
         .catch(err => console.error('Error fetching XYZ count:', err));
       
-      const fetchXYZRevenue = dashboardApi.getXYZRevenue()
+      const fetchXYZRevenue = dashboardApi.getXYZRevenue(timeId)
         .then(res => setXyzRevenue(res.data))
         .catch(err => console.error('Error fetching XYZ revenue:', err));
       

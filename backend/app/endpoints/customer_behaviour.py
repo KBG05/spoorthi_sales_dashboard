@@ -308,19 +308,21 @@ async def get_customer_behaviour_trend(
         for customer_id in cust_list:
             cust_id_int = int(customer_id)
             
-            # Overall line for this customer
+            # Overall line for this customer (always include, even if zero)
+            overall_value = customer_overall[cust_id_int].get(time_id, 0.0)
             result.append(CustomerBehaviourDataPoint(
                 month=month_str,
-                value=round(customer_overall[cust_id_int].get(time_id, 0.0), 2),
+                value=round(overall_value, 2),
                 type=f"Customer {cust_id_int} Overall",
                 product_id=None
             ))
             
-            # Product-specific line for this customer (if product selected)
+            # Product-specific line for this customer (if product selected, always include even if zero)
             if selected_product_id:
+                product_value = customer_product[cust_id_int].get(time_id, 0.0)
                 result.append(CustomerBehaviourDataPoint(
                     month=month_str,
-                    value=round(customer_product[cust_id_int].get(time_id, 0.0), 2),
+                    value=round(product_value, 2),
                     type=f"Customer {cust_id_int} Product {selected_product_id}",
                     product_id=selected_product_id
                 ))

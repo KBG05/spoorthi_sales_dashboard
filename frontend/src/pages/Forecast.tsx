@@ -53,7 +53,7 @@ const Forecast: React.FC = () => {
     {
       field: 'product_names',
       headerName: 'Product Names',
-      width: 250,
+      width: 550,
       minWidth: 200,
       valueFormatter: (value: string[]) => value?.join(', ') ?? '-',
     },
@@ -88,9 +88,9 @@ const Forecast: React.FC = () => {
     },
     {
       field: 'last_3_months_quantity',
-      headerName: 'Last 3M Qty',
-      width: 130,
-      minWidth: 110,
+      headerName: 'Avg Last 3M Qty',
+      width: 150,
+      minWidth: 130,
       type: 'number',
       align: 'right',
       headerAlign: 'right',

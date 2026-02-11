@@ -20,6 +20,19 @@ export interface ABCXYZMatrixCell {
   revenue: number;
 }
 
+export interface CategoryHierarchyItem {
+  id: string;
+  label: string;
+  value: number;
+  color?: string;
+  parent_category?: string;
+}
+
+export interface CategoryHierarchyResponse {
+  main_categories: CategoryHierarchyItem[];
+  subcategories: CategoryHierarchyItem[];
+}
+
 export interface ABCTrendDataPoint {
   month_date: string;
   abc_category: string;

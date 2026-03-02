@@ -3,33 +3,49 @@ from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta
 from ..database import (
-    query_one, query_all, query_scalar,
-    get_latest_rolling_table, get_latest_time_id, get_rolling_table_for_time_id,
-    safe_table_name
+    query_one,
+    query_all,
+    query_scalar,
+    get_latest_rolling_table,
+    get_latest_time_id,
+    get_rolling_table_for_time_id,
+    safe_table_name,
 )
-from ..schemas import KPIResponse, CategoryCountResponse, CategoryRevenueResponse, ComboCountResponse, User, CategoryBreakupItem, ABCXYZMatrixCell, CategoryHierarchyItem
+from ..schemas import (
+    KPIResponse,
+    CategoryCountResponse,
+    CategoryRevenueResponse,
+    ComboCountResponse,
+    User,
+    CategoryBreakupItem,
+    ABCXYZMatrixCell,
+    CategoryHierarchyItem,
+)
 from ..endpoints.auth import get_current_user
 from typing import Any, Dict, List, Optional
 import pandas as pd
 
-router=APIRouter(prefix="/dashboard", tags=["Dashboard"], dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/dashboard", tags=["Dashboard"], dependencies=[Depends(get_current_user)]
+)
 
-#HELPER FUNCTION
+# HELPER FUNCTION
 
 BASE_DATE = datetime(2021, 1, 1)
+
 
 def get_month_string_from_time_id(time_id: int) -> str:
     """
     Convert TimeID to month string in 'YYYY-MM' format.
     TimeID represents months since January 2021 (TimeID=1).
-    
+
     Example:
         time_id = 1 -> "January 2021"
         time_id = 55 -> "July 2025"
     """
     if not time_id or not isinstance(time_id, int):
         return "Unknown month"
-    
+
     try:
         # TimeID 1 = January 2021, TimeID 2 = February 2021, etc.
         # Add (time_id - 1) months to the base date
@@ -45,19 +61,19 @@ def get_month_string_from_time_id(time_id: int) -> str:
 async def get_dashboard_kpis(time_id: Optional[int] = None):
     """
     Get KPIs for a specific month or the LATEST month.
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month.
-    
+
     SQL Queries:
         1. SELECT MAX("TimeID") AS max_id FROM public."Aggregated Data"
         2. SELECT SUM("Revenue"), SUM("Quantity") FROM ... WHERE "TimeID" = {time_id}
-    
+
     Functions Used:
         - query_scalar() - get max TimeID
         - query_one() - get revenue/quantity sums
         - get_month_string_from_time_id() - convert TimeID to month name
-    
+
     Returns:
         {
             "total_revenue": 12345678.90,
@@ -68,21 +84,21 @@ async def get_dashboard_kpis(time_id: Optional[int] = None):
     """
     if time_id is None:
         time_id = get_latest_time_id()
-    
+
     if not time_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No data found for KPIs.",
         )
-    
-    sql='''
+
+    sql = """
         SELECT 
             SUM("Revenue") AS total_revenue,
             SUM("Quantity") AS total_quantity
         FROM public."Aggregated Data"
         WHERE "TimeID" = %s
-    '''
-    kpi_data=query_one(sql, (time_id,))
+    """
+    kpi_data = query_one(sql, (time_id,))
 
     if not kpi_data:
         raise HTTPException(
@@ -90,33 +106,34 @@ async def get_dashboard_kpis(time_id: Optional[int] = None):
             detail="No KPI data found for the specified month.",
         )
     return KPIResponse(
-        total_revenue=float(kpi_data['total_revenue'] or 0),
-        total_quantity=int(kpi_data['total_quantity'] or 0),
+        total_revenue=float(kpi_data["total_revenue"] or 0),
+        total_quantity=int(kpi_data["total_quantity"] or 0),
         month_name=get_month_string_from_time_id(time_id),
-        time_id=time_id
+        time_id=time_id,
     )
+
 
 @router.get("/abc-count", response_model=List[CategoryCountResponse])
 def get_abc_count(time_id: Optional[int] = None):
     """
     Get article count by ABC category.
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month's rolling table.
-    
+
     Matches: dashboard_server.R -> abc_count_chart renderPlot
-    
+
     SQL Query:
         SELECT abc_category, COUNT(*) as count
         FROM public."rolling_abc_xyz_summary_YYYY_MM"
         GROUP BY abc_category
         ORDER BY abc_category
-    
+
     Functions Used:
         - get_latest_rolling_table() - find latest rolling summary table
         - safe_table_name() - safely quote table name
         - query_all() - execute query and get all rows
-    
+
     Returns:
         [
             {"category": "A", "count": 150},
@@ -128,31 +145,27 @@ def get_abc_count(time_id: Optional[int] = None):
         table_name = get_latest_rolling_table()
     else:
         table_name = get_rolling_table_for_time_id(time_id)
-    
+
     if not table_name:
         raise HTTPException(
-            status_code=404,
-            detail="No rolling ABC/XYZ summary table found"
+            status_code=404, detail="No rolling ABC/XYZ summary table found"
         )
-    
+
     table = safe_table_name(table_name)
-    
-    sql = f'''
+
+    sql = f"""
         SELECT 
             abc_category as category,
             COUNT(*) as count
         FROM {table}
         GROUP BY abc_category
         ORDER BY abc_category
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     return [
-        CategoryCountResponse(
-            category=row["category"],
-            count=int(row["count"])
-        )
+        CategoryCountResponse(category=row["category"], count=int(row["count"]))
         for row in rows
     ]
 
@@ -161,23 +174,23 @@ def get_abc_count(time_id: Optional[int] = None):
 def get_abc_revenue(time_id: Optional[int] = None):
     """
     Get revenue by ABC category (in millions).
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month's rolling table.
-    
+
     Matches: dashboard_server.R -> abc_revenue_chart renderPlot
-    
+
     SQL Query:
         SELECT abc_category, SUM(total_revenue) / 1e6 as revenue
         FROM public."rolling_abc_xyz_summary_YYYY_MM"
         GROUP BY abc_category
         ORDER BY abc_category
-    
+
     Functions Used:
         - get_latest_rolling_table()
         - safe_table_name()
         - query_all()
-    
+
     Returns:
         [
             {"category": "A", "revenue": 123.45},
@@ -189,30 +202,28 @@ def get_abc_revenue(time_id: Optional[int] = None):
         table_name = get_latest_rolling_table()
     else:
         table_name = get_rolling_table_for_time_id(time_id)
-    
+
     if not table_name:
         raise HTTPException(
-            status_code=404,
-            detail="No rolling ABC/XYZ summary table found"
+            status_code=404, detail="No rolling ABC/XYZ summary table found"
         )
-    
+
     table = safe_table_name(table_name)
-    
-    sql = f'''
+
+    sql = f"""
         SELECT 
             abc_category as category,
             SUM(total_revenue) / 1000000.0 as revenue
         FROM {table}
         GROUP BY abc_category
         ORDER BY abc_category
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     return [
         CategoryRevenueResponse(
-            category=row["category"],
-            revenue=round(float(row["revenue"]), 2)
+            category=row["category"], revenue=round(float(row["revenue"]), 2)
         )
         for row in rows
     ]
@@ -222,23 +233,23 @@ def get_abc_revenue(time_id: Optional[int] = None):
 def get_xyz_count(time_id: Optional[int] = None):
     """
     Get article count by XYZ category.
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month's rolling table.
-    
+
     Matches: dashboard_server.R -> xyz_count_chart renderPlot
-    
+
     SQL Query:
         SELECT xyz_category, COUNT(*) as count
         FROM public."rolling_abc_xyz_summary_YYYY_MM"
         GROUP BY xyz_category
         ORDER BY xyz_category
-    
+
     Functions Used:
         - get_latest_rolling_table()
         - safe_table_name()
         - query_all()
-    
+
     Returns:
         [
             {"category": "X", "count": 120},
@@ -250,31 +261,27 @@ def get_xyz_count(time_id: Optional[int] = None):
         table_name = get_latest_rolling_table()
     else:
         table_name = get_rolling_table_for_time_id(time_id)
-    
+
     if not table_name:
         raise HTTPException(
-            status_code=404,
-            detail="No rolling ABC/XYZ summary table found"
+            status_code=404, detail="No rolling ABC/XYZ summary table found"
         )
-    
+
     table = safe_table_name(table_name)
-    
-    sql = f'''
+
+    sql = f"""
         SELECT 
             xyz_category as category,
             COUNT(*) as count
         FROM {table}
         GROUP BY xyz_category
         ORDER BY xyz_category
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     return [
-        CategoryCountResponse(
-            category=row["category"],
-            count=int(row["count"])
-        )
+        CategoryCountResponse(category=row["category"], count=int(row["count"]))
         for row in rows
     ]
 
@@ -283,23 +290,23 @@ def get_xyz_count(time_id: Optional[int] = None):
 def get_xyz_revenue(time_id: Optional[int] = None):
     """
     Get revenue by XYZ category (in millions).
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month's rolling table.
-    
+
     Matches: dashboard_server.R -> xyz_revenue_chart renderPlot
-    
+
     SQL Query:
         SELECT xyz_category, SUM(total_revenue) / 1e6 as revenue
         FROM public."rolling_abc_xyz_summary_YYYY_MM"
         GROUP BY xyz_category
         ORDER BY xyz_category
-    
+
     Functions Used:
         - get_latest_rolling_table()
         - safe_table_name()
         - query_all()
-    
+
     Returns:
         [
             {"category": "X", "revenue": 89.50},
@@ -311,30 +318,28 @@ def get_xyz_revenue(time_id: Optional[int] = None):
         table_name = get_latest_rolling_table()
     else:
         table_name = get_rolling_table_for_time_id(time_id)
-    
+
     if not table_name:
         raise HTTPException(
-            status_code=404,
-            detail="No rolling ABC/XYZ summary table found"
+            status_code=404, detail="No rolling ABC/XYZ summary table found"
         )
-    
+
     table = safe_table_name(table_name)
-    
-    sql = f'''
+
+    sql = f"""
         SELECT 
             xyz_category as category,
             SUM(total_revenue) / 1000000.0 as revenue
         FROM {table}
         GROUP BY xyz_category
         ORDER BY xyz_category
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     return [
         CategoryRevenueResponse(
-            category=row["category"],
-            revenue=round(float(row["revenue"]), 2)
+            category=row["category"], revenue=round(float(row["revenue"]), 2)
         )
         for row in rows
     ]
@@ -344,11 +349,11 @@ def get_xyz_revenue(time_id: Optional[int] = None):
 def get_abc_xyz_count():
     """
     Get article count by ABC-XYZ combination.
-    
+
     Matches: dashboard_server.R -> abc_xyz_count_chart renderPlot
-    
+
     SQL Query:
-        SELECT 
+        SELECT
             abc_category,
             xyz_category,
             abc_category || xyz_category as abc_xyz,
@@ -356,12 +361,12 @@ def get_abc_xyz_count():
         FROM public."rolling_abc_xyz_summary_YYYY_MM"
         GROUP BY abc_category, xyz_category
         ORDER BY abc_category, xyz_category
-    
+
     Functions Used:
         - get_latest_rolling_table()
         - safe_table_name()
         - query_all()
-    
+
     Returns:
         [
             {"abc_category": "A", "xyz_category": "X", "abc_xyz": "AX", "count": 50},
@@ -372,16 +377,15 @@ def get_abc_xyz_count():
         ]
     """
     table_name = get_latest_rolling_table()
-    
+
     if not table_name:
         raise HTTPException(
-            status_code=404,
-            detail="No rolling ABC/XYZ summary table found"
+            status_code=404, detail="No rolling ABC/XYZ summary table found"
         )
-    
+
     table = safe_table_name(table_name)
-    
-    sql = f'''
+
+    sql = f"""
         SELECT 
             abc_category,
             xyz_category,
@@ -390,16 +394,16 @@ def get_abc_xyz_count():
         FROM {table}
         GROUP BY abc_category, xyz_category
         ORDER BY abc_category, xyz_category
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     return [
         ComboCountResponse(
             abc_category=row["abc_category"],
             xyz_category=row["xyz_category"],
             abc_xyz=row["abc_xyz"],
-            count=int(row["count"])
+            count=int(row["count"]),
         )
         for row in rows
     ]
@@ -411,6 +415,7 @@ from fastapi.responses import StreamingResponse
 import io
 import csv
 
+
 @router.get("/export/rolling-abc-xyz")
 async def export_rolling_abc_xyz():
     """
@@ -421,13 +426,13 @@ async def export_rolling_abc_xyz():
     if not table_name:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No rolling ABC/XYZ summary table found."
+            detail="No rolling ABC/XYZ summary table found.",
         )
-    
+
     table = safe_table_name(table_name)
-    
+
     # Get all available data from the rolling summary table
-    sql = f'''
+    sql = f"""
         SELECT 
             article_no,
             abc_category,
@@ -436,26 +441,28 @@ async def export_rolling_abc_xyz():
             total_quantity
         FROM {table}
         ORDER BY abc_category, xyz_category, total_revenue DESC
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     if not rows:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No data available for export."
+            detail="No data available for export.",
         )
-    
+
     # Convert to pandas DataFrame and then to CSV
     df = pd.DataFrame(rows)
     output = io.StringIO()
     df.to_csv(output, index=False)
     output.seek(0)
-    
+
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=rolling_abc_xyz_analysis.csv"}
+        headers={
+            "Content-Disposition": "attachment; filename=rolling_abc_xyz_analysis.csv"
+        },
     )
 
 
@@ -474,42 +481,41 @@ async def export_forecast():
         ORDER BY table_name DESC
         LIMIT 1
     """
-    
+
     result = query_one(table_query)
-    
+
     if not result or not result.get("table_name"):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No forecast table found."
+            status_code=status.HTTP_404_NOT_FOUND, detail="No forecast table found."
         )
-    
+
     table_name = result["table_name"]
-    
+
     # Use exact same query as forecast.py
-    sql = f'''
+    sql = f"""
         SELECT "ProductID", "ForecastMonth", "PredictedQuantity" 
         FROM public."{table_name}" 
         ORDER BY "ProductID"
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     if not rows:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No forecast data available for export."
+            detail="No forecast data available for export.",
         )
-    
+
     # Convert to pandas DataFrame and then to CSV
     df = pd.DataFrame(rows)
     output = io.StringIO()
     df.to_csv(output, index=False)
     output.seek(0)
-    
+
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=demand_forecast.csv"}
+        headers={"Content-Disposition": "attachment; filename=demand_forecast.csv"},
     )
 
 
@@ -528,45 +534,47 @@ async def export_cross_sell():
         ORDER BY tablename DESC
         LIMIT 1
     """
-    
+
     result = query_one(table_query)
-    
+
     if not result or not result.get("tablename"):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No cross-sell recommendations table found."
+            detail="No cross-sell recommendations table found.",
         )
-    
+
     table_name = result["tablename"]
-    
+
     # Use exact same query as cross_sell.py
-    data_query = f'''
+    data_query = f"""
         SELECT 
             "Distributor_Code",
             "Products_Bought_Together",
             "Suggested_Product"
         FROM public."{table_name}"
         ORDER BY "Distributor_Code"
-    '''
-    
+    """
+
     rows = query_all(data_query)
-    
+
     if not rows:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No cross-sell data available for export."
+            detail="No cross-sell data available for export.",
         )
-    
+
     # Convert to pandas DataFrame and then to CSV
     df = pd.DataFrame(rows)
     output = io.StringIO()
     df.to_csv(output, index=False)
     output.seek(0)
-    
+
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=cross_sell_recommendations.csv"}
+        headers={
+            "Content-Disposition": "attachment; filename=cross_sell_recommendations.csv"
+        },
     )
 
 
@@ -574,10 +582,10 @@ async def export_cross_sell():
 async def get_category_breakup(time_id: Optional[int] = None):
     """
     Get revenue and quantity breakdown by product category (Monofilaments, Trading, MISC).
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month.
-    
+
     Returns:
         [
             {"category": "Monofilaments", "revenue": 12345678.90, "quantity": 5000},
@@ -587,42 +595,49 @@ async def get_category_breakup(time_id: Optional[int] = None):
     """
     if time_id is None:
         time_id = get_latest_time_id()
-    
+
     if not time_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No data found."
+            status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
         )
-    
-    sql = '''
+
+    sql = """
         SELECT 
             CASE 
-                WHEN pm.category IN ('MCF', 'WMF', 'INH', 'INB', 'Happa') THEN 'Monofilaments'
-                WHEN pm.category IN ('MSN', 'TSN', 'PP Woven Sack', 'WMT', 'Bird Net', 'Knitted Fabric', 'Knotted Netting', 'Mulch Film', 'Others') THEN 'Trading'
-                ELSE 'MISC'
+                WHEN pm.clean_cat IN ('MCF', 'WMF', 'INSECT NET', 'INSECT NET BAG', 'HAPPA', 'YARN') THEN 'Monofilaments'
+                WHEN pm.clean_cat IN ('MSN', 'TSN', 'PP WOVEN SACK', 'WMT', 'BIRD NET', 'KNITTED FABRIC', 'KNOTTED NETTING', 'MULCH FILM', 'OTHERS') THEN 'Trading'
+                WHEN pm.clean_cat IN ('HDPE', 'CP', 'MB') THEN 'RM'
+                WHEN pm.clean_cat IN ('WASTE', 'SUNDRY', 'ROPE') THEN 'MISC'
             END as category,
             SUM(ad."Revenue") as revenue,
             SUM(ad."Quantity") as quantity
         FROM public."Aggregated Data" ad
         LEFT JOIN (
-            SELECT DISTINCT ON (product_code) product_code, category
+            SELECT product_code, MAX(category) as clean_cat
             FROM priyatextile_product_master
-        ) pm ON CAST(ad."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
+            GROUP BY product_code
+        ) pm ON ad."ProductID" = pm.product_code
         WHERE ad."TimeID" = %s
+          AND pm.clean_cat IN (
+              'MCF', 'WMF', 'INSECT NET', 'INSECT NET BAG', 'HAPPA', 'YARN',
+              'MSN', 'TSN', 'PP WOVEN SACK', 'WMT', 'BIRD NET', 'KNITTED FABRIC', 'KNOTTED NETTING', 'MULCH FILM', 'OTHERS',
+              'HDPE', 'CP', 'MB',
+              'WASTE', 'SUNDRY', 'ROPE'
+          )
         GROUP BY category
         ORDER BY revenue DESC
-    '''
-    
+    """
+
     rows = query_all(sql, (time_id,))
-    
+
     if not rows:
         return []
-    
+
     return [
         CategoryBreakupItem(
             category=row["category"] or "MISC",
             revenue=float(row["revenue"] or 0),
-            quantity=int(row["quantity"] or 0)
+            quantity=int(row["quantity"] or 0),
         )
         for row in rows
     ]
@@ -632,10 +647,10 @@ async def get_category_breakup(time_id: Optional[int] = None):
 async def get_abc_xyz_matrix(time_id: Optional[int] = None):
     """
     Get 3×3 ABC×XYZ matrix with counts and revenue for each combination.
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month's rolling table.
-    
+
     Returns:
         [
             {"abc": "A", "xyz": "X", "count": 50, "revenue": 5000000.0},
@@ -648,16 +663,16 @@ async def get_abc_xyz_matrix(time_id: Optional[int] = None):
         table_name = get_latest_rolling_table()
     else:
         table_name = get_rolling_table_for_time_id(time_id)
-    
+
     if not table_name:
         raise HTTPException(
             status_code=404,
-            detail="No rolling ABC/XYZ summary table found for the specified month"
+            detail="No rolling ABC/XYZ summary table found for the specified month",
         )
-    
+
     table = safe_table_name(table_name)
-    
-    sql = f'''
+
+    sql = f"""
         SELECT 
             abc_category,
             xyz_category,
@@ -667,33 +682,35 @@ async def get_abc_xyz_matrix(time_id: Optional[int] = None):
         WHERE abc_category IS NOT NULL AND xyz_category IS NOT NULL
         GROUP BY abc_category, xyz_category
         ORDER BY abc_category, xyz_category
-    '''
-    
+    """
+
     rows = query_all(sql)
-    
+
     if not rows:
         return []
-    
+
     return [
         ABCXYZMatrixCell(
             abc=row["abc_category"],
             xyz=row["xyz_category"],
             count=int(row["count"]),
-            revenue=float(row["revenue"] or 0)
+            revenue=float(row["revenue"] or 0),
         )
         for row in rows
     ]
 
 
 @router.get("/category-hierarchy", response_model=Dict[str, Any])
-async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "revenue"):
+async def get_category_hierarchy(
+    time_id: Optional[int] = None, metric: str = "revenue"
+):
     """
     Get hierarchical category data for dual-circle pie chart.
-    
+
     Args:
         time_id: Optional TimeID. If not provided, uses latest month.
         metric: "revenue" or "quantity"
-    
+
     Returns:
         {
             "main_categories": [{"id": "Monofilaments", "label": "Monofilaments", "value": 12345678.90, "color": "#..."}],
@@ -702,20 +719,19 @@ async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "r
     """
     if time_id is None:
         time_id = get_latest_time_id()
-    
+
     if not time_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No data found."
+            status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
         )
-    
+
     # Main category colors
     category_colors = {
         "Monofilaments": "#4caf50",  # Green
         "Trading": "#2196f3",  # Blue
-        "MISC": "#ff9800"  # Orange
+        "MISC": "#ff9800",  # Orange
     }
-    
+
     # Subcategory mapping with lighter/darker shades
     subcategory_info = {
         "MCF": {"parent": "Monofilaments", "opacity": 0.9},
@@ -733,18 +749,22 @@ async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "r
         "Mulch Film": {"parent": "Trading", "opacity": 0.2},
         "Others": {"parent": "Trading", "opacity": 0.15},
     }
-    
+
     # Helper to convert hex to rgba
     def hex_to_rgba(hex_color: str, opacity: float) -> str:
-        hex_color = hex_color.lstrip('#')
-        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        hex_color = hex_color.lstrip("#")
+        r, g, b = (
+            int(hex_color[0:2], 16),
+            int(hex_color[2:4], 16),
+            int(hex_color[4:6], 16),
+        )
         return f"rgba({r}, {g}, {b}, {opacity})"
-    
+
     # Determine the column to aggregate
     value_column = '"Revenue"' if metric.lower() == "revenue" else '"Quantity"'
-    
+
     # Query for main categories - aggregate subcategories into main groups
-    main_sql = f'''
+    main_sql = f"""
         WITH categorized_data AS (
             SELECT 
                 CASE 
@@ -766,12 +786,12 @@ async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "r
         FROM categorized_data
         GROUP BY main_category
         ORDER BY value DESC
-    '''
-    
+    """
+
     main_rows = query_all(main_sql, (time_id,))
-    
+
     # Query for subcategories
-    sub_sql = f'''
+    sub_sql = f"""
         SELECT 
             pm.category as subcategory,
             SUM(ad.{value_column}) as value
@@ -784,21 +804,21 @@ async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "r
           AND pm.category IS NOT NULL
         GROUP BY pm.category
         ORDER BY value DESC
-    '''
-    
+    """
+
     sub_rows = query_all(sub_sql, (time_id,))
-    
+
     # Build main categories response
     main_categories = [
         CategoryHierarchyItem(
             id=row["category"] or "MISC",
             label=row["category"] or "MISC",
             value=float(row["value"] or 0),
-            color=category_colors.get(row["category"] or "MISC", "#9e9e9e")
+            color=category_colors.get(row["category"] or "MISC", "#9e9e9e"),
         )
         for row in main_rows
     ]
-    
+
     # Build subcategories response with color based on parent
     subcategories = []
     for row in sub_rows:
@@ -812,19 +832,18 @@ async def get_category_hierarchy(time_id: Optional[int] = None, metric: str = "r
             # MISC subcategories
             parent = "MISC"
             color = hex_to_rgba(category_colors["MISC"], 0.5)
-        
+
         subcategories.append(
             CategoryHierarchyItem(
                 id=subcat,
                 label=subcat,
                 value=float(row["value"] or 0),
                 color=color,
-                parent_category=parent
+                parent_category=parent,
             )
         )
-    
+
     return {
         "main_categories": [item.dict() for item in main_categories],
-        "subcategories": [item.dict() for item in subcategories]
+        "subcategories": [item.dict() for item in subcategories],
     }
-

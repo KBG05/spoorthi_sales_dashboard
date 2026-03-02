@@ -9,4 +9,4 @@ htmlcov
 .github
 .env
 .env.*
-.log
+*.log

@@ -192,20 +192,19 @@ const TransitionAnalysis: React.FC = () => {
           <ToggleButton value="Customers">Customers</ToggleButton>
         </ToggleButtonGroup>
 
-        {analysisType === 'Customers' && (
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Financial Year</InputLabel>
-            <Select
-              value={financialYear}
-              label="Financial Year"
-              onChange={(e) => setFinancialYear(e.target.value)}
-            >
-              <MenuItem value="FY23-24">FY23-24</MenuItem>
-              <MenuItem value="FY24-25">FY24-25</MenuItem>
-              <MenuItem value="FY25-26">FY25-26</MenuItem>
-            </Select>
-          </FormControl>
-        )}
+        {/* FY Dropdown — shown for both Products and Customers */}
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Financial Year</InputLabel>
+          <Select
+            value={financialYear}
+            label="Financial Year"
+            onChange={(e) => setFinancialYear(e.target.value)}
+          >
+            <MenuItem value="FY23-24">FY23-24</MenuItem>
+            <MenuItem value="FY24-25">FY24-25</MenuItem>
+            <MenuItem value="FY25-26">FY25-26</MenuItem>
+          </Select>
+        </FormControl>
 
         {/* Column Filters */}
         {data && data.column_headers.map((header) => {

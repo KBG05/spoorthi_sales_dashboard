@@ -17,7 +17,8 @@ import type {
   SegmentData,
   ClassComparisonDataPoint,
   CategoryBreakupItem,
-  ABCXYZMatrixCell,
+  ABCXYZMatrixResponse,
+  ABCXYZProductItem,
   CategoryHierarchyResponse,
 } from './types.js';
 
@@ -61,8 +62,13 @@ export const dashboardApi = {
     });
   },
   getABCXYZMatrix: async (timeId?: number) => {
-    return await apiClient.get<ABCXYZMatrixCell[]>('/dashboard/abc-xyz-matrix', {
+    return await apiClient.get<ABCXYZMatrixResponse>('/dashboard/abc-xyz-matrix', {
       params: timeId ? { time_id: timeId } : undefined,
+    });
+  },
+  getABCXYZProducts: async (abc: string, xyz: string, timeId?: number) => {
+    return await apiClient.get<ABCXYZProductItem[]>('/dashboard/abc-xyz-products', {
+      params: { abc, xyz, ...(timeId ? { time_id: timeId } : {}) },
     });
   },
   getCategoryHierarchy: async (timeId?: number, metric: 'revenue' | 'quantity' = 'revenue') => {

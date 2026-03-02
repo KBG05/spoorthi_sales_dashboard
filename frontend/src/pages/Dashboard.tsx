@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Paper, CircularProgress, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { ShoppingCart } from '@mui/icons-material';
+import { Box, Typography, Card, CardContent, Paper, CircularProgress, Select, MenuItem, FormControl, InputLabel, ToggleButtonGroup, ToggleButton, Dialog, DialogTitle, DialogContent, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { ShoppingCart, Close as CloseIcon } from '@mui/icons-material';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { PieChart } from '@mui/x-charts/PieChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { dashboardApi } from '../api';
-import type { KPIResponse, CategoryBreakupItem, ABCXYZMatrixCell } from '../api/types';
-import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS } from '../constants/constants';
+import type { KPIResponse, CategoryBreakupItem, ABCXYZMatrixCell, ABCXYZProductItem } from '../api/types';
+import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS, formatQuantity } from '../constants/constants';
 
 // Custom Rupee Icon Component
 const RupeeIcon = () => (
@@ -42,11 +42,15 @@ const Dashboard = () => {
   const [kpiData, setKpiData] = useState<KPIResponse | null>(null);
   const [categoryBreakup, setCategoryBreakup] = useState<CategoryBreakupItem[]>([]);
   const [abcXyzMatrix, setAbcXyzMatrix] = useState<ABCXYZMatrixCell[]>([]);
+  const [matrixPeriodLabel, setMatrixPeriodLabel] = useState<string>('');
   const [abcCount, setAbcCount] = useState<CategoryData[]>([]);
   const [abcRevenue, setAbcRevenue] = useState<CategoryData[]>([]);
   const [xyzCount, setXyzCount] = useState<CategoryData[]>([]);
   const [xyzRevenue, setXyzRevenue] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pieMetric, setPieMetric] = useState<'revenue' | 'quantity'>('revenue');
+  // Product popup state
+  const [productPopup, setProductPopup] = useState<{ open: boolean; abc: string; xyz: string; products: ABCXYZProductItem[]; loading: boolean }>({ open: false, abc: '', xyz: '', products: [], loading: false });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,7 +83,10 @@ const Dashboard = () => {
         .catch(err => console.error('Error fetching category breakup:', err));
       
       const fetchABCXYZMatrix = dashboardApi.getABCXYZMatrix(timeId)
-        .then(res => setAbcXyzMatrix(res.data))
+        .then(res => {
+          setAbcXyzMatrix(res.data.cells);
+          setMatrixPeriodLabel(res.data.period_label);
+        })
         .catch(err => console.error('Error fetching ABC×XYZ matrix:', err));
       
       const fetchABCCount = dashboardApi.getABCCount(timeId)
@@ -123,19 +130,19 @@ const Dashboard = () => {
     );
   }
 
-  // Format currency
+  // Format currency (Revenue → 2 decimals)
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     }).format(value);
   };
 
-  // Format number
+  // Format number (Quantity → 1 decimal)
   const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('en-US').format(value);
+    return formatQuantity(value);
   };
 
   const kpis = [
@@ -154,6 +161,26 @@ const Dashboard = () => {
       color: ABC_COLORS.B, // Green
     },
   ];
+
+  // Handler for product popup when clicking matrix cell
+  const handleMatrixCellClick = async (abc: string, xyz: string) => {
+    setProductPopup({ open: true, abc, xyz, products: [], loading: true });
+    try {
+      let timeId: number | undefined = undefined;
+      if (selectedMonth !== '') {
+        if (selectedMonth >= 4 && selectedMonth <= 12) {
+          timeId = (2025 - 2021) * 12 + selectedMonth;
+        } else if (selectedMonth >= 1 && selectedMonth <= 3) {
+          timeId = (2026 - 2021) * 12 + selectedMonth;
+        }
+      }
+      const res = await dashboardApi.getABCXYZProducts(abc, xyz, timeId);
+      setProductPopup(prev => ({ ...prev, products: res.data, loading: false }));
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setProductPopup(prev => ({ ...prev, loading: false }));
+    }
+  };
 
   return (
     <Box sx={{ width: '100%', boxSizing: 'border-box' }}>
@@ -265,9 +292,21 @@ const Dashboard = () => {
         {/* Pie Chart */}
         <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
           <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
-              Category Breakup
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Category Breakup
+              </Typography>
+              <ToggleButtonGroup
+                value={pieMetric}
+                exclusive
+                onChange={(_, val) => val && setPieMetric(val)}
+                size="small"
+                sx={{ height: 28 }}
+              >
+                <ToggleButton value="revenue" sx={{ px: 1.5, py: 0.25, fontSize: '0.7rem' }}>Revenue</ToggleButton>
+                <ToggleButton value="quantity" sx={{ px: 1.5, py: 0.25, fontSize: '0.7rem' }}>Quantity</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
               {categoryBreakup.length > 0 ? (
                 <PieChart
                   series={[
@@ -275,7 +314,11 @@ const Dashboard = () => {
                       data: Object.entries(
                         categoryBreakup.reduce((acc, cat) => {
                           const category = cat.category || 'MISC';
-                          acc[category] = (acc[category] || 0) + (cat.revenue / 10000000);
+                          if (pieMetric === 'revenue') {
+                            acc[category] = (acc[category] || 0) + (cat.revenue / 10000000);
+                          } else {
+                            acc[category] = (acc[category] || 0) + cat.quantity;
+                          }
                           return acc;
                         }, {} as Record<string, number>)
                       ).map(([category, value], index) => ({
@@ -284,7 +327,9 @@ const Dashboard = () => {
                         label: category,
                       })),
                       highlightScope: { fade: 'global', highlight: 'item' },
-                      valueFormatter: (item) => `₹${item.value.toFixed(2)} Cr`,
+                      valueFormatter: pieMetric === 'revenue'
+                        ? (item) => `₹${(item.value * 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}  (₹${item.value.toFixed(2)} Cr)`
+                        : (item) => `${item.value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`,
                     },
                   ]}
                   height={340}
@@ -307,7 +352,7 @@ const Dashboard = () => {
           <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
             <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.95rem' }}>
-                ABC×XYZ Revenue Matrix
+                ABC×XYZ Revenue Matrix {matrixPeriodLabel && `(${matrixPeriodLabel})`}
               </Typography>
               {abcXyzMatrix.length > 0 ? (
                 <Box sx={{ display: 'grid', gridTemplateColumns: '50px repeat(3, 1fr)', gap: 2, mt: 0.5 }}>
@@ -331,6 +376,7 @@ const Dashboard = () => {
                           <Card
                             key={`${abc}${xyz}`}
                             elevation={1}
+                            onClick={() => handleMatrixCellClick(abc, xyz)}
                             sx={{
                               bgcolor: `${bgColor}30`,
                               minHeight: 80,
@@ -341,10 +387,13 @@ const Dashboard = () => {
                               alignItems: 'center',
                               p: 1,
                               border: `1px solid ${bgColor}`,
+                              cursor: 'pointer',
+                              '&:hover': { opacity: 0.8, transform: 'scale(1.02)' },
+                              transition: 'all 0.15s',
                             }}
                           >
                             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '1rem' }}>
-                              ₹{cell ? (cell.revenue / 10000000).toFixed(1) : '0.0'}
+                              ₹{cell ? (cell.revenue / 10000000).toFixed(2) : '0.00'}
                             </Typography>
                             <Typography variant="caption" sx={{ fontSize: '0.75rem' }} color="text.secondary">
                               Cr
@@ -367,7 +416,7 @@ const Dashboard = () => {
           <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
             <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.95rem' }}>
-                ABC×XYZ Quantity Matrix
+                ABC×XYZ Quantity Matrix {matrixPeriodLabel && `(${matrixPeriodLabel})`}
               </Typography>
               {abcXyzMatrix.length > 0 ? (
                 <Box sx={{ display: 'grid', gridTemplateColumns: '50px repeat(3, 1fr)', gap: 2, mt: 0.5 }}>
@@ -391,6 +440,7 @@ const Dashboard = () => {
                           <Card
                             key={`${abc}${xyz}`}
                             elevation={1}
+                            onClick={() => handleMatrixCellClick(abc, xyz)}
                             sx={{
                               bgcolor: `${bgColor}30`,
                               minHeight: 80,
@@ -401,6 +451,9 @@ const Dashboard = () => {
                               alignItems: 'center',
                               p: 1,
                               border: `1px solid ${bgColor}`,
+                              cursor: 'pointer',
+                              '&:hover': { opacity: 0.8, transform: 'scale(1.02)' },
+                              transition: 'all 0.15s',
                             }}
                           >
                             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '1rem' }}>
@@ -551,14 +604,14 @@ const Dashboard = () => {
                 series={[{ 
                   data: abcRevenue.map(d => d.revenue || 0),
                   label: 'Revenue of Articles (Cr)',
-                  valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0 Cr',
+                  valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                 }]}
                   height={295}
                 margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
                   const value = item.value as number;
-                  return `₹${(value / 10).toFixed(1)} Cr`;
+                  return `₹${(value / 10).toFixed(2)} Cr`;
                 }}
                 slotProps={{
                   barLabel: {
@@ -700,7 +753,7 @@ const Dashboard = () => {
                   data: xyzRevenue.map(d => d.revenue || 0), 
                   color: XYZ_COLORS.Z, // Red
                   label: 'Revenue of Articles (Cr)',
-                  valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0 Cr',
+                  valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                   barLabelPlacement:"outside"
                 }]}
                   height={315}
@@ -709,7 +762,7 @@ const Dashboard = () => {
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
                   const value = item.value as number;
-                  return `₹${(value / 10).toFixed(1)} Cr`;
+                  return `₹${(value / 10).toFixed(2)} Cr`;
                 }}
                 slotProps={{
                   barLabel: {
@@ -732,6 +785,52 @@ const Dashboard = () => {
         </Box>
       </Box>
 
+      {/* Product Popup Dialog */}
+      <Dialog
+        open={productPopup.open}
+        onClose={() => setProductPopup(prev => ({ ...prev, open: false }))}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Products — {productPopup.abc}{productPopup.xyz}
+          </Typography>
+          <IconButton size="small" onClick={() => setProductPopup(prev => ({ ...prev, open: false }))}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0 }}>
+          {productPopup.loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : productPopup.products.length > 0 ? (
+            <TableContainer sx={{ maxHeight: 400 }}>
+              <Table stickyHeader size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Product ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Product Name</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {productPopup.products.map((p) => (
+                    <TableRow key={p.product_id} hover>
+                      <TableCell>{p.product_id}</TableCell>
+                      <TableCell>{p.product_name || '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography color="text.secondary">No products found</Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
 
     </Box>
   );

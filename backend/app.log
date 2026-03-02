@@ -19809,3 +19809,895 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2026-03-02 21:44:55,299 - INFO - Application shutdown complete - Database pool closed
 2026-03-02 21:44:56,778 - INFO - ✅ Database pool initialized
 2026-03-02 21:44:56,778 - INFO - Application startup complete - Database pool initialized
+2026-03-02 21:57:36,650 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 21:57:36,651 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 21:57:36,651 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 21:57:36,652 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 21:57:36,658 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 21:57:36,669 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 21:57:36,672 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 21:57:36,676 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 21:57:37,107 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2026-03-02 21:57:37,108 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2026-03-02 21:57:37,109 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 21:57:37,110 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 21:57:37,115 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 21:57:37,159 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.044s)
+2026-03-02 21:57:37,163 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 21:57:37,192 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.029s)
+2026-03-02 21:58:33,003 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 21:58:33,005 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 21:58:33,011 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 21:58:33,013 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 21:58:33,437 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 21:58:33,485 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.048s)
+2026-03-02 21:58:33,516 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 21:58:33,555 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.039s)
+2026-03-02 22:00:04,138 - INFO - ✅ Database pool closed
+2026-03-02 22:00:04,138 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:00:07,259 - INFO - ✅ Database pool initialized
+2026-03-02 22:00:07,260 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:00:07,266 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:00:07,277 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:00:07,281 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:00:07,283 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:00:07,500 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:00:07,544 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.044s)
+2026-03-02 22:00:07,551 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:00:07,583 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.033s)
+2026-03-02 22:01:06,824 - INFO - ✅ Database pool closed
+2026-03-02 22:01:06,824 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:01:08,374 - INFO - ✅ Database pool initialized
+2026-03-02 22:01:08,374 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:01:49,174 - INFO - ✅ Database pool closed
+2026-03-02 22:01:49,174 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:01:50,768 - INFO - ✅ Database pool initialized
+2026-03-02 22:01:50,769 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:02:21,855 - INFO - ✅ Database pool closed
+2026-03-02 22:02:21,856 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:02:23,284 - INFO - ✅ Database pool initialized
+2026-03-02 22:02:23,284 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:02:50,827 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:02:50,829 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:02:50,830 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:02:50,831 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:02:50,833 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:02:50,834 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:02:50,835 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:02:50,836 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:02:50,837 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:02:50,838 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:02:50,839 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:02:50,840 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:02:50,857 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:02:50,857 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:02:50,859 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:02:50,859 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:02:50,872 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:02:50,873 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:02:50,873 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:02:50,873 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:02:50,892 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:02:50,893 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:02:50,893 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:02:50,893 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:02:50,894 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:02:50,894 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:02:50,896 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:02:50,897 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:02:50,922 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:02:50,923 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:02:50,924 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:02:50,942 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:02:50,942 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:02:50,942 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:02:50,951 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.029s)
+2026-03-02 22:02:50,951 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:02:50,952 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:02:50,973 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:02:50,974 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:02:50,976 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:02:50,995 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:02:50,997 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:02:51,007 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.065s)
+2026-03-02 22:02:51,012 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:02:51,012 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:02:51,024 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.082s)
+2026-03-02 22:02:51,025 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:02:51,027 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.055s)
+2026-03-02 22:02:51,034 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.092s)
+2026-03-02 22:02:51,038 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.026s)
+2026-03-02 22:02:51,055 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:02:51,056 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:02:51,056 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:02:51,066 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:02:51,071 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:02:51,087 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.031s)
+2026-03-02 22:03:07,059 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:03:07,062 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:03:07,075 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:03:07,081 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.006s)
+2026-03-02 22:03:07,774 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:03:07,785 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:03:07,789 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:03:07,801 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:03:07,801 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:03:07,802 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:03:07,802 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:03:07,804 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:03:07,814 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:03:07,819 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.018s)
+2026-03-02 22:03:07,832 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:03:07,848 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:03:07,861 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:03:07,864 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:03:07,888 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.086s)
+2026-03-02 22:03:07,891 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.089s)
+2026-03-02 22:03:07,892 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.078s)
+2026-03-02 22:03:07,892 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.091s)
+2026-03-02 22:03:07,897 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.036s)
+2026-03-02 22:03:07,897 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.033s)
+2026-03-02 22:03:07,945 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:03:07,948 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:03:07,959 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:03:07,960 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:03:07,971 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:03:07,979 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.034s)
+2026-03-02 22:03:07,981 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:03:08,002 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.042s)
+2026-03-02 22:03:20,188 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:03:20,198 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:03:20,219 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:03:20,233 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:03:20,234 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:03:20,234 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:03:20,235 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:03:20,236 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:03:20,236 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:03:20,251 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.018s)
+2026-03-02 22:03:20,260 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.026s)
+2026-03-02 22:03:20,261 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.027s)
+2026-03-02 22:03:20,302 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.067s)
+2026-03-02 22:03:20,316 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.081s)
+2026-03-02 22:04:11,624 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:04:11,626 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:04:11,631 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:04:11,635 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:04:12,190 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:04:12,201 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:04:12,202 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:04:12,217 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:04:12,225 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:04:12,226 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:04:12,232 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:04:12,232 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:04:12,233 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:04:12,242 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:04:12,262 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:04:12,262 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:04:12,323 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.062s)
+2026-03-02 22:04:12,324 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.099s)
+2026-03-02 22:04:12,325 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.063s)
+2026-03-02 22:04:12,327 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.095s)
+2026-03-02 22:04:12,332 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.100s)
+2026-03-02 22:04:12,333 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.091s)
+2026-03-02 22:04:12,350 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:04:12,351 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:04:12,352 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:04:12,355 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:04:12,356 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:04:12,372 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:04:12,379 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:04:12,385 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.034s)
+2026-03-02 22:04:12,413 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.057s)
+2026-03-02 22:04:12,432 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.080s)
+2026-03-02 22:05:23,889 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:23,889 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:05:23,896 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:23,912 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:05:36,412 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:36,412 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:05:36,418 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:36,425 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:05:40,235 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:40,237 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:05:40,267 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:40,282 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:05:47,240 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:47,240 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:05:47,247 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:05:47,258 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:07:40,039 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:07:40,046 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.006s)
+2026-03-02 22:07:44,841 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:07:44,851 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:07:49,182 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:07:49,187 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:07:53,160 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:07:53,161 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:07:53,168 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:07:53,178 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:07:56,300 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:07:56,310 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:08:00,410 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:00,411 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:08:00,418 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:00,425 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:08:05,730 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:05,738 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:08:10,517 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:10,523 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:08:15,361 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:15,366 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:08:17,499 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:17,506 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:08:22,704 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:22,704 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:08:22,710 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:22,716 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.006s)
+2026-03-02 22:08:25,004 - INFO - ✅ Database pool closed
+2026-03-02 22:08:25,004 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:08:27,290 - INFO - ✅ Database pool initialized
+2026-03-02 22:08:27,290 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:08:40,937 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:40,954 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:08:49,630 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:08:49,641 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:08:52,251 - INFO - ✅ Database pool closed
+2026-03-02 22:08:52,252 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:08:53,791 - INFO - ✅ Database pool initialized
+2026-03-02 22:08:53,791 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:09:11,249 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2026-03-02 22:09:11,249 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2026-03-02 22:09:11,249 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:09:11,250 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:09:11,257 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:09:11,293 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.036s)
+2026-03-02 22:09:11,297 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:09:11,322 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.025s)
+2026-03-02 22:09:15,738 - INFO - ✅ Database pool closed
+2026-03-02 22:09:15,738 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:09:17,262 - INFO - ✅ Database pool initialized
+2026-03-02 22:09:17,262 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:09:18,342 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:18,344 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:18,345 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:09:18,346 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:09:18,354 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:18,381 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.027s)
+2026-03-02 22:09:18,386 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:18,406 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.020s)
+2026-03-02 22:09:40,258 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:40,259 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:09:40,267 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:40,315 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.049s)
+2026-03-02 22:09:44,812 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:44,812 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:09:44,819 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:44,846 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.026s)
+2026-03-02 22:09:47,590 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:47,623 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.032s)
+2026-03-02 22:09:50,579 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:50,604 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.024s)
+2026-03-02 22:09:52,743 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:52,831 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.088s)
+2026-03-02 22:09:55,737 - INFO - ✅ Database pool closed
+2026-03-02 22:09:55,738 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:09:57,230 - INFO - ✅ Database pool initialized
+2026-03-02 22:09:57,230 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:09:57,235 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:09:57,265 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.030s)
+2026-03-02 22:10:04,397 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:10:04,431 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.034s)
+2026-03-02 22:10:06,766 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:10:06,767 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:06,774 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:10:06,799 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.025s)
+2026-03-02 22:10:08,688 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:10:08,720 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.032s)
+2026-03-02 22:10:10,744 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:10:10,769 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.026s)
+2026-03-02 22:10:18,670 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:10:18,720 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.050s)
+2026-03-02 22:10:21,587 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:10:21,615 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.029s)
+2026-03-02 22:10:21,620 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:10:21,643 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:10:23,760 - INFO - Request: OPTIONS /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:10:23,760 - INFO - Response: OPTIONS /cross-sell/recommendations returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:23,762 - INFO - Request: OPTIONS /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:10:23,763 - INFO - Response: OPTIONS /cross-sell/recommendations returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:23,774 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:10:29,813 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1 (took 6.040s)
+2026-03-02 22:10:29,816 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:10:36,188 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1 (took 6.372s)
+2026-03-02 22:10:36,189 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 22:10:36,190 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 22:10:36,191 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:10:36,191 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:36,205 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:10:36,206 - INFO - Response: GET /auth/me returned 401 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:10:36,210 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:10:36,211 - INFO - Response: GET /auth/me returned 401 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:43,302 - INFO - Request: POST /auth/login from 127.0.0.1
+2026-03-02 22:10:43,307 - INFO - Login attempt from IP: 127.0.0.1 for username: kbg
+2026-03-02 22:10:43,597 - WARNING - Failed login attempt from IP: 127.0.0.1 for username: kbg (took 0.291s)
+2026-03-02 22:10:43,598 - INFO - Response: POST /auth/login returned 401 to 127.0.0.1 (took 0.296s)
+2026-03-02 22:10:46,052 - INFO - Request: POST /auth/login from 127.0.0.1
+2026-03-02 22:10:46,056 - INFO - Login attempt from IP: 127.0.0.1 for username: kbg
+2026-03-02 22:10:46,329 - INFO - Successful login from IP: 127.0.0.1 for username: kbg (took 0.273s)
+2026-03-02 22:10:46,329 - INFO - Response: POST /auth/login returned 200 to 127.0.0.1 (took 0.277s)
+2026-03-02 22:10:46,338 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:10:46,339 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:10:46,544 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:10:46,545 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:46,546 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:10:46,547 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:10:46,556 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:10:46,557 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:10:46,557 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:10:46,564 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:10:46,564 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:10:46,565 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:10:46,566 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:10:46,566 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:10:46,570 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:10:46,572 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:10:46,573 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:10:46,573 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:10:46,591 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:10:46,600 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:10:46,602 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:10:46,602 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:10:46,603 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:10:46,604 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:10:46,605 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:10:46,607 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:10:46,608 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:10:46,612 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:10:46,613 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:10:46,618 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:10:46,645 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:10:46,653 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:10:46,653 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:10:46,654 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:10:46,655 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:10:46,657 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:10:46,680 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.027s)
+2026-03-02 22:10:46,680 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.027s)
+2026-03-02 22:10:46,692 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.047s)
+2026-03-02 22:10:46,696 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.042s)
+2026-03-02 22:10:46,697 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.043s)
+2026-03-02 22:10:46,702 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.046s)
+2026-03-02 22:10:46,741 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:10:46,756 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:10:46,763 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:10:46,763 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:10:46,764 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:10:46,764 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:10:46,764 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:10:46,788 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.025s)
+2026-03-02 22:10:46,795 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.032s)
+2026-03-02 22:10:46,804 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.047s)
+2026-03-02 22:10:46,825 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.061s)
+2026-03-02 22:10:46,830 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.066s)
+2026-03-02 22:10:53,364 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:10:53,365 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:10:53,365 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:10:53,366 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:10:53,366 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:10:53,368 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:10:53,369 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:10:53,369 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:10:53,382 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:10:53,383 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:10:53,383 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:10:53,384 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:10:53,384 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:10:53,385 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:10:53,397 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:10:53,398 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:10:53,398 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:10:53,398 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:10:53,399 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:10:53,402 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:10:53,411 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:10:53,416 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:10:53,416 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:10:53,416 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:10:53,417 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:10:53,425 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:10:53,425 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:10:53,443 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:12:01,032 - INFO - ✅ Database pool closed
+2026-03-02 22:12:01,032 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:12:02,643 - INFO - ✅ Database pool initialized
+2026-03-02 22:12:02,643 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:12:09,363 - INFO - ✅ Database pool closed
+2026-03-02 22:12:09,364 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:12:10,959 - INFO - ✅ Database pool initialized
+2026-03-02 22:12:10,960 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:12:14,733 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:12:14,773 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.039s)
+2026-03-02 22:12:14,776 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:12:14,802 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.026s)
+2026-03-02 22:12:16,384 - INFO - ✅ Database pool closed
+2026-03-02 22:12:16,384 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:12:18,075 - INFO - ✅ Database pool initialized
+2026-03-02 22:12:18,075 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:14:17,599 - INFO - ✅ Database pool closed
+2026-03-02 22:14:17,600 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:23:36,167 - INFO - ✅ Database pool initialized
+2026-03-02 22:23:36,168 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:23:37,891 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 22:23:37,892 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 22:23:37,893 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:23:37,894 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:23:37,901 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:23:37,913 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:23:37,918 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:23:37,920 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:23:38,200 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:23:42,881 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1 (took 4.681s)
+2026-03-02 22:23:42,886 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:23:47,297 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1 (took 4.411s)
+2026-03-02 22:24:22,193 - INFO - Request: POST /auth/login from 127.0.0.1
+2026-03-02 22:24:22,197 - INFO - Login attempt from IP: 127.0.0.1 for username: kbg
+2026-03-02 22:24:22,465 - INFO - Successful login from IP: 127.0.0.1 for username: kbg (took 0.268s)
+2026-03-02 22:24:22,466 - INFO - Response: POST /auth/login returned 200 to 127.0.0.1 (took 0.273s)
+2026-03-02 22:24:22,475 - INFO - Request: OPTIONS /auth/me from 127.0.0.1
+2026-03-02 22:24:22,475 - INFO - Response: OPTIONS /auth/me returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:24:22,479 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:24:22,480 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:24:22,645 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:24:22,653 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:24:22,654 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:24:22,664 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:24:22,672 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:24:22,673 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.020s)
+2026-03-02 22:24:22,676 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:24:22,676 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.012s)
+2026-03-02 22:24:22,678 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:24:22,679 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:24:22,684 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:24:22,723 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:24:22,733 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.048s)
+2026-03-02 22:24:22,733 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:24:22,734 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.059s)
+2026-03-02 22:24:22,735 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.063s)
+2026-03-02 22:24:22,735 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.057s)
+2026-03-02 22:24:22,735 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.057s)
+2026-03-02 22:24:22,746 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:24:22,752 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:24:22,753 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:24:22,753 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:24:22,753 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:24:22,762 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:24:22,768 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:24:22,770 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.018s)
+2026-03-02 22:24:22,792 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.039s)
+2026-03-02 22:24:22,794 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.041s)
+2026-03-02 22:24:24,421 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:24:24,422 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:24:24,423 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:24:24,425 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:24:24,425 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:24:24,427 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:24:24,443 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:24:24,450 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:24:24,450 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:24:24,451 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:24:24,452 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:24:24,452 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:24:24,452 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:24:24,454 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:24:24,454 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:24:24,455 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:24:24,455 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:24:24,456 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:24:24,472 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:24:24,472 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:24:24,473 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:24:24,473 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:24:24,473 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:24:24,473 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:24:24,473 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:24:24,481 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:24:24,481 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:24:24,481 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:24:24,482 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:24:24,482 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:24:24,499 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:24:24,505 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:24:24,505 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:24:24,505 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:24:24,506 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:24:24,506 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:24:24,518 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.019s)
+2026-03-02 22:24:24,519 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:24:24,522 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:24:24,524 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.019s)
+2026-03-02 22:24:24,530 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:24:24,538 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:24:24,544 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:24:24,544 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:24:24,544 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:24:24,547 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:24:24,554 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.049s)
+2026-03-02 22:24:24,557 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.051s)
+2026-03-02 22:24:24,560 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:24:24,565 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:24:24,568 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:24:24,572 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:24:24,573 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:24:24,580 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.036s)
+2026-03-02 22:24:29,771 - INFO - Request: OPTIONS /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:24:29,772 - INFO - Request: OPTIONS /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:24:29,773 - INFO - Response: OPTIONS /cross-sell/recommendations returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:24:29,775 - INFO - Response: OPTIONS /cross-sell/recommendations returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:24:29,784 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:24:34,623 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1 (took 4.840s)
+2026-03-02 22:24:34,627 - INFO - Request: GET /cross-sell/recommendations from 127.0.0.1
+2026-03-02 22:24:38,952 - INFO - Response: GET /cross-sell/recommendations returned 200 to 127.0.0.1 (took 4.326s)
+2026-03-02 22:27:27,003 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2026-03-02 22:27:27,004 - INFO - Request: OPTIONS /forecast/demand from 127.0.0.1
+2026-03-02 22:27:27,004 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:27:27,007 - INFO - Response: OPTIONS /forecast/demand returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:27:27,012 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:27:27,045 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.033s)
+2026-03-02 22:27:27,048 - INFO - Request: GET /forecast/demand from 127.0.0.1
+2026-03-02 22:27:27,078 - INFO - Response: GET /forecast/demand returned 200 to 127.0.0.1 (took 0.030s)
+2026-03-02 22:27:50,356 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:27:50,358 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:27:50,358 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:27:50,359 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:27:50,365 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:27:50,386 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:27:50,390 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:27:50,423 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.034s)
+2026-03-02 22:27:52,856 - INFO - Request: OPTIONS /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:27:52,856 - INFO - Response: OPTIONS /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:27:52,861 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:27:52,883 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:28:05,580 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:05,592 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:05,592 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:05,605 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.025s)
+2026-03-02 22:28:05,606 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:05,606 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:28:05,606 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:28:05,608 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:05,611 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:05,617 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:05,645 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:05,645 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:05,655 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:28:05,655 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:28:05,658 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.050s)
+2026-03-02 22:28:05,659 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.054s)
+2026-03-02 22:28:05,660 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.049s)
+2026-03-02 22:28:05,661 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.045s)
+2026-03-02 22:28:05,672 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:05,681 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:05,682 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:05,682 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:05,682 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:05,689 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:28:05,694 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.012s)
+2026-03-02 22:28:05,695 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:28:05,697 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:28:05,718 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.035s)
+2026-03-02 22:28:07,863 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:07,863 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:07,865 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:07,865 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:07,872 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:07,877 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:07,877 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:07,878 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:07,878 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:07,878 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:07,878 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:28:07,879 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:07,880 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:07,880 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:07,881 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:07,881 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:07,899 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:07,904 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:07,904 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:07,904 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:07,911 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:07,911 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:07,911 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:28:07,913 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:28:07,915 - INFO - Response: GET /dashboard/abc-count returned 404 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:28:07,916 - INFO - Response: GET /dashboard/xyz-revenue returned 404 to 127.0.0.1 (took 0.012s)
+2026-03-02 22:28:07,938 - INFO - Response: GET /dashboard/xyz-count returned 404 to 127.0.0.1 (took 0.027s)
+2026-03-02 22:28:07,939 - INFO - Response: GET /dashboard/abc-revenue returned 404 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:28:10,579 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:10,580 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:10,581 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:10,581 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:28:10,582 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:10,583 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:10,584 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:10,585 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:28:10,586 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:10,586 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:28:10,587 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:10,588 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:10,604 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:10,605 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:10,605 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:10,605 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:10,605 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:10,606 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:10,621 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:28:10,622 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:28:10,622 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:28:10,622 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:28:10,626 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.020s)
+2026-03-02 22:28:10,627 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:28:10,636 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:10,637 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:10,641 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:28:10,642 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:28:23,212 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:23,219 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:23,219 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:23,220 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:23,231 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:23,232 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:23,232 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.019s)
+2026-03-02 22:28:23,234 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:28:23,234 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:28:23,238 - INFO - Response: GET /dashboard/abc-count returned 404 to 127.0.0.1 (took 0.018s)
+2026-03-02 22:28:23,239 - INFO - Response: GET /dashboard/abc-revenue returned 404 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:28:23,244 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:23,247 - INFO - Response: GET /dashboard/xyz-revenue returned 404 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:23,256 - INFO - Response: GET /dashboard/xyz-count returned 404 to 127.0.0.1 (took 0.025s)
+2026-03-02 22:28:25,773 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:28:25,784 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:28:25,785 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:28:25,785 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:28:25,785 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:28:25,785 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:28:25,785 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.012s)
+2026-03-02 22:28:25,805 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:28:25,806 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:28:25,808 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:28:25,833 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.048s)
+2026-03-02 22:28:25,833 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.048s)
+2026-03-02 22:28:25,834 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.049s)
+2026-03-02 22:28:25,836 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:28:35,070 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2026-03-02 22:28:35,071 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2026-03-02 22:28:35,071 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:35,072 - INFO - Request: OPTIONS /customer-trend/available-years from 127.0.0.1
+2026-03-02 22:28:35,072 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2026-03-02 22:28:35,072 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:35,073 - INFO - Response: OPTIONS /customer-trend/available-years returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:35,073 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:28:35,085 - INFO - Request: GET /abc/trend from 127.0.0.1
+2026-03-02 22:28:35,117 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2026-03-02 22:28:35,123 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1 (took 0.038s)
+2026-03-02 22:28:35,124 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:28:35,132 - INFO - Request: GET /customer-trend/available-years from 127.0.0.1
+2026-03-02 22:28:35,137 - INFO - Request: GET /abc/trend from 127.0.0.1
+2026-03-02 22:28:35,153 - INFO - Response: GET /customer-trend/available-years returned 200 to 127.0.0.1 (took 0.021s)
+2026-03-02 22:28:35,154 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1 (took 0.017s)
+2026-03-02 22:28:35,312 - INFO - Request: OPTIONS /customer-trend/trend from 127.0.0.1
+2026-03-02 22:28:35,313 - INFO - Response: OPTIONS /customer-trend/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:35,323 - INFO - Request: GET /customer-trend/trend from 127.0.0.1
+2026-03-02 22:28:35,335 - INFO - Response: GET /customer-trend/trend returned 200 to 127.0.0.1 (took 0.012s)
+2026-03-02 22:28:38,219 - INFO - Request: OPTIONS /abc/trend from 127.0.0.1
+2026-03-02 22:28:38,220 - INFO - Response: OPTIONS /abc/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:38,224 - INFO - Request: GET /abc/trend from 127.0.0.1
+2026-03-02 22:28:38,242 - INFO - Response: GET /abc/trend returned 200 to 127.0.0.1 (took 0.018s)
+2026-03-02 22:28:43,517 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:43,518 - INFO - Request: OPTIONS /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:43,519 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:43,520 - INFO - Response: OPTIONS /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:43,530 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:43,535 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:28:43,541 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:43,545 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:28:43,622 - INFO - Request: OPTIONS /customer-behaviour/customers from 127.0.0.1
+2026-03-02 22:28:43,623 - INFO - Response: OPTIONS /customer-behaviour/customers returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:43,629 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2026-03-02 22:28:43,634 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:28:44,925 - INFO - Request: OPTIONS /customer-behaviour/products from 127.0.0.1
+2026-03-02 22:28:44,926 - INFO - Response: OPTIONS /customer-behaviour/products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:44,932 - INFO - Request: GET /customer-behaviour/products from 127.0.0.1
+2026-03-02 22:28:44,945 - INFO - Response: GET /customer-behaviour/products returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:28:45,607 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2026-03-02 22:28:45,608 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:45,616 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2026-03-02 22:28:45,635 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1 (took 0.019s)
+2026-03-02 22:28:47,381 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:47,382 - INFO - Request: OPTIONS /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:47,383 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:28:47,384 - INFO - Response: OPTIONS /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:47,393 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:47,400 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:28:47,404 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:28:47,410 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:28:47,479 - INFO - Request: OPTIONS /product-behaviour/products from 127.0.0.1
+2026-03-02 22:28:47,479 - INFO - Response: OPTIONS /product-behaviour/products returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:28:47,483 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2026-03-02 22:28:47,487 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:28:48,752 - INFO - Request: OPTIONS /product-behaviour/trend from 127.0.0.1
+2026-03-02 22:28:48,752 - INFO - Response: OPTIONS /product-behaviour/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:28:48,758 - INFO - Request: GET /product-behaviour/trend from 127.0.0.1
+2026-03-02 22:28:48,792 - INFO - Response: GET /product-behaviour/trend returned 200 to 127.0.0.1 (took 0.033s)
+2026-03-02 22:29:17,775 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:29:17,776 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:29:17,777 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:29:17,779 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:29:17,782 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:29:17,783 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:29:17,785 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:29:17,785 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:29:17,793 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:29:17,794 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:29:17,794 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:29:17,794 - INFO - Request: OPTIONS /dashboard/kpis from 127.0.0.1
+2026-03-02 22:29:17,794 - INFO - Request: OPTIONS /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:29:17,795 - INFO - Request: OPTIONS /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:29:17,796 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:29:17,797 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:29:17,798 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:29:17,799 - INFO - Response: OPTIONS /dashboard/kpis returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:29:17,799 - INFO - Response: OPTIONS /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:29:17,801 - INFO - Response: OPTIONS /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:29:17,818 - INFO - Request: OPTIONS /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:29:17,818 - INFO - Request: OPTIONS /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:29:17,819 - INFO - Request: OPTIONS /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:29:17,819 - INFO - Request: OPTIONS /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:29:17,820 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:29:17,820 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:29:17,821 - INFO - Response: OPTIONS /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:29:17,833 - INFO - Response: OPTIONS /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:29:17,835 - INFO - Response: OPTIONS /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:29:17,835 - INFO - Response: OPTIONS /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:29:17,836 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:29:17,836 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:29:17,852 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:29:17,858 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:29:17,859 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:29:17,859 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:29:17,859 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:29:17,865 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:29:17,866 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:29:17,873 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:29:17,875 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:29:17,910 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:29:17,910 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.035s)
+2026-03-02 22:29:17,914 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:29:17,916 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.057s)
+2026-03-02 22:29:17,916 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.058s)
+2026-03-02 22:29:17,916 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.057s)
+2026-03-02 22:29:17,917 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.058s)
+2026-03-02 22:29:17,927 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:29:17,929 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:29:17,930 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:29:17,930 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:29:17,940 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:29:17,941 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:29:17,965 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.038s)
+2026-03-02 22:29:17,966 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.036s)
+2026-03-02 22:30:06,109 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:30:06,113 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:30:06,116 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:30:06,120 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:30:06,193 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2026-03-02 22:30:06,200 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:30:06,975 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2026-03-02 22:30:06,976 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:30:06,980 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2026-03-02 22:30:06,980 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:30:06,985 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2026-03-02 22:30:06,986 - INFO - Request: OPTIONS /cba/rfm-analysis from 127.0.0.1
+2026-03-02 22:30:06,986 - INFO - Request: OPTIONS /cba/summary from 127.0.0.1
+2026-03-02 22:30:06,986 - INFO - Request: OPTIONS /cba/segments from 127.0.0.1
+2026-03-02 22:30:06,986 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2026-03-02 22:30:06,986 - INFO - Request: GET /cba/summary from 127.0.0.1
+2026-03-02 22:30:07,524 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1 (took 0.539s)
+2026-03-02 22:30:07,525 - INFO - Response: OPTIONS /cba/rfm-analysis returned 200 to 127.0.0.1 (took 0.539s)
+2026-03-02 22:30:07,526 - INFO - Response: OPTIONS /cba/summary returned 200 to 127.0.0.1 (took 0.540s)
+2026-03-02 22:30:07,526 - INFO - Response: OPTIONS /cba/segments returned 200 to 127.0.0.1 (took 0.540s)
+2026-03-02 22:30:07,526 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1 (took 0.540s)
+2026-03-02 22:30:07,526 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1 (took 0.540s)
+2026-03-02 22:30:07,550 - INFO - Request: GET /cba/segments from 127.0.0.1
+2026-03-02 22:30:07,840 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2026-03-02 22:30:07,840 - INFO - Request: GET /cba/summary from 127.0.0.1
+2026-03-02 22:30:08,293 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1 (took 0.743s)
+2026-03-02 22:30:08,294 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1 (took 0.454s)
+2026-03-02 22:30:08,294 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1 (took 0.454s)
+2026-03-02 22:30:08,304 - INFO - Request: GET /cba/segments from 127.0.0.1
+2026-03-02 22:30:08,551 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1 (took 0.247s)
+2026-03-02 22:30:09,286 - INFO - Request: OPTIONS /ticket-size/bands from 127.0.0.1
+2026-03-02 22:30:09,288 - INFO - Request: OPTIONS /ticket-size/bands from 127.0.0.1
+2026-03-02 22:30:09,288 - INFO - Response: OPTIONS /ticket-size/bands returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:30:09,290 - INFO - Response: OPTIONS /ticket-size/bands returned 200 to 127.0.0.1 (took 0.002s)
+2026-03-02 22:30:09,303 - INFO - Request: GET /ticket-size/bands from 127.0.0.1
+2026-03-02 22:30:09,315 - INFO - Response: GET /ticket-size/bands returned 200 to 127.0.0.1 (took 0.012s)
+2026-03-02 22:30:09,319 - INFO - Request: GET /ticket-size/bands from 127.0.0.1
+2026-03-02 22:30:09,332 - INFO - Response: GET /ticket-size/bands returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:30:10,158 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:30:10,186 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:30:10,191 - INFO - Request: GET /transition-analysis/transitions from 127.0.0.1
+2026-03-02 22:30:10,214 - INFO - Response: GET /transition-analysis/transitions returned 200 to 127.0.0.1 (took 0.024s)
+2026-03-02 22:30:11,452 - INFO - Request: GET /ticket-size/bands from 127.0.0.1
+2026-03-02 22:30:11,462 - INFO - Response: GET /ticket-size/bands returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:30:11,466 - INFO - Request: GET /ticket-size/bands from 127.0.0.1
+2026-03-02 22:30:11,473 - INFO - Response: GET /ticket-size/bands returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:30:12,115 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:30:12,130 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:30:12,130 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:30:12,132 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:30:12,132 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:30:12,133 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:30:12,133 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.018s)
+2026-03-02 22:30:12,152 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:30:12,152 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.022s)
+2026-03-02 22:30:12,158 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.026s)
+2026-03-02 22:30:12,160 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.027s)
+2026-03-02 22:30:12,166 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:30:12,170 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:30:12,170 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:30:12,171 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:30:12,171 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:30:12,193 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:30:12,193 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:30:12,193 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.023s)
+2026-03-02 22:30:12,195 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.062s)
+2026-03-02 22:30:12,197 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.031s)
+2026-03-02 22:30:12,198 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:30:12,211 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:30:12,213 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:30:12,213 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:30:12,221 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:30:12,221 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:30:12,245 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.034s)
+2026-03-02 22:30:26,097 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:30:26,101 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:30:26,216 - INFO - ✅ Database pool closed
+2026-03-02 22:30:26,216 - INFO - Application shutdown complete - Database pool closed
+2026-03-02 22:30:28,362 - INFO - ✅ Database pool initialized
+2026-03-02 22:30:28,362 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:30:29,879 - INFO - ✅ Database pool initialized
+2026-03-02 22:30:29,879 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:30:31,026 - INFO - ✅ Database pool initialized
+2026-03-02 22:30:31,026 - INFO - Application startup complete - Database pool initialized
+2026-03-02 22:30:31,032 - INFO - Request: GET /auth/me from 127.0.0.1
+2026-03-02 22:30:31,039 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:30:31,044 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:30:31,045 - INFO - Response: GET /auth/me returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:30:31,052 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:30:31,053 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:30:31,058 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:30:31,059 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:30:31,061 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:30:31,062 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:30:31,065 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:30:31,068 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:30:31,071 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:30:31,077 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:30:31,085 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:30:31,085 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:30:31,086 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.028s)
+2026-03-02 22:30:31,087 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.019s)
+2026-03-02 22:30:31,095 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:30:31,096 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:30:31,096 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:30:31,105 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.011s)
+2026-03-02 22:30:31,107 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.042s)
+2026-03-02 22:30:31,108 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.047s)
+2026-03-02 22:30:31,110 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:30:31,111 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:30:31,117 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:30:31,119 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:30:31,123 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:30:31,124 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.007s)

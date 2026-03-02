@@ -11,13 +11,16 @@ class KPIResponse(BaseModel):
     month_name: str
     time_id: int
 
+
 class CategoryCountResponse(BaseModel):
     category: str
     count: int
 
+
 class CategoryRevenueResponse(BaseModel):
     category: str
     revenue: float  # in millions
+
 
 class ComboCountResponse(BaseModel):
     abc_category: str
@@ -25,10 +28,12 @@ class ComboCountResponse(BaseModel):
     abc_xyz: str
     count: int
 
+
 class CategoryBreakupItem(BaseModel):
     category: str  # "Monofilaments", "Trading", "MISC"
     revenue: float
     quantity: int
+
 
 class ABCXYZMatrixCell(BaseModel):
     abc: str  # "A", "B", or "C"
@@ -36,8 +41,20 @@ class ABCXYZMatrixCell(BaseModel):
     count: int
     revenue: float
 
+
+class ABCXYZMatrixResponse(BaseModel):
+    cells: List[ABCXYZMatrixCell]
+    period_label: str  # e.g., "FY 2025-26" or "Apr 2025 – Mar 2026"
+
+
+class ABCXYZProductItem(BaseModel):
+    product_id: int
+    product_name: Optional[str] = None
+
+
 class CategoryHierarchyItem(BaseModel):
     """Item for dual-circle pie chart"""
+
     id: str  # Unique identifier (category name or subcategory name)
     label: str  # Display label
     value: float  # Revenue or quantity
@@ -50,12 +67,15 @@ class CategoryHierarchyItem(BaseModel):
 # -----------------------
 class ABCTrendDataPoint(BaseModel):
     """Single data point for ABC trend (revenue or quantity)"""
+
     month_date: str  # Format: "YYYY-MM-DD"
     abc_category: str  # "A", "B", "C", or "Overall"
     value: float  # Revenue in millions or Quantity
 
+
 class ABCTrendResponse(BaseModel):
     """Response for ABC trend endpoint"""
+
     data: List[ABCTrendDataPoint]
     metric: str  # "Revenue" or "Quantity"
     financial_year: str
@@ -66,6 +86,7 @@ class ABCTrendResponse(BaseModel):
 # -----------------------
 class CrossSellRecommendation(BaseModel):
     """Cross-sell recommendation for a distributor"""
+
     customer: str  # Distributor_Code
     customer_name: Optional[str] = None
     products_purchased: str  # Comma-separated list
@@ -79,17 +100,22 @@ class CrossSellRecommendation(BaseModel):
 # -----------------------
 class CustomerListItem(BaseModel):
     """Customer ID for dropdown"""
+
     customer_id: int
     customer_name: Optional[str] = None
     abc_category: Optional[str] = None  # For filtering customers by class
 
+
 class ProductListItem(BaseModel):
     """Product ID for dropdown"""
+
     product_id: int
     product_name: Optional[str] = None
 
+
 class CustomerBehaviourDataPoint(BaseModel):
     """Single data point for customer behaviour plot"""
+
     month: str  # Format: "YYYY-MM-DD"
     value: float
     type: str  # e.g., "Selected Customers Overall" or "Product 123"
@@ -101,6 +127,7 @@ class CustomerBehaviourDataPoint(BaseModel):
 # -----------------------
 class CustomerTrendDataPoint(BaseModel):
     """Single data point for customer trend"""
+
     month_label: str  # e.g., "Apr", "May", etc.
     category: str  # "A", "B", "C", or "Overall"
     value: float  # Revenue or Quantity
@@ -111,6 +138,7 @@ class CustomerTrendDataPoint(BaseModel):
 # -----------------------
 class ProductBehaviourDataPoint(BaseModel):
     """Single data point for product behaviour (dual axis)"""
+
     month: str  # Format: "YYYY-MM-DD"
     value: float
     scaled_value: float  # For dual axis plotting
@@ -123,12 +151,15 @@ class ProductBehaviourDataPoint(BaseModel):
 # -----------------------
 class TopPerformerItem(BaseModel):
     """Top performer (customer or product)"""
+
     id: int  # CustomerID or ProductID
     revenue: float  # Total revenue
     name: Optional[str] = None  # Customer or Product name
 
+
 class TopPerformersResponse(BaseModel):
     """Response containing top performers"""
+
     top_fy: List[TopPerformerItem]  # Top 10 for entire FY
     top_latest: List[TopPerformerItem]  # Top 10 for latest month
     entity_type: str  # "Customers" or "Products"
@@ -139,6 +170,7 @@ class TopPerformersResponse(BaseModel):
 # -----------------------
 class TicketSizeBand(BaseModel):
     """Ticket size band data"""
+
     band: str  # e.g., "0-5L", "5L-20L", etc.
     metric: str  # "Count" or "Revenue"
     value: float
@@ -150,11 +182,16 @@ class TicketSizeBand(BaseModel):
 # -----------------------
 class TransitionRow(BaseModel):
     """Single row of transition analysis"""
+
     id: int  # ProductID or CustomerID
-    categories: Dict[str, str]  # e.g., {"Category_Jan_2025": "A", "Category_Feb_2025": "B", ...}
+    categories: Dict[
+        str, str
+    ]  # e.g., {"Category_Jan_2025": "A", "Category_Feb_2025": "B", ...}
+
 
 class TransitionAnalysisResponse(BaseModel):
     """Response for transition analysis"""
+
     data: List[Dict[str, Any]]  # Flexible structure for different columns
     analysis_type: str  # "Products" or "Customers"
     column_headers: List[str]  # Dynamic column names
@@ -165,6 +202,7 @@ class TransitionAnalysisResponse(BaseModel):
 # -----------------------
 class ForecastRow(BaseModel):
     """Single forecast row"""
+
     product_id: int
     product_names: Optional[List[str]] = None  # All product names for this product code
     category: Optional[str] = None  # ABC-XYZ combined category
@@ -176,8 +214,10 @@ class ForecastRow(BaseModel):
     month_2_quantity: Optional[float] = None  # 2nd most recent month quantity
     month_3_quantity: Optional[float] = None  # 3rd most recent month quantity
 
+
 class ForecastResponse(BaseModel):
     """Response for forecast data"""
+
     table_name: str
     display_month: str
     data: List[ForecastRow]
@@ -192,6 +232,7 @@ class ForecastResponse(BaseModel):
 # -----------------------
 class RFMMetrics(BaseModel):
     """RFM metrics for a single customer"""
+
     customer_id: int
     recency: int
     frequency: int
@@ -207,6 +248,7 @@ class RFMMetrics(BaseModel):
 
 class RFMSummary(BaseModel):
     """Summary statistics for RFM analysis"""
+
     total_customers: int
     avg_recency: float
     avg_frequency: float
@@ -216,6 +258,7 @@ class RFMSummary(BaseModel):
 
 class SegmentData(BaseModel):
     """Customer segment aggregated data"""
+
     segment: str
     customer_count: int
     total_revenue: float
@@ -226,6 +269,7 @@ class SegmentData(BaseModel):
 # -----------------------
 class ClassComparisonDataPoint(BaseModel):
     """Single data point for class vs customer comparison"""
+
     month: str  # Format: "YYYY-MM"
     financial_year: str  # e.g., "FY24-25"
     class_total: float  # Total for the entire class
@@ -238,37 +282,50 @@ class ClassComparisonDataPoint(BaseModel):
 # -----------------------
 class Token(BaseModel):
     """JWT token response"""
+
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     """Data stored in JWT token"""
+
     username: Optional[str] = None
+
 
 class User(BaseModel):
     """User model"""
+
     id: int
     username: str
     role: str
 
+
 class UserInDB(User):
     """User model with hashed password"""
+
     hashed_password: str
+
 
 class UserCreate(BaseModel):
     """User creation request"""
+
     username: str
     password: str
     role: str = "user"  # Default role is "user"
 
+
 class UserResponse(BaseModel):
     """User response after creation"""
+
     id: int
     username: str
     role: str
     message: str
 
+
 class PasswordChange(BaseModel):
     """Password change request"""
+
     current_password: str
     new_password: str

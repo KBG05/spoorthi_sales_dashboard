@@ -20,6 +20,16 @@ export interface ABCXYZMatrixCell {
   revenue: number;
 }
 
+export interface ABCXYZMatrixResponse {
+  cells: ABCXYZMatrixCell[];
+  period_label: string;
+}
+
+export interface ABCXYZProductItem {
+  product_id: number;
+  product_name?: string;
+}
+
 export interface CategoryHierarchyItem {
   id: string;
   label: string;

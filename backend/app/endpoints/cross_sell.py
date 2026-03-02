@@ -13,24 +13,28 @@ from ..database import query_one, query_all
 from ..schemas import CrossSellRecommendation, User
 from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/cross-sell", tags=["Cross-Sell Analysis"], dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/cross-sell",
+    tags=["Cross-Sell Analysis"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/recommendations", response_model=List[CrossSellRecommendation])
 async def get_cross_sell_recommendations():
     """
     Get cross-sell recommendations for all distributors.
-    
+
     Matches: cross_sell_server.R -> recommendations_table renderDataTable
-    
+
     SQL Query:
         1. Find latest cross_sell_recommendations table
         2. SELECT and aggregate recommendations by distributor
-    
+
     Functions Used:
         - query_one() - find latest table
         - query_all() - get all recommendations
-    
+
     Returns:
         [
             {
@@ -50,19 +54,18 @@ async def get_cross_sell_recommendations():
         ORDER BY tablename DESC
         LIMIT 1
     """
-    
+
     result = query_one(table_query)  # type: ignore
-    
+
     if not result or not result.get("tablename"):
         raise HTTPException(
-            status_code=404,
-            detail="No cross-sell recommendation table found"
+            status_code=404, detail="No cross-sell recommendation table found"
         )
-    
+
     table_name = result["tablename"]
-    
+
     # Fetch all recommendations
-    data_query = f'''
+    data_query = f"""
         SELECT 
             cr."Distributor_Code",
             cm.customer,
@@ -71,38 +74,46 @@ async def get_cross_sell_recommendations():
         FROM public."{table_name}" cr
         LEFT JOIN priyatextile_customer_master cm ON CAST(cr."Distributor_Code" AS TEXT) = CAST(cm.customer_code AS TEXT)
         ORDER BY cr."Distributor_Code"
-    '''
-    
+    """
+
     rows = query_all(data_query)  # type: ignore
-    
+
     if not rows:
         return []
-    
+
     # Fetch product master for name lookups
-    product_master_query = "SELECT product_code, commercial_name FROM priyatextile_product_master"
+    product_master_query = (
+        "SELECT product_code, commercial_name FROM priyatextile_product_master"
+    )
     product_rows = query_all(product_master_query)  # type: ignore
-    product_names = {str(row["product_code"]): row["commercial_name"] for row in product_rows if row.get("commercial_name")}
-    
+    product_names = {
+        str(row["product_code"]): row["commercial_name"]
+        for row in product_rows
+        if row.get("commercial_name")
+    }
+
     # Group by distributor and aggregate products
     from collections import defaultdict
-    
-    distributor_data = defaultdict(lambda: {
-        "customer_name": None,
-        "purchased": set(), 
-        "recommendations": set(),
-        "purchased_names": set(),
-        "recommendation_names": set()
-    })
-    
+
+    distributor_data = defaultdict(
+        lambda: {
+            "customer_name": None,
+            "purchased": set(),
+            "recommendations": set(),
+            "purchased_names": set(),
+            "recommendation_names": set(),
+        }
+    )
+
     for row in rows:
         dist_code = row["Distributor_Code"]
         cust_name = row.get("customer")
         products_bought = row.get("Products_Bought_Together", "")
         suggested = row.get("Suggested_Product", "")
-        
+
         if cust_name and not distributor_data[dist_code]["customer_name"]:
             distributor_data[dist_code]["customer_name"] = cust_name
-        
+
         # Split comma-separated products
         if products_bought:
             for p in products_bought.split(","):
@@ -110,27 +121,53 @@ async def get_cross_sell_recommendations():
                 if p:
                     distributor_data[dist_code]["purchased"].add(p)
                     if p in product_names:
-                        distributor_data[dist_code]["purchased_names"].add(product_names[p])
-        
+                        distributor_data[dist_code]["purchased_names"].add(
+                            product_names[p]
+                        )
+
         if suggested:
             for p in suggested.split(","):
                 p = p.strip()
                 if p:
                     distributor_data[dist_code]["recommendations"].add(p)
                     if p in product_names:
-                        distributor_data[dist_code]["recommendation_names"].add(product_names[p])
-    
+                        distributor_data[dist_code]["recommendation_names"].add(
+                            product_names[p]
+                        )
+
     # Build response
     recommendations = []
     for dist_code in sorted(distributor_data.keys()):
         data = distributor_data[dist_code]
-        recommendations.append(CrossSellRecommendation(
-            customer=dist_code,
-            customer_name=data["customer_name"],
-            products_purchased=", ".join(sorted(data["purchased"])),
-            product_names_purchased=", ".join(sorted(data["purchased_names"])) if data["purchased_names"] else None,
-            recommendations=", ".join(sorted(data["recommendations"])),
-            recommendation_names=", ".join(sorted(data["recommendation_names"])) if data["recommendation_names"] else None
-        ))
-    
+
+        # Remove already-purchased products from recommendations
+        filtered_recs = data["recommendations"] - data["purchased"]
+        filtered_rec_names = set()
+        for p in filtered_recs:
+            if p in product_names:
+                filtered_rec_names.add(product_names[p])
+
+        # Skip distributor if no recommendations remain after filtering
+        if not filtered_recs:
+            continue
+
+        recommendations.append(
+            CrossSellRecommendation(
+                customer=dist_code,
+                customer_name=data["customer_name"],
+                products_purchased=", ".join(sorted(data["purchased"])),
+                product_names_purchased=(
+                    ", ".join(sorted(data["purchased_names"]))
+                    if data["purchased_names"]
+                    else None
+                ),
+                recommendations=", ".join(sorted(filtered_recs)),
+                recommendation_names=(
+                    ", ".join(sorted(filtered_rec_names))
+                    if filtered_rec_names
+                    else None
+                ),
+            )
+        )
+
     return recommendations

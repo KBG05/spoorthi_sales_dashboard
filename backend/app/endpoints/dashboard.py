@@ -19,6 +19,8 @@ from ..schemas import (
     User,
     CategoryBreakupItem,
     ABCXYZMatrixCell,
+    ABCXYZMatrixResponse,
+    ABCXYZProductItem,
     CategoryHierarchyItem,
 )
 from ..endpoints.auth import get_current_user
@@ -431,16 +433,23 @@ async def export_rolling_abc_xyz():
 
     table = safe_table_name(table_name)
 
-    # Get all available data from the rolling summary table
+    # Get all available data from the rolling summary table with product names
     sql = f"""
         SELECT 
-            article_no,
-            abc_category,
-            xyz_category,
-            total_revenue,
-            total_quantity
-        FROM {table}
-        ORDER BY abc_category, xyz_category, total_revenue DESC
+            r.article_no,
+            COALESCE(
+                (SELECT STRING_AGG(DISTINCT pm.commercial_name, ', ')
+                 FROM priyatextile_product_master pm
+                 WHERE CAST(pm.product_code AS TEXT) = CAST(r.article_no AS TEXT)
+                   AND pm.commercial_name IS NOT NULL),
+                '-'
+            ) AS product_name,
+            r.abc_category,
+            r.xyz_category,
+            r.total_revenue,
+            r.total_quantity
+        FROM {table} r
+        ORDER BY r.abc_category, r.xyz_category, r.total_revenue DESC
     """
 
     rows = query_all(sql)
@@ -491,11 +500,21 @@ async def export_forecast():
 
     table_name = result["table_name"]
 
-    # Use exact same query as forecast.py
+    # Use exact same query as forecast.py with product names
     sql = f"""
-        SELECT "ProductID", "ForecastMonth", "PredictedQuantity" 
-        FROM public."{table_name}" 
-        ORDER BY "ProductID"
+        SELECT 
+            f."ProductID",
+            COALESCE(
+                (SELECT STRING_AGG(DISTINCT pm.commercial_name, ', ')
+                 FROM priyatextile_product_master pm
+                 WHERE CAST(pm.product_code AS TEXT) = CAST(f."ProductID" AS TEXT)
+                   AND pm.commercial_name IS NOT NULL),
+                '-'
+            ) AS "ProductName",
+            f."ForecastMonth",
+            f."PredictedQuantity" 
+        FROM public."{table_name}" f
+        ORDER BY f."ProductID"
     """
 
     rows = query_all(sql)
@@ -545,14 +564,17 @@ async def export_cross_sell():
 
     table_name = result["tablename"]
 
-    # Use exact same query as cross_sell.py
+    # Use exact same query as cross_sell.py with customer names
     data_query = f"""
         SELECT 
-            "Distributor_Code",
-            "Products_Bought_Together",
-            "Suggested_Product"
-        FROM public."{table_name}"
-        ORDER BY "Distributor_Code"
+            cr."Distributor_Code",
+            COALESCE(cm.customer, '-') AS "Customer_Name",
+            cr."Products_Bought_Together",
+            cr."Suggested_Product"
+        FROM public."{table_name}" cr
+        LEFT JOIN priyatextile_customer_master cm 
+            ON CAST(cr."Distributor_Code" AS TEXT) = CAST(cm.customer_code AS TEXT)
+        ORDER BY cr."Distributor_Code"
     """
 
     rows = query_all(data_query)
@@ -643,32 +665,44 @@ async def get_category_breakup(time_id: Optional[int] = None):
     ]
 
 
-@router.get("/abc-xyz-matrix", response_model=List[ABCXYZMatrixCell])
+@router.get("/abc-xyz-matrix", response_model=ABCXYZMatrixResponse)
 async def get_abc_xyz_matrix(time_id: Optional[int] = None):
     """
     Get 3×3 ABC×XYZ matrix with counts and revenue for each combination.
-
-    Args:
-        time_id: Optional TimeID. If not provided, uses latest month's rolling table.
-
-    Returns:
-        [
-            {"abc": "A", "xyz": "X", "count": 50, "revenue": 5000000.0},
-            {"abc": "A", "xyz": "Y", "count": 40, "revenue": 3000000.0},
-            ...
-        ]
+    Returns a wrapper with cells + period_label (FY info).
+    Automatically falls back to the latest available table when the requested
+    month's rolling table doesn't exist (e.g., future months Feb/Mar).
     """
     # Get the appropriate rolling table based on time_id
+    table_name = None
     if time_id is None:
         table_name = get_latest_rolling_table()
     else:
         table_name = get_rolling_table_for_time_id(time_id)
+        # Fallback to latest if future month doesn't have a table yet
+        if not table_name:
+            table_name = get_latest_rolling_table()
 
     if not table_name:
         raise HTTPException(
             status_code=404,
             detail="No rolling ABC/XYZ summary table found for the specified month",
         )
+
+    # Parse period_label from table name (e.g., rolling_abc_xyz_summary_2025_12)
+    parts = table_name.replace("rolling_abc_xyz_summary_", "").split("_")
+    if len(parts) == 2:
+        year, month = int(parts[0]), int(parts[1])
+        # Determine FY: if month >= April, FY is year–(year+1), else (year-1)–year
+        if month >= 4:
+            fy_start = year
+            fy_end = year + 1
+        else:
+            fy_start = year - 1
+            fy_end = year
+        period_label = f"FY {fy_start}-{str(fy_end)[-2:]}"
+    else:
+        period_label = "N/A"
 
     table = safe_table_name(table_name)
 
@@ -686,18 +720,69 @@ async def get_abc_xyz_matrix(time_id: Optional[int] = None):
 
     rows = query_all(sql)
 
-    if not rows:
-        return []
+    cells = (
+        [
+            ABCXYZMatrixCell(
+                abc=row["abc_category"],
+                xyz=row["xyz_category"],
+                count=int(row["count"]),
+                revenue=float(row["revenue"] or 0),
+            )
+            for row in rows
+        ]
+        if rows
+        else []
+    )
 
-    return [
-        ABCXYZMatrixCell(
-            abc=row["abc_category"],
-            xyz=row["xyz_category"],
-            count=int(row["count"]),
-            revenue=float(row["revenue"] or 0),
-        )
-        for row in rows
-    ]
+    return ABCXYZMatrixResponse(cells=cells, period_label=period_label)
+
+
+@router.get("/abc-xyz-products", response_model=List[ABCXYZProductItem])
+async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None):
+    """
+    Get product IDs and names for a specific ABC×XYZ cell.
+    Used for the popup when clicking a matrix cell or bar chart bar.
+    """
+    table_name = None
+    if time_id is None:
+        table_name = get_latest_rolling_table()
+    else:
+        table_name = get_rolling_table_for_time_id(time_id)
+        if not table_name:
+            table_name = get_latest_rolling_table()
+
+    if not table_name:
+        raise HTTPException(status_code=404, detail="No rolling table found")
+
+    table = safe_table_name(table_name)
+
+    sql = f"""
+        SELECT 
+            r.article_no as product_id,
+            pm.commercial_name as product_name
+        FROM {table} r
+        LEFT JOIN (
+            SELECT product_code, MAX(commercial_name) as commercial_name
+            FROM priyatextile_product_master
+            GROUP BY product_code
+        ) pm ON r.article_no = pm.product_code
+        WHERE r.abc_category = %s AND r.xyz_category = %s
+        ORDER BY r.total_revenue DESC
+    """
+
+    rows = query_all(sql, (abc.upper(), xyz.upper()))
+
+    return (
+        [
+            ABCXYZProductItem(
+                product_id=int(row["product_id"]),
+                product_name=row.get("product_name") or "-",
+            )
+            for row in rows
+        ]
+        if rows
+        else []
+    )
 
 
 @router.get("/category-hierarchy", response_model=Dict[str, Any])

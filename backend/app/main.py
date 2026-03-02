@@ -22,7 +22,7 @@ from .endpoints import (
     transition_analysis,
     cba,
     customer_class_comparison,
-    masters
+    masters,
 )
 
 
@@ -35,19 +35,19 @@ async def lifespan(app: FastAPI):
     # Startup: Initialize database connection pool
     database.init_db()
     logging.info("Application startup complete - Database pool initialized")
-    
+
     yield
-    
+
     # Shutdown: Close database connection pool
     database.close_db()
     logging.info("Application shutdown complete - Database pool closed")
 
 
 app = FastAPI(
-    title="Priya Textile Analytics API",
-    description="Backend API for Textile Analytics Dashboard",
+    title="Priyafil Analytics API",
+    description="Backend API for Priyafil Analytics Dashboard",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS middleware for frontend
@@ -83,11 +83,7 @@ app.include_router(customer_class_comparison.router)
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {
-        "message": "Priya Textile Analytics API",
-        "version": "1.0.0",
-        "docs": "/docs"
-    }
+    return {"message": "Priyafil Analytics API", "version": "1.0.0", "docs": "/docs"}
 
 
 @app.get("/health")

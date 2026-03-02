@@ -18,7 +18,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 import { forecastApi } from '../api';
 import type { ForecastResponse } from '../api/types';
 
-import { ABC_COLORS } from '../constants/constants';
+import { ABC_COLORS, formatQuantity } from '../constants/constants';
 
 const Forecast: React.FC = () => {
   const [data, setData] = useState<ForecastResponse | null>(null);
@@ -47,20 +47,20 @@ const Forecast: React.FC = () => {
     {
       field: 'product_id',
       headerName: 'Product ID',
-      width: 140,
+      flex: 1,
       minWidth: 120,
     },
     {
       field: 'product_names',
       headerName: 'Product Names',
-      width: 550,
+      flex: 3,
       minWidth: 200,
       valueFormatter: (value: string[]) => value?.join(', ') ?? '-',
     },
     {
       field: 'category',
       headerName: 'Category',
-      width: 100,
+      flex: 0.7,
       minWidth: 80,
       renderCell: (params) => {
         const value = String(params.value || '').toUpperCase();
@@ -79,7 +79,7 @@ const Forecast: React.FC = () => {
     {
       field: 'unique_customers',
       headerName: 'Unique Customers',
-      width: 140,
+      flex: 1,
       minWidth: 120,
       type: 'number',
       align: 'right',
@@ -89,64 +89,67 @@ const Forecast: React.FC = () => {
     {
       field: 'last_3_months_quantity',
       headerName: 'Avg Last 3M Qty',
-      width: 150,
+      flex: 1,
       minWidth: 130,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
       valueFormatter: (value: number) => 
         value !== undefined && value !== null 
-          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'month_1_quantity',
       headerName: data?.month_1_name ? `${data.month_1_name} Qty` : 'Month 1 Qty',
-      width: 130,
+      flex: 1,
       minWidth: 110,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
       valueFormatter: (value: number) => 
         value !== undefined && value !== null 
-          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'month_2_quantity',
       headerName: data?.month_2_name ? `${data.month_2_name} Qty` : 'Month 2 Qty',
-      width: 130,
+      flex: 1,
       minWidth: 110,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
       valueFormatter: (value: number) => 
         value !== undefined && value !== null 
-          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'month_3_quantity',
       headerName: data?.month_3_name ? `${data.month_3_name} Qty` : 'Month 3 Qty',
-      width: 130,
+      flex: 1,
       minWidth: 110,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
       valueFormatter: (value: number) => 
         value !== undefined && value !== null 
-          ? value.toLocaleString('en-IN', { maximumFractionDigits: 2 })
+          ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'predicted_quantity',
       headerName: 'Predicted Quantity',
-      width: 150,
+      flex: 1.1,
       minWidth: 130,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: (value: number) => value?.toLocaleString(),
+      valueFormatter: (value: number) => 
+        value !== undefined && value !== null 
+          ? formatQuantity(value)
+          : '-',
     },
   ], [data]);
 
@@ -172,6 +175,10 @@ const Forecast: React.FC = () => {
       });
     });
   }, [rows, columnFilters]);
+
+  const totalPredictedQuantity = useMemo(() => {
+    return filteredRows.reduce((sum, row) => sum + (row.predicted_quantity || 0), 0);
+  }, [filteredRows]);
 
   const getUniqueValues = (columnName: string) => {
     const values = rows.map(row => (row as any)[columnName]).filter(Boolean);
@@ -289,6 +296,18 @@ const Forecast: React.FC = () => {
             </FormControl>
           );
         })}
+      </Box>
+
+      {/* Total Predicted Quantity Summary */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1.5 }}>
+        <Paper elevation={1} sx={{ px: 2.5, py: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Total Predicted Quantity:
+          </Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            {formatQuantity(totalPredictedQuantity)}
+          </Typography>
+        </Paper>
       </Box>
       
       <Paper elevation={1} sx={{ width: '100%', height: 'calc(100vh - 280px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>

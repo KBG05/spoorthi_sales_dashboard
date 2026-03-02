@@ -137,7 +137,7 @@ export const AppLayout = () => {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <img src={PriyafilLogo} alt="Priyafil Logo" style={{ height: 40, marginRight: 12 }} />
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Textile Analytics
+                Priyafil Analytics
               </Typography>
             </Box>
             <Box sx={{ flexGrow: 1 }} />

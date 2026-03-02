@@ -14,13 +14,14 @@ export const FINANCIAL_YEARS = [
 // ──────────────────────────────────────────────────────────────
 
 // ABC Category colors
-// A – Red   (high-ticket products, needs attention)
-// B – Green (normal / healthy)
-// C – Orange (low-ticket, lesser concern)
+// Overall – Blue
+// A – Green  (high-ticket products)
+// B – Orange (mid-range)
+// C – Red    (low-ticket)
 export const ABC_COLORS: Record<string, string> = {
-  A: '#e74c3c',     // Red
-  B: '#2ecc71',     // Green
-  C: '#f39c12',     // Orange
+  A: '#2ecc71',     // Green
+  B: '#f39c12',     // Orange
+  C: '#e74c3c',     // Red
   Overall: '#3498db', // Blue
   Unknown: '#95a5a6', // Gray
 };
@@ -35,20 +36,20 @@ export const XYZ_COLORS: Record<string, string> = {
   Z: '#e74c3c', // Red
 };
 
-// Combined ABC-XYZ colors — simplified 3 groups
-// AZ → Red   (high-ticket + erratic = DANGER)
-// CX → Orange (low-ticket + consistent = low risk)
-// Everything else → Green (acceptable)
+// Combined ABC-XYZ colors — derived from ABC base colors
+// A-combos → Green  (A color)
+// B-combos → Orange (B color)
+// C-combos → Red    (C color)
 export const ABC_XYZ_COLORS: Record<string, string> = {
-  AX: '#2ecc71',
-  AY: '#2ecc71',
-  AZ: '#e74c3c',   // 🔴 Danger
-  BX: '#2ecc71',
-  BY: '#2ecc71',
-  BZ: '#2ecc71',
-  CX: '#f39c12',   // 🟠 Low risk
-  CY: '#2ecc71',
-  CZ: '#2ecc71',
+  AX: '#2ecc71',   // Green (A)
+  AY: '#2ecc71',   // Green (A)
+  AZ: '#2ecc71',   // Green (A)
+  BX: '#f39c12',   // Orange (B)
+  BY: '#f39c12',   // Orange (B)
+  BZ: '#f39c12',   // Orange (B)
+  CX: '#e74c3c',   // Red (C)
+  CY: '#e74c3c',   // Red (C)
+  CZ: '#e74c3c',   // Red (C)
 };
 
 // Multi-line chart palette (for multi-product / multi-customer grids)
@@ -99,6 +100,26 @@ export function withAlpha(hex: string, alpha: number): string {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ──────────────────────────────────────────────────────────────
+// Number formatting helpers – SINGLE SOURCE OF TRUTH
+// Revenue → 2 decimals, Quantity → 1 decimal
+// ──────────────────────────────────────────────────────────────
+export function formatRevenue(value: number): string {
+  return value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export function formatQuantity(value: number): string {
+  return value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
+
+export function formatRevenueCr(value: number): string {
+  return `₹${(value / 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr`;
+}
+
+export function formatRevenueFull(value: number): string {
+  return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 // API Base URL

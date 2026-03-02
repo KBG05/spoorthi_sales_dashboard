@@ -20701,3 +20701,81 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2026-03-02 22:30:31,119 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
 2026-03-02 22:30:31,123 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.004s)
 2026-03-02 22:30:31,124 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:30:50,350 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:30:50,350 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.000s)
+2026-03-02 22:30:50,357 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:30:50,363 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.006s)
+2026-03-02 22:30:56,368 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:30:56,376 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:31:01,316 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:01,317 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:31:01,321 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:01,326 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:31:03,876 - INFO - Request: GET /dashboard/kpis from 127.0.0.1
+2026-03-02 22:31:03,889 - INFO - Request: GET /dashboard/category-breakup from 127.0.0.1
+2026-03-02 22:31:03,890 - INFO - Response: GET /dashboard/kpis returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:31:03,899 - INFO - Request: GET /dashboard/abc-xyz-matrix from 127.0.0.1
+2026-03-02 22:31:03,905 - INFO - Request: GET /dashboard/abc-count from 127.0.0.1
+2026-03-02 22:31:03,905 - INFO - Response: GET /dashboard/category-breakup returned 200 to 127.0.0.1 (took 0.016s)
+2026-03-02 22:31:03,907 - INFO - Request: GET /dashboard/abc-revenue from 127.0.0.1
+2026-03-02 22:31:03,908 - INFO - Response: GET /dashboard/abc-xyz-matrix returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:31:03,910 - INFO - Request: GET /dashboard/xyz-revenue from 127.0.0.1
+2026-03-02 22:31:03,911 - INFO - Request: GET /dashboard/xyz-count from 127.0.0.1
+2026-03-02 22:31:03,918 - INFO - Response: GET /dashboard/abc-count returned 200 to 127.0.0.1 (took 0.013s)
+2026-03-02 22:31:03,920 - INFO - Response: GET /dashboard/xyz-revenue returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:31:03,922 - INFO - Response: GET /dashboard/abc-revenue returned 200 to 127.0.0.1 (took 0.015s)
+2026-03-02 22:31:03,943 - INFO - Response: GET /dashboard/xyz-count returned 200 to 127.0.0.1 (took 0.032s)
+2026-03-02 22:31:04,983 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:04,983 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:31:04,990 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:04,998 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:31:07,820 - INFO - Request: OPTIONS /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:07,821 - INFO - Response: OPTIONS /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:31:07,825 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:07,834 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.009s)
+2026-03-02 22:31:15,599 - INFO - Request: GET /dashboard/abc-xyz-products from 127.0.0.1
+2026-03-02 22:31:15,605 - INFO - Response: GET /dashboard/abc-xyz-products returned 200 to 127.0.0.1 (took 0.006s)
+2026-03-02 22:31:29,164 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:31:29,172 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.008s)
+2026-03-02 22:31:29,178 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:31:29,182 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:31:29,259 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2026-03-02 22:31:29,265 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:31:31,933 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2026-03-02 22:31:32,215 - INFO - Request: GET /cba/summary from 127.0.0.1
+2026-03-02 22:31:32,215 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1 (took 0.283s)
+2026-03-02 22:31:32,504 - INFO - Request: GET /cba/segments from 127.0.0.1
+2026-03-02 22:31:32,725 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1 (took 0.509s)
+2026-03-02 22:31:32,725 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1 (took 0.221s)
+2026-03-02 22:31:32,726 - INFO - Request: GET /cba/rfm-analysis from 127.0.0.1
+2026-03-02 22:31:33,041 - INFO - Request: GET /cba/segments from 127.0.0.1
+2026-03-02 22:31:33,041 - INFO - Request: GET /cba/summary from 127.0.0.1
+2026-03-02 22:31:33,041 - INFO - Response: GET /cba/rfm-analysis returned 200 to 127.0.0.1 (took 0.316s)
+2026-03-02 22:31:33,574 - INFO - Response: GET /cba/segments returned 200 to 127.0.0.1 (took 0.533s)
+2026-03-02 22:31:33,574 - INFO - Response: GET /cba/summary returned 200 to 127.0.0.1 (took 0.533s)
+2026-03-02 22:35:25,053 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:35:25,063 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:35:25,072 - INFO - Request: GET /product-behaviour/available-years from 127.0.0.1
+2026-03-02 22:35:25,077 - INFO - Response: GET /product-behaviour/available-years returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:35:25,171 - INFO - Request: GET /product-behaviour/products from 127.0.0.1
+2026-03-02 22:35:25,175 - INFO - Response: GET /product-behaviour/products returned 200 to 127.0.0.1 (took 0.003s)
+2026-03-02 22:35:27,609 - INFO - Request: OPTIONS /product-behaviour/trend from 127.0.0.1
+2026-03-02 22:35:27,610 - INFO - Response: OPTIONS /product-behaviour/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:35:27,614 - INFO - Request: GET /product-behaviour/trend from 127.0.0.1
+2026-03-02 22:35:27,648 - INFO - Response: GET /product-behaviour/trend returned 200 to 127.0.0.1 (took 0.034s)
+2026-03-02 22:35:31,018 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:35:31,025 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.007s)
+2026-03-02 22:35:31,028 - INFO - Request: GET /customer-behaviour/available-years from 127.0.0.1
+2026-03-02 22:35:31,032 - INFO - Response: GET /customer-behaviour/available-years returned 200 to 127.0.0.1 (took 0.004s)
+2026-03-02 22:35:31,114 - INFO - Request: GET /customer-behaviour/customers from 127.0.0.1
+2026-03-02 22:35:31,119 - INFO - Response: GET /customer-behaviour/customers returned 200 to 127.0.0.1 (took 0.005s)
+2026-03-02 22:35:32,758 - INFO - Request: OPTIONS /customer-behaviour/products from 127.0.0.1
+2026-03-02 22:35:32,759 - INFO - Response: OPTIONS /customer-behaviour/products returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:35:32,763 - INFO - Request: GET /customer-behaviour/products from 127.0.0.1
+2026-03-02 22:35:32,773 - INFO - Response: GET /customer-behaviour/products returned 200 to 127.0.0.1 (took 0.010s)
+2026-03-02 22:35:33,925 - INFO - Request: OPTIONS /customer-behaviour/trend from 127.0.0.1
+2026-03-02 22:35:33,925 - INFO - Response: OPTIONS /customer-behaviour/trend returned 200 to 127.0.0.1 (took 0.001s)
+2026-03-02 22:35:33,932 - INFO - Request: GET /customer-behaviour/trend from 127.0.0.1
+2026-03-02 22:35:33,946 - INFO - Response: GET /customer-behaviour/trend returned 200 to 127.0.0.1 (took 0.014s)
+2026-03-02 22:36:12,908 - INFO - ✅ Database pool closed
+2026-03-02 22:36:12,908 - INFO - Application shutdown complete - Database pool closed

@@ -35,7 +35,7 @@ const CustomerClassComparison = () => {
   const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [selectedClass, setSelectedClass] = useState<string>('A');
   const [selectedYears, setSelectedYears] = useState<string[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<number | ''>('');
+  const [selectedCustomer, setSelectedCustomer] = useState<string | ''>('');
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [showLabels, setShowLabels] = useState(true);
   
@@ -145,7 +145,7 @@ const CustomerClassComparison = () => {
         </FormControl>
         <FormControl size="small" sx={{ minWidth: 200 }} disabled={loading || customers.length === 0}>
           <InputLabel>Customer</InputLabel>
-          <Select value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value as number | '')} label="Customer" size="small">
+          <Select value={selectedCustomer} onChange={(e) => setSelectedCustomer(e.target.value as string | '')} label="Customer" size="small">
             <MenuItem value=""><em>Select a customer</em></MenuItem>
             {customers.map((customer) => (<MenuItem key={customer.customer_id} value={customer.customer_id}>Customer {customer.customer_id}</MenuItem>))}
           </Select>

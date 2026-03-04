@@ -10,7 +10,7 @@ Provides product trend data grouped by ABC and XYZ categories.
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
-from ..database import query_all
+from ..database import query_all, parse_fy
 from ..schemas import ABCTrendDataPoint, ABCTrendResponse, User
 from ..endpoints.auth import get_current_user
 
@@ -62,27 +62,11 @@ async def get_abc_trend(
             "financial_year": "FY24-25"
         }
     """
-    # Parse FY to get TimeID range
-    # FY24-25 means Apr 2024 to Mar 2025
-    # Assuming TimeID 1 = Apr 2021, we need to calculate offset
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
-        raise HTTPException(status_code=400, detail="Invalid financial year format")
-    
-    start_year = int(f"20{fy_parts[0]}")
-    end_year = int(f"20{fy_parts[1]}")
-    
-    # Calculate TimeID: months since BASE_DATE (Apr 2021 = TimeID 1)
-    start_date = datetime(start_year, 4, 1)  # April of start year
-    end_date = datetime(end_year, 3, 31)  # March of end year
-    
-    start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
-                     (start_date.month - BASE_DATE.month) + 1)
-    end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
-                   (end_date.month - BASE_DATE.month) + 1)
-    
-    # Build table name
-    table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
+    # Build year string
+    try:
+        fy_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid financial year format. Expected 'FY24-25' or '2024-25'")
     
     # Parse categories
     abc_list = [cat.strip().upper() for cat in abc_categories.split(",")]
@@ -92,35 +76,31 @@ async def get_abc_trend(
     xyz_in = ",".join([f"'{cat}'" for cat in xyz_list])
     
     # Build query - two queries: one for filtered data, one for overall
-    # Filtered query for ABC/XYZ combinations
     sql_filtered = f'''
         SELECT
-            t1."TimeID",
-            t2."ABC_Category",
-            t2."XYZ_Category",
-            SUM(t1."Quantity") AS "TotalQuantity",
-            SUM(t1."Revenue") AS "TotalValue"
-        FROM public."Aggregated Data" AS t1
-        INNER JOIN public."product_ABC_XYZ_{table_suffix}" AS t2 
-            ON t1."ProductID" = t2."ProductID"
-        WHERE
-            t1."TimeID" BETWEEN {start_time_id} AND {end_time_id}
-            AND t2."ABC_Category" IN ({abc_in})
-            AND t2."XYZ_Category" IN ({xyz_in})
-        GROUP BY t1."TimeID", t2."ABC_Category", t2."XYZ_Category"
-        ORDER BY t1."TimeID"
+            year_month as "TimeID",
+            abc as "ABC_Category",
+            xyz as "XYZ_Category",
+            SUM(inv_quantity) AS "TotalQuantity",
+            SUM(ass_value) AS "TotalValue"
+        FROM public."spoorthi_abc_xyz_datamart"
+        WHERE fin_year = {fy_year}
+            AND abc IN ({abc_in})
+            AND xyz IN ({xyz_in})
+        GROUP BY year_month, abc, xyz
+        ORDER BY year_month
     '''
     
     # Overall query - no filters on ABC/XYZ
     sql_overall = f'''
         SELECT
-            t1."TimeID",
-            SUM(t1."Quantity") AS "TotalQuantity",
-            SUM(t1."Revenue") AS "TotalValue"
-        FROM public."Aggregated Data" AS t1
-        WHERE t1."TimeID" BETWEEN {start_time_id} AND {end_time_id}
-        GROUP BY t1."TimeID"
-        ORDER BY t1."TimeID"
+            year_month as "TimeID",
+            SUM(inv_quantity) AS "TotalQuantity",
+            SUM(ass_value) AS "TotalValue"
+        FROM public."spoorthi_abc_xyz_datamart"
+        WHERE fin_year = {fy_year}
+        GROUP BY year_month
+        ORDER BY year_month
     '''
     
     rows = query_all(sql_filtered)  # type: ignore
@@ -172,13 +152,8 @@ async def get_abc_trend(
     all_time_ids = set(list(grouped.keys()) + list(overall.keys()))
     
     for time_id in sorted(all_time_ids):
-        # Calculate proper month/year from TimeID
-        # TimeID 1 = Jan 2021, so we add (time_id - 1) months to BASE_DATE
-        months_offset = time_id - 1
-        year = BASE_DATE.year + (BASE_DATE.month + months_offset - 1) // 12
-        month = (BASE_DATE.month + months_offset - 1) % 12 + 1
-        month_date = datetime(year, month, 1)
-        month_str = month_date.strftime("%Y-%m-%d")
+        # time_id here is "year_month" like "2024-04"
+        month_str = f"{time_id}-01"
         
         # Add individual ABC categories (only if they have data)
         if time_id in grouped:

@@ -10,7 +10,7 @@ Provides customer trend analysis by ABC category over time.
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
-from ..database import query_all
+from ..database import query_all, parse_fy
 from ..schemas import CustomerTrendDataPoint, User
 from ..endpoints.auth import get_current_user
 
@@ -22,17 +22,13 @@ BASE_DATE = datetime(2021, 1, 1)
 @router.get("/available-years")
 async def get_available_years():
     """
-    Get list of available financial years based on customer_ABC_FY* tables.
+    Get list of available financial years based on spoorthi_abc_xyz_datamart.
     """
-    import re
-    
     table_query = """
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name LIKE 'customer_ABC_FY%'
-        AND table_name ~ 'customer_ABC_FY[0-9]+_[0-9]+'
-        ORDER BY table_name DESC
+        SELECT DISTINCT fin_year_label 
+        FROM public.spoorthi_abc_xyz_datamart 
+        WHERE fin_year_label IS NOT NULL
+        ORDER BY fin_year_label DESC
     """
     
     rows = query_all(table_query)  # type: ignore
@@ -40,15 +36,9 @@ async def get_available_years():
     if not rows:
         return {"financial_years": []}
     
-    fy_years = []
-    for row in rows:
-        table_name = row["table_name"]
-        match = re.search(r'FY(\d{2})_(\d{2})$', table_name)
-        if match:
-            fy_key = f"FY{match.group(1)}-{match.group(2)}"
-            fy_years.append(fy_key)
+    fy_years = [row["fin_year_label"] for row in rows if row["fin_year_label"]]
     
-    return {"financial_years": sorted(set(fy_years), reverse=True)}
+    return {"financial_years": fy_years}
 
 # Month labels for financial year (Apr-Mar)
 MONTH_LABELS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", 
@@ -88,37 +78,27 @@ def get_customer_trend(
         ]
     """
     # Parse FY
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid financial year format")
     
-    table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
-    
-    start_year = int(f"20{fy_parts[0]}")
-    end_year = int(f"20{fy_parts[1]}")
-    
-    start_date = datetime(start_year, 4, 1)
-    end_date = datetime(end_year, 3, 31)
-    
-    start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
-                     (start_date.month - BASE_DATE.month) + 1)
-    end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
-                   (end_date.month - BASE_DATE.month) + 1)
+    start_date = f"{start_year}-04-01"
+    end_date = f"{end_year}-03-31"
     
     # Query data
     sql = f'''
         SELECT 
-            a."TimeID",
-            c."Category" AS "Category",
-            SUM(a."Revenue") AS "Revenue",
-            SUM(a."Quantity") AS "Quantity"
-        FROM public."Aggregated Data" a
-        INNER JOIN public."customer_ABC_{table_suffix}" c 
-            ON a."CustomerID" = c."CustomerID"
-        WHERE a."TimeID" >= {start_time_id}
-            AND a."TimeID" <= {end_time_id}
-        GROUP BY a."TimeID", c."Category"
-        ORDER BY a."TimeID", c."Category"
+            TO_CHAR(a.invoice_date, 'YYYY-MM') AS "TimeID",
+            c.abc_category AS "Category",
+            SUM(a.ass_value) AS "Revenue",
+            SUM(a.inv_quantity) AS "Quantity"
+        FROM public."spoorthi_dataset_without_spares" a
+        INNER JOIN public."customer_abc_xyz_fy_{start_year}_{end_year}" c 
+            ON a.customer_name = c.customer_name
+        WHERE a.invoice_date BETWEEN '{start_date}' AND '{end_date}'
+        GROUP BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
+        ORDER BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
     '''
     
     rows = query_all(sql)  # type: ignore
@@ -139,7 +119,7 @@ def get_customer_trend(
     overall_data = defaultdict(float)
     
     for row in rows:
-        time_id = row["TimeID"]
+        time_id = row["TimeID"] # 'YYYY-MM'
         category = row["Category"] or "Unknown"
         value = float(row[metric_col] or 0)
         
@@ -156,9 +136,15 @@ def get_customer_trend(
     ))
     
     for time_id in all_time_ids:
-        # Calculate month number within FY (0-11)
-        month_num = (time_id - start_time_id) % 12
-        month_label = MONTH_LABELS[month_num]
+        # Calculate month number within FY (0-11) based on month string
+        y, m = map(int, time_id.split("-"))
+        
+        # calculate diff in months from start_date
+        month_num = (y - start_year) * 12 + (m - 4)
+        if 0 <= month_num < 12:
+            month_label = MONTH_LABELS[month_num]
+        else:
+            month_label = f"{y}-{m:02d}" # fallback
         
         # Add Overall if selected
         if "Overall" in selected_categories:

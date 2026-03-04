@@ -47,9 +47,9 @@ class ABCXYZMatrixResponse(BaseModel):
     period_label: str  # e.g., "FY 2025-26" or "Apr 2025 – Mar 2026"
 
 
-class ABCXYZProductItem(BaseModel):
-    product_id: int
-    product_name: Optional[str] = None
+class ABCXYZArticleItem(BaseModel):
+    article_no: str
+    article_name: Optional[str] = None
 
 
 class CategoryHierarchyItem(BaseModel):
@@ -89,8 +89,8 @@ class CrossSellRecommendation(BaseModel):
 
     customer: str  # Distributor_Code
     customer_name: Optional[str] = None
-    products_purchased: str  # Comma-separated list
-    product_names_purchased: Optional[str] = None  # Comma-separated names
+    articles_purchased: str  # Comma-separated list
+    article_names_purchased: Optional[str] = None  # Comma-separated names
     recommendations: str  # Comma-separated list
     recommendation_names: Optional[str] = None  # Comma-separated names
 
@@ -101,16 +101,16 @@ class CrossSellRecommendation(BaseModel):
 class CustomerListItem(BaseModel):
     """Customer ID for dropdown"""
 
-    customer_id: int
+    customer_id: str
     customer_name: Optional[str] = None
     abc_category: Optional[str] = None  # For filtering customers by class
 
 
-class ProductListItem(BaseModel):
-    """Product ID for dropdown"""
+class ArticleListItem(BaseModel):
+    """Article ID for dropdown"""
 
-    product_id: int
-    product_name: Optional[str] = None
+    article_no: str
+    article_name: Optional[str] = None
 
 
 class CustomerBehaviourDataPoint(BaseModel):
@@ -118,8 +118,8 @@ class CustomerBehaviourDataPoint(BaseModel):
 
     month: str  # Format: "YYYY-MM-DD"
     value: float
-    type: str  # e.g., "Selected Customers Overall" or "Product 123"
-    product_id: Optional[int] = None
+    type: str  # e.g., "Selected Customers Overall" or "Article 123"
+    article_no: Optional[str] = None
 
 
 # -----------------------
@@ -134,16 +134,16 @@ class CustomerTrendDataPoint(BaseModel):
 
 
 # -----------------------
-# product_behaviour_server.R
+# article_behaviour_server.R
 # -----------------------
-class ProductBehaviourDataPoint(BaseModel):
-    """Single data point for product behaviour (dual axis)"""
+class ArticleBehaviourDataPoint(BaseModel):
+    """Single data point for article behaviour (dual axis)"""
 
     month: str  # Format: "YYYY-MM-DD"
     value: float
     scaled_value: float  # For dual axis plotting
-    type: str  # e.g., "Class A Total" or "Product 456"
-    product_id: Optional[int] = None
+    type: str  # e.g., "Class A Total" or "Article 456"
+    article_no: Optional[str] = None
 
 
 # -----------------------
@@ -152,9 +152,9 @@ class ProductBehaviourDataPoint(BaseModel):
 class TopPerformerItem(BaseModel):
     """Top performer (customer or product)"""
 
-    id: int  # CustomerID or ProductID
+    id: str  # customer_name or article_no
     revenue: float  # Total revenue
-    name: Optional[str] = None  # Customer or Product name
+    name: Optional[str] = None  # Customer or Article name
 
 
 class TopPerformersResponse(BaseModel):
@@ -162,7 +162,11 @@ class TopPerformersResponse(BaseModel):
 
     top_fy: List[TopPerformerItem]  # Top 10 for entire FY
     top_latest: List[TopPerformerItem]  # Top 10 for latest month
-    entity_type: str  # "Customers" or "Products"
+    entity_type: str  # "Customers" or "Articles"
+
+
+# Backward-compatible alias
+ProductBehaviourDataPoint = ArticleBehaviourDataPoint
 
 
 # -----------------------
@@ -183,7 +187,7 @@ class TicketSizeBand(BaseModel):
 class TransitionRow(BaseModel):
     """Single row of transition analysis"""
 
-    id: int  # ProductID or CustomerID
+    id: str  # article_no or CustomerName
     categories: Dict[
         str, str
     ]  # e.g., {"Category_Jan_2025": "A", "Category_Feb_2025": "B", ...}
@@ -193,7 +197,7 @@ class TransitionAnalysisResponse(BaseModel):
     """Response for transition analysis"""
 
     data: List[Dict[str, Any]]  # Flexible structure for different columns
-    analysis_type: str  # "Products" or "Customers"
+    analysis_type: str  # "Articles" or "Customers"
     column_headers: List[str]  # Dynamic column names
 
 
@@ -203,16 +207,17 @@ class TransitionAnalysisResponse(BaseModel):
 class ForecastRow(BaseModel):
     """Single forecast row"""
 
-    product_id: int
-    product_names: Optional[List[str]] = None  # All product names for this product code
-    category: Optional[str] = None  # ABC-XYZ combined category
-    forecast_month: str
+    article_no: str
+    prediction_month: str  # "YYYY-MM-DD"
+    granularity: str  # "monthly", "bimonthly", "quarterly"
     predicted_quantity: float
-    unique_customers: Optional[int] = None
-    last_3_months_quantity: Optional[float] = None  # Total quantity for last 3 months
-    month_1_quantity: Optional[float] = None  # Most recent month quantity
-    month_2_quantity: Optional[float] = None  # 2nd most recent month quantity
-    month_3_quantity: Optional[float] = None  # 3rd most recent month quantity
+    category: str = ""
+    abc_xyz: str = ""
+    unique_customers: int = 0
+    last_3_months_quantity: float = 0.0
+    month_1_quantity: float = 0.0
+    month_2_quantity: float = 0.0
+    month_3_quantity: float = 0.0
 
 
 class ForecastResponse(BaseModel):
@@ -221,9 +226,10 @@ class ForecastResponse(BaseModel):
     table_name: str
     display_month: str
     data: List[ForecastRow]
-    month_1_name: Optional[str] = None  # Most recent month name
-    month_2_name: Optional[str] = None  # 2nd most recent month name
-    month_3_name: Optional[str] = None  # 3rd most recent month name
+    available_granularities: List[str] = []
+    month_1_name: str = "Month 1"
+    month_2_name: str = "Month 2"
+    month_3_name: str = "Month 3"
 
 
 # -----------------------
@@ -233,7 +239,7 @@ class ForecastResponse(BaseModel):
 class RFMMetrics(BaseModel):
     """RFM metrics for a single customer"""
 
-    customer_id: int
+    customer_id: str
     recency: int
     frequency: int
     monetary: float
@@ -267,6 +273,23 @@ class SegmentData(BaseModel):
 # -----------------------
 # Customer Class Comparison
 # -----------------------
+# -----------------------
+# Customer Product List
+# -----------------------
+class CustomerProductRow(BaseModel):
+    """Single row of customer-product mapping"""
+    customer_name: str
+    article_no: str
+    last_purchase_date: str  # "YYYY-MM-DD"
+
+
+class CustomerProductResponse(BaseModel):
+    """Response for customer product list"""
+    data: List[CustomerProductRow]
+    total: int
+    calculation_date: str
+
+
 class ClassComparisonDataPoint(BaseModel):
     """Single data point for class vs customer comparison"""
 

@@ -19,8 +19,8 @@ import {
   ListItemIcon,
 } from '@mui/material';
 import { Brightness4, Brightness7, AccountCircle, Logout, Lock } from '@mui/icons-material';
-import PriyafilLogo from '../../public/Priyafil-Logo-PNG-Final.png';
-import Logo1 from '../../public/logo1.png';
+import Logo1 from '../../public/Spoorthi-Logo.png';
+import Logo2 from '../../public/logo1.png';
 import Sidebar from '../components/Sidebar';
 import { useThemeMode } from '../theme/ThemeProvider';
 import { useAuth } from '../contexts/AuthContext';
@@ -135,13 +135,13 @@ export const AppLayout = () => {
         >
           <Toolbar sx={{ minHeight: 64, px: { xs: 2, sm: 3 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <img src={PriyafilLogo} alt="Priyafil Logo" style={{ height: 40, marginRight: 12 }} />
+              <img src={Logo1} alt="Spoorthi Logo" style={{ height: 40, marginRight: 12 }} />
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Priyafil Analytics
+                Spoorthi Analytics
               </Typography>
             </Box>
             <Box sx={{ flexGrow: 1 }} />
-            <img src={Logo1} alt="Logo1" style={{ height: 50, marginRight: 16 }} />
+            <img src={Logo2} alt="Spoorthi Logo" style={{ height: 40, marginRight: 12 }} />
             <IconButton onClick={toggleTheme} color="inherit" sx={{ mr: 1 }}>
               {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
             </IconButton>
@@ -266,7 +266,7 @@ export const AppLayout = () => {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © Numentrix
+            © Copyright Lumin AI Systems
           </Typography>
         </Box>
       </Box>

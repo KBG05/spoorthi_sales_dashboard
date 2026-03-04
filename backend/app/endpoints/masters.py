@@ -22,10 +22,10 @@ async def get_products() -> Dict[str, str]:
         Dict mapping product_code (as string) to commercial_name
     """
     query = """
-        SELECT product_code, commercial_name 
-        FROM priyatextile_product_master
-        WHERE commercial_name IS NOT NULL
-        ORDER BY product_code
+        SELECT DISTINCT article_no AS product_code, article_no AS commercial_name 
+        FROM spoorthi_dataset_without_spares
+        WHERE article_no IS NOT NULL
+        ORDER BY article_no
     """
     
     try:
@@ -53,10 +53,10 @@ async def get_customers() -> Dict[str, str]:
         Dict mapping customer_code (as string) to customer
     """
     query = """
-        SELECT customer_code, customer 
-        FROM priyatextile_customer_master
-        WHERE customer IS NOT NULL
-        ORDER BY customer_code
+        SELECT DISTINCT customer_name AS customer_code, customer_name AS customer 
+        FROM spoorthi_dataset_without_spares
+        WHERE customer_name IS NOT NULL
+        ORDER BY customer_name
     """
     
     try:

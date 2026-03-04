@@ -9,11 +9,22 @@ Provides top performers (customers and products) analysis.
 
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Literal
-from ..database import query_all, query_one, get_latest_time_id
+from ..database import query_all, query_one, parse_fy
 from ..schemas import TopPerformersResponse, TopPerformerItem, User
 from ..endpoints.auth import get_current_user
 
 router = APIRouter(prefix="/top-performance", tags=["Top Performance"], dependencies=[Depends(get_current_user)])
+
+
+def _get_latest_month_start():
+    """Get the first day of the latest month in raw data."""
+    row = query_one(
+        "SELECT DATE_TRUNC('month', MAX(invoice_date)) AS latest "
+        "FROM spoorthi_dataset_without_spares"
+    )
+    if not row or not row["latest"]:
+        return None
+    return row["latest"]
 
 
 @router.get("/top-performers", response_model=TopPerformersResponse)
@@ -23,133 +34,88 @@ async def get_top_performers(
 ):
     """
     Get top 10 performers (customers or products) for FY and latest month.
-    
-    Matches: top_performance_server.R -> top_cust_fy, top_cust_latest, top_prod_fy, top_prod_latest
-    
-    SQL Queries:
-        For Customers FY:
-            SELECT "CustomerID", "Revenue" 
-            FROM public."customer_ABC_{table_suffix}" 
-            ORDER BY "Revenue" DESC LIMIT 10
-        
-        For Customers Latest:
-            SELECT "CustomerID", SUM("Revenue") AS "TotalRevenue" 
-            FROM public."Aggregated Data" 
-            WHERE "TimeID" = {latest_id} 
-            GROUP BY "CustomerID" 
-            ORDER BY "TotalRevenue" DESC LIMIT 10
-        
-        For Products FY:
-            SELECT "ProductID", "Revenue" 
-            FROM public."product_ABC_XYZ_{table_suffix}" 
-            ORDER BY "Revenue" DESC LIMIT 10
-        
-        For Products Latest:
-            SELECT "ProductID", SUM("Revenue") AS "TotalRevenue" 
-            FROM public."Aggregated Data" 
-            WHERE "TimeID" = {latest_id} 
-            GROUP BY "ProductID" 
-            ORDER BY "TotalRevenue" DESC LIMIT 10
-    
-    Returns:
-        {
-            "top_fy": [{"id": 101, "revenue": 1234567.89}, ...],
-            "top_latest": [{"id": 102, "revenue": 98765.43}, ...],
-            "entity_type": "Customers"
-        }
+    Matches: top_performance_server.R
     """
-    # Parse FY to get table suffix
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid financial year format")
-    
-    # Get latest TimeID
-    latest_time_id = get_latest_time_id()
-    if not latest_time_id:
+
+    latest_month_start = _get_latest_month_start()
+    if not latest_month_start:
         raise HTTPException(status_code=404, detail="No data found")
-    
+
+    # Helper to check if a table exists
+    def _table_exists(table_name: str) -> bool:
+        row = query_one(
+            "SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname='public' AND tablename=%s",
+            (table_name,)
+        )
+        return row is not None
+
+    # FY date range for fallback raw-data queries
+    fy_start_date = f"{start_year}-04-01"
+    fy_end_date = f"{end_year}-03-31"
+
     if entity_type == "Customers":
-        # Customers FY
-        table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
-        fy_sql = f'''
-            SELECT c."CustomerID", c."Revenue", cm.customer
-            FROM public."customer_ABC_{table_suffix}" c
-            LEFT JOIN priyatextile_customer_master cm ON CAST(c."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
-            ORDER BY c."Revenue" DESC LIMIT 10
-        '''
-        
-        # Customers Latest
-        latest_sql = f'''
-            SELECT ad."CustomerID", SUM(ad."Revenue") AS "TotalRevenue", cm.customer
-            FROM public."Aggregated Data" ad
-            LEFT JOIN priyatextile_customer_master cm ON CAST(ad."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
-            WHERE ad."TimeID" = {latest_time_id} 
-            GROUP BY ad."CustomerID", cm.customer
-            ORDER BY "TotalRevenue" DESC LIMIT 10
-        '''
-        
-        fy_rows = query_all(fy_sql)  # type: ignore
-        latest_rows = query_all(latest_sql)  # type: ignore
-        
+        fy_table = f"customer_abc_xyz_fy_{start_year}_{end_year}"
+        if _table_exists(fy_table):
+            fy_sql = f'''SELECT customer_name, total_revenue
+                FROM public."{fy_table}" ORDER BY total_revenue DESC LIMIT 10'''
+            fy_rows = query_all(fy_sql)
+        else:
+            fy_sql = f'''SELECT customer_name, SUM(ass_value) AS total_revenue
+                FROM public."spoorthi_dataset_without_spares"
+                WHERE invoice_date >= '{fy_start_date}' AND invoice_date <= '{fy_end_date}'
+                GROUP BY customer_name ORDER BY total_revenue DESC LIMIT 10'''
+            fy_rows = query_all(fy_sql)
+
+        latest_sql = f'''SELECT customer_name, SUM(ass_value) AS total_revenue
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date >= '{latest_month_start}'
+            GROUP BY customer_name ORDER BY total_revenue DESC LIMIT 10'''
+        latest_rows = query_all(latest_sql)
+
         top_fy = [
-            TopPerformerItem(
-                id=int(row["CustomerID"]), 
-                revenue=float(row["Revenue"] or 0),
-                name=row.get("customer")
-            )
-            for row in fy_rows
+            TopPerformerItem(id=str(r["customer_name"]), revenue=float(r["total_revenue"] or 0), name=r["customer_name"])
+            for r in fy_rows
         ]
-        
         top_latest = [
-            TopPerformerItem(
-                id=int(row["CustomerID"]), 
-                revenue=float(row["TotalRevenue"] or 0),
-                name=row.get("customer")
-            )
-            for row in latest_rows
+            TopPerformerItem(id=str(r["customer_name"]), revenue=float(r["total_revenue"] or 0), name=r["customer_name"])
+            for r in latest_rows
         ]
-        
+
     else:  # Products
-        # Products FY
-        table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
-        fy_sql = f'''
-            SELECT p."ProductID", p."Revenue", pm.commercial_name
-            FROM public."product_ABC_XYZ_{table_suffix}" p
-            LEFT JOIN priyatextile_product_master pm ON p."ProductID" = pm.product_code
-            ORDER BY p."Revenue" DESC LIMIT 10
-        '''
-        
-        # Products Latest
-        latest_sql = f'''
-            SELECT ad."ProductID", SUM(ad."Revenue") AS "TotalRevenue", pm.commercial_name
-            FROM public."Aggregated Data" ad
-            LEFT JOIN priyatextile_product_master pm ON ad."ProductID" = pm.product_code
-            WHERE ad."TimeID" = {latest_time_id} 
-            GROUP BY ad."ProductID", pm.commercial_name
-            ORDER BY "TotalRevenue" DESC LIMIT 10
-        '''
-        
-        fy_rows = query_all(fy_sql)  # type: ignore
-        latest_rows = query_all(latest_sql)  # type: ignore
-        
-        top_fy = [
-            TopPerformerItem(
-                id=int(row["ProductID"]), 
-                revenue=float(row["Revenue"] or 0),
-                name=row.get("commercial_name")
-            )
-            for row in fy_rows
-        ]
-        
+        fy_table = f"abc_categorization_spoorthi_{start_year}_{end_year}"
+        if _table_exists(fy_table):
+            fy_sql = f'''SELECT article_no, ass__value
+                FROM public."{fy_table}" ORDER BY ass__value DESC LIMIT 10'''
+            fy_rows = query_all(fy_sql)
+            top_fy = [
+                TopPerformerItem(id=str(r["article_no"]), revenue=float(r["ass__value"] or 0), name=str(r["article_no"]))
+                for r in fy_rows
+            ]
+        else:
+            fy_sql = f'''SELECT article_no, SUM(ass_value) AS total_revenue
+                FROM public."spoorthi_dataset_without_spares"
+                WHERE invoice_date >= '{fy_start_date}' AND invoice_date <= '{fy_end_date}'
+                GROUP BY article_no ORDER BY total_revenue DESC LIMIT 10'''
+            fy_rows = query_all(fy_sql)
+            top_fy = [
+                TopPerformerItem(id=str(r["article_no"]), revenue=float(r["total_revenue"] or 0), name=str(r["article_no"]))
+                for r in fy_rows
+            ]
+
+        latest_sql = f'''SELECT article_no, SUM(ass_value) AS total_revenue
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date >= '{latest_month_start}'
+            GROUP BY article_no ORDER BY total_revenue DESC LIMIT 10'''
+        latest_rows = query_all(latest_sql)
         top_latest = [
-            TopPerformerItem(
-                id=int(row["ProductID"]), 
-                revenue=float(row["TotalRevenue"] or 0),
-                name=row.get("commercial_name")
-            )
-            for row in latest_rows
+            TopPerformerItem(id=str(r["article_no"]), revenue=float(r["total_revenue"] or 0), name=str(r["article_no"]))
+            for r in latest_rows
         ]
-    
+
     return TopPerformersResponse(
         top_fy=top_fy,
         top_latest=top_latest,

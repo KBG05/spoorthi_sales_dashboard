@@ -50,7 +50,7 @@ async def get_cross_sell_recommendations():
         SELECT tablename
         FROM pg_catalog.pg_tables
         WHERE schemaname = 'public'
-          AND tablename ~ '^cross_sell_recommendations_[0-9]{4}_[0-9]{2}$'
+          AND tablename ~ '^cross_sell_[0-9]{4}_[0-9]{2}$'
         ORDER BY tablename DESC
         LIMIT 1
     """
@@ -67,13 +67,13 @@ async def get_cross_sell_recommendations():
     # Fetch all recommendations
     data_query = f"""
         SELECT 
-            cr."Distributor_Code",
-            cm.customer,
-            cr."Products_Bought_Together",
-            cr."Suggested_Product"
+            DISTINCT cr."Customer" AS "Distributor_Code",
+            ad.customer_name AS customer,
+            cr."Trigger_Items_Antecedents" AS "Products_Bought_Together",
+            cr."Recommended_Items_Consequents" AS "Suggested_Product"
         FROM public."{table_name}" cr
-        LEFT JOIN priyatextile_customer_master cm ON CAST(cr."Distributor_Code" AS TEXT) = CAST(cm.customer_code AS TEXT)
-        ORDER BY cr."Distributor_Code"
+        LEFT JOIN public."spoorthi_dataset_without_spares" ad ON CAST(cr."Customer" AS TEXT) = CAST(ad.customer_name AS TEXT)
+        ORDER BY cr."Customer"
     """
 
     rows = query_all(data_query)  # type: ignore
@@ -83,7 +83,7 @@ async def get_cross_sell_recommendations():
 
     # Fetch product master for name lookups
     product_master_query = (
-        "SELECT product_code, commercial_name FROM priyatextile_product_master"
+        "SELECT DISTINCT article_no AS product_code, article_no AS commercial_name FROM spoorthi_dataset_without_spares"
     )
     product_rows = query_all(product_master_query)  # type: ignore
     product_names = {
@@ -155,8 +155,8 @@ async def get_cross_sell_recommendations():
             CrossSellRecommendation(
                 customer=dist_code,
                 customer_name=data["customer_name"],
-                products_purchased=", ".join(sorted(data["purchased"])),
-                product_names_purchased=(
+                articles_purchased=", ".join(sorted(data["purchased"])),
+                article_names_purchased=(
                     ", ".join(sorted(data["purchased_names"]))
                     if data["purchased_names"]
                     else None

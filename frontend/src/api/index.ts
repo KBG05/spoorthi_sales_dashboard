@@ -127,7 +127,7 @@ export const customerBehaviourApi = {
     return response.data;
   },
   getProducts: async (financialYear: string, customerIds: string) => {
-    const response = await apiClient.get<ProductListItem[]>('/customer-behaviour/products', {
+    const response = await apiClient.get<ProductListItem[]>('/customer-behaviour/articles', {
       params: {
         financial_year: financialYear,
         customer_ids: customerIds,
@@ -145,7 +145,7 @@ export const customerBehaviourApi = {
       params: {
         financial_year: financialYear,
         customer_ids: customerIds,
-        product_ids: productIds,
+        article_ids: productIds,
         metric: metric,
       },
     });
@@ -153,13 +153,48 @@ export const customerBehaviourApi = {
   },
 };
 
-// Product Behaviour API
+// Customer Comparison API
+export const customerComparisonApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>('/customer-comparison/available-years');
+  },
+  getArticles: async (financialYear: string, abcClasses: string) => {
+    const response = await apiClient.get<ProductListItem[]>('/customer-comparison/articles', {
+      params: { financial_year: financialYear, abc_classes: abcClasses },
+    });
+    return response.data;
+  },
+  getCustomers: async (financialYear: string, articleNo: string) => {
+    const response = await apiClient.get<CustomerListItem[]>('/customer-comparison/customers', {
+      params: { financial_year: financialYear, article_no: articleNo },
+    });
+    return response.data;
+  },
+  getTrend: async (
+    financialYear: string,
+    articleNo: string,
+    customerIds: string,
+    metric: string,
+  ) => {
+    const response = await apiClient.get<CustomerBehaviourDataPoint[]>('/customer-comparison/trend', {
+      params: {
+        financial_year: financialYear,
+        article_no: articleNo,
+        customer_ids: customerIds,
+        metric: metric,
+      },
+    });
+    return response.data;
+  },
+};
+
+// Article Behaviour API (was Product Behaviour)
 export const productBehaviourApi = {
   getAvailableYears: async () => {
-    return await apiClient.get<{ financial_years: string[] }>('/product-behaviour/available-years');
+    return await apiClient.get<{ financial_years: string[] }>('/article-behaviour/available-years');
   },
   getProducts: async (financialYear: string, abcClass: string) => {
-    const response = await apiClient.get<ProductListItem[]>('/product-behaviour/products', {
+    const response = await apiClient.get<ProductListItem[]>('/article-behaviour/articles', {
       params: {
         financial_year: financialYear,
         abc_class: abcClass,
@@ -167,11 +202,11 @@ export const productBehaviourApi = {
     });
     return response.data;
   },
-  getCustomers: async (financialYear: string, productId: number, abcClasses: string) => {
-    const response = await apiClient.get<CustomerListItem[]>('/product-behaviour/customers', {
+  getCustomers: async (financialYear: string, articleNo: string, abcClasses: string) => {
+    const response = await apiClient.get<CustomerListItem[]>('/article-behaviour/customers', {
       params: {
         financial_year: financialYear,
-        product_id: productId,
+        article_no: articleNo,
         abc_classes: abcClasses,
       },
     });
@@ -180,15 +215,15 @@ export const productBehaviourApi = {
   getTrend: async (
     financialYear: string,
     abcClass: string,
-    productId: number,
+    articleNo: string,
     metric: string,
     customerIds?: string
   ) => {
-    const response = await apiClient.get<ProductBehaviourDataPoint[]>('/product-behaviour/trend', {
+    const response = await apiClient.get<ProductBehaviourDataPoint[]>('/article-behaviour/trend', {
       params: {
         financial_year: financialYear,
         abc_class: abcClass,
-        product_id: productId,
+        article_no: articleNo,
         metric: metric,
         customer_ids: customerIds || '',
       },
@@ -233,11 +268,10 @@ export const ticketSizeApi = {
 
 // Forecast API
 export const forecastApi = {
-  getAvailableMonths: async () => {
-    return await apiClient.get<{ months: { table_name: string, display: string, year: string, month: string }[] }>('/forecast/available-months');
-  },
-  getDemandForecast: async () => {
-    const response = await apiClient.get<ForecastResponse>('/forecast/demand');
+  getDemandForecast: async (granularity: string = 'monthly') => {
+    const response = await apiClient.get<ForecastResponse>('/forecast/demand', {
+      params: { granularity },
+    });
     return response.data;
   },
 };
@@ -333,7 +367,7 @@ export const customerClassComparisonApi = {
    */
   getTrend: async (
     abcClass: string,
-    customerId: number,
+    customerId: string,
     financialYears: string,
     metric: string
   ): Promise<ClassComparisonDataPoint[]> => {
@@ -348,6 +382,33 @@ export const customerClassComparisonApi = {
         },
       }
     );
+    return response.data;
+  },
+};
+
+// Customer Product List API
+export const customerProductApi = {
+  getDates: async () => {
+    const response = await apiClient.get<{ dates: string[] }>('/customer-product/dates');
+    return response.data;
+  },
+  getCustomers: async (calculationDate: string) => {
+    const response = await apiClient.get<{ customers: string[] }>('/customer-product/customers', {
+      params: { calculation_date: calculationDate },
+    });
+    return response.data;
+  },
+  getArticles: async (calculationDate: string, customerName?: string) => {
+    const response = await apiClient.get<{ articles: string[] }>('/customer-product/articles', {
+      params: { calculation_date: calculationDate, ...(customerName ? { customer_name: customerName } : {}) },
+    });
+    return response.data;
+  },
+  getData: async (calculationDate: string, customerName?: string, articleNo?: string) => {
+    const params: Record<string, string> = { calculation_date: calculationDate };
+    if (customerName) params.customer_name = customerName;
+    if (articleNo) params.article_no = articleNo;
+    const response = await apiClient.get<import('./types').CustomerProductResponse>('/customer-product/data', { params });
     return response.data;
   },
 };

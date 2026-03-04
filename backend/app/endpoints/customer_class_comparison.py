@@ -8,7 +8,7 @@ and individual customer performance across multiple financial years.
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime
-from ..database import query_all, query_one
+from ..database import query_all, query_one, parse_fy
 from ..schemas import CustomerListItem, ClassComparisonDataPoint, User
 from ..endpoints.auth import get_current_user
 
@@ -27,8 +27,8 @@ def get_available_fy_tables():
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' 
-        AND table_name LIKE 'customer_ABC_FY%'
-        AND table_name ~ 'customer_ABC_FY[0-9]+_[0-9]+'
+        AND table_name LIKE 'customer_abc_xyz_fy_%'
+        AND table_name ~ 'customer_abc_xyz_fy_[0-9]{4}_[0-9]{4}'
         ORDER BY table_name
     """
     rows = query_all(sql)  # type: ignore
@@ -37,15 +37,14 @@ def get_available_fy_tables():
     
     for row in rows:
         table_name = row["table_name"]
-        # Extract suffix after "customer_ABC_"
-        suffix = table_name.replace("customer_ABC_", "")
+        suffix = table_name.replace("customer_abc_xyz_fy_", "")
         
-        # Only process underscore format: FY24_25
-        if "_" in suffix:
-            parts = suffix.replace("FY", "").split("_")
-            if len(parts) == 2:
-                fy_key = f"FY{parts[0]}-{parts[1]}"
-                fy_map[fy_key] = suffix
+        parts = suffix.split("_")
+        if len(parts) == 2:
+            y1 = parts[0][2:] # e.g., '2024' -> '24' 
+            y2 = parts[1][2:] # e.g., '2025' -> '25'
+            fy_key = f"FY{y1}-{y2}"
+            fy_map[fy_key] = suffix
     
     return fy_map
 
@@ -82,25 +81,25 @@ async def get_customers_in_class(
         
         table_suffix = fy_map[fy]
         union_queries.append(f'''
-            SELECT DISTINCT "CustomerID"
-            FROM public."customer_ABC_{table_suffix}"
-            WHERE "Category" = '{abc_class.upper()}'
+            SELECT DISTINCT customer_name
+            FROM public."customer_abc_xyz_fy_{table_suffix}"
+            WHERE abc_category = '{abc_class.upper()}'
         ''')
     
     if not union_queries:
         raise HTTPException(status_code=400, detail=f"No valid financial year tables found. Available: {list(fy_map.keys())}")
     
-    sql = " UNION ".join(union_queries) + " ORDER BY \"CustomerID\""
+    sql = " UNION ".join(union_queries) + " ORDER BY customer_name"
     
     rows = query_all(sql)  # type: ignore
     
-    return [CustomerListItem(customer_id=int(row["CustomerID"])) for row in rows]
+    return [CustomerListItem(customer_id=str(row["customer_name"]), customer_name=str(row["customer_name"])) for row in rows if row["customer_name"]]
 
 
 @router.get("/trend", response_model=List[ClassComparisonDataPoint])
 async def get_class_comparison_trend(
     abc_class: str = Query(..., description="ABC class (A, B, or C)"),
-    customer_id: int = Query(..., description="Customer ID to compare"),
+    customer_id: str = Query(..., description="Customer Name to compare"),
     financial_years: str = Query(..., description="Comma-separated financial years (e.g., 'FY24-25,FY23-24')"),
     metric: str = Query("Revenue", description="Metric to compare (Revenue or Quantity)")
 ):
@@ -129,65 +128,50 @@ async def get_class_comparison_trend(
         if fy not in fy_map:
             continue
         
-        fy_parts = fy.replace("FY", "").split("-")
-        if len(fy_parts) != 2:
+        try:
+            start_year, end_year, fy_label = parse_fy(fy)
+        except ValueError:
             continue
         
-        start_year = int(f"20{fy_parts[0]}")
-        end_year = int(f"20{fy_parts[1]}")
-        
-        start_date = datetime(start_year, 4, 1)
-        end_date = datetime(end_year, 3, 31)
-        
-        start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
-                         (start_date.month - BASE_DATE.month) + 1)
-        end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
-                       (end_date.month - BASE_DATE.month) + 1)
+        start_date = f"{start_year}-04-01"
+        end_date = f"{end_year}-03-31"
         
         table_suffix = fy_map[fy]
         
         # Get customers in this class for this FY
         class_customers_sql = f'''
-            SELECT "CustomerID"
-            FROM public."customer_ABC_{table_suffix}"
-            WHERE "Category" = '{abc_class.upper()}'
+            SELECT customer_name
+            FROM public."customer_abc_xyz_fy_{table_suffix}"
+            WHERE abc_category = '{abc_class.upper()}'
         '''
         
         class_customer_rows = query_all(class_customers_sql)  # type: ignore
-        class_customer_ids = [int(row["CustomerID"]) for row in class_customer_rows]
+        class_customer_ids = [str(row["customer_name"]) for row in class_customer_rows if row.get("customer_name")]
         
         if not class_customer_ids:
             continue
         
-        class_customer_ids_str = ",".join(map(str, class_customer_ids))
+        class_customer_ids_str = ",".join([f"'{c.replace(chr(39), chr(39)+chr(39))}'" for c in class_customer_ids])
+        cust_id_safe = customer_id.replace(chr(39), chr(39)+chr(39))
         
         # Query month-wise data
-        metric_column = '"Revenue"' if metric == "Revenue" else '"Quantity"'
+        metric_column = 'ass_value' if metric == "Revenue" else 'inv_quantity'
         
         sql = f'''
             SELECT 
-                "TimeID",
-                SUM(CASE WHEN "CustomerID" IN ({class_customer_ids_str}) THEN {metric_column} ELSE 0 END) as class_total,
-                SUM(CASE WHEN "CustomerID" = {customer_id} THEN {metric_column} ELSE 0 END) as customer_value
-            FROM public."Aggregated Data"
-            WHERE "TimeID" BETWEEN {start_time_id} AND {end_time_id}
-            GROUP BY "TimeID"
-            ORDER BY "TimeID"
+                TO_CHAR(invoice_date, 'YYYY-MM') AS "TimeID",
+                SUM(CASE WHEN customer_name IN ({class_customer_ids_str}) THEN {metric_column} ELSE 0 END) as class_total,
+                SUM(CASE WHEN customer_name = '{cust_id_safe}' THEN {metric_column} ELSE 0 END) as customer_value
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date BETWEEN '{start_date}' AND '{end_date}'
+            GROUP BY TO_CHAR(invoice_date, 'YYYY-MM')
+            ORDER BY TO_CHAR(invoice_date, 'YYYY-MM')
         '''
         
         rows = query_all(sql)  # type: ignore
         
         for row in rows:
-            time_id = int(row["TimeID"])
-            months_since_base = time_id - 1
-            year = BASE_DATE.year + (months_since_base // 12)
-            month = BASE_DATE.month + (months_since_base % 12)
-            
-            if month > 12:
-                year += 1
-                month -= 12
-            
-            month_str = f"{year:04d}-{month:02d}"
+            month_str = row["TimeID"] # format is 'YYYY-MM'
             
             # Convert to millions for revenue
             class_total = float(row["class_total"] or 0)

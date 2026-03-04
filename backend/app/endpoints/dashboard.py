@@ -16,11 +16,10 @@ from ..schemas import (
     CategoryCountResponse,
     CategoryRevenueResponse,
     ComboCountResponse,
-    User,
     CategoryBreakupItem,
     ABCXYZMatrixCell,
     ABCXYZMatrixResponse,
-    ABCXYZProductItem,
+    ABCXYZArticleItem,
     CategoryHierarchyItem,
 )
 from ..endpoints.auth import get_current_user
@@ -36,21 +35,25 @@ router = APIRouter(
 BASE_DATE = datetime(2021, 1, 1)
 
 
+def time_id_to_yyyy_mm(time_id: int) -> str:
+    """
+    Convert numeric TimeID to 'YYYY-MM' string.
+    TimeID 1 = January 2021, TimeID 60 = December 2025, etc.
+    """
+    year = BASE_DATE.year + ((BASE_DATE.month + time_id - 2) // 12)
+    month = ((BASE_DATE.month + time_id - 2) % 12) + 1
+    return f"{year}-{month:02d}"
+
+
 def get_month_string_from_time_id(time_id: int) -> str:
     """
-    Convert TimeID to month string in 'YYYY-MM' format.
+    Convert TimeID to month string in 'Month YYYY' format.
     TimeID represents months since January 2021 (TimeID=1).
-
-    Example:
-        time_id = 1 -> "January 2021"
-        time_id = 55 -> "July 2025"
     """
     if not time_id or not isinstance(time_id, int):
         return "Unknown month"
 
     try:
-        # TimeID 1 = January 2021, TimeID 2 = February 2021, etc.
-        # Add (time_id - 1) months to the base date
         year = BASE_DATE.year + ((BASE_DATE.month + time_id - 2) // 12)
         month = ((BASE_DATE.month + time_id - 2) % 12) + 1
         month_date = datetime(year, month, 1)
@@ -60,45 +63,39 @@ def get_month_string_from_time_id(time_id: int) -> str:
 
 
 @router.get("/kpis")
-async def get_dashboard_kpis(time_id: Optional[int] = None):
+async def get_dashboard_kpis(time_id: Optional[str] = None):
     """
     Get KPIs for a specific month or the LATEST month.
-
-    Args:
-        time_id: Optional TimeID. If not provided, uses latest month.
-
-    SQL Queries:
-        1. SELECT MAX("TimeID") AS max_id FROM public."Aggregated Data"
-        2. SELECT SUM("Revenue"), SUM("Quantity") FROM ... WHERE "TimeID" = {time_id}
-
-    Functions Used:
-        - query_scalar() - get max TimeID
-        - query_one() - get revenue/quantity sums
-        - get_month_string_from_time_id() - convert TimeID to month name
-
-    Returns:
-        {
-            "total_revenue": 12345678.90,
-            "total_quantity": 98765,
-            "month_name": "July 2025",
-            "time_id": 55
-        }
     """
     if time_id is None:
-        time_id = get_latest_time_id()
+        # find the max month
+        max_date_sql = """
+            SELECT MAX(invoice_date) as max_date
+            FROM public."spoorthi_dataset_without_spares"
+        """
+        row = query_one(max_date_sql)
+        if not row or not row["max_date"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No data found for KPIs.",
+            )
+        max_date = row["max_date"]
+        # Format as YYYY-MM
+        time_id = f"{max_date.year}-{max_date.month:02d}"
+    else:
+        # If numeric time_id sent by frontend, convert to YYYY-MM
+        if time_id.isdigit():
+            time_id = time_id_to_yyyy_mm(int(time_id))
 
-    if not time_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No data found for KPIs.",
-        )
-
+    start_date = f"{time_id}-01"
+    
+    # Needs to be end of month, but a simple prefix match on TO_CHAR works too
     sql = """
         SELECT 
-            SUM("Revenue") AS total_revenue,
-            SUM("Quantity") AS total_quantity
-        FROM public."Aggregated Data"
-        WHERE "TimeID" = %s
+            SUM(ass_value) AS total_revenue,
+            SUM(inv_quantity) AS total_quantity
+        FROM public."spoorthi_dataset_without_spares"
+        WHERE TO_CHAR(invoice_date, 'YYYY-MM') = %s
     """
     kpi_data = query_one(sql, (time_id,))
 
@@ -107,11 +104,15 @@ async def get_dashboard_kpis(time_id: Optional[int] = None):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No KPI data found for the specified month.",
         )
+        
+    y, m = map(int, time_id.split("-"))
+    month_val = datetime(y, m, 1)
+
     return KPIResponse(
         total_revenue=float(kpi_data["total_revenue"] or 0),
         total_quantity=int(kpi_data["total_quantity"] or 0),
-        month_name=get_month_string_from_time_id(time_id),
-        time_id=time_id,
+        month_name=month_val.strftime("%B %Y"),
+        time_id=0, # Deprecated
     )
 
 
@@ -433,17 +434,11 @@ async def export_rolling_abc_xyz():
 
     table = safe_table_name(table_name)
 
-    # Get all available data from the rolling summary table with product names
+    # Get all available data from the rolling summary table
     sql = f"""
         SELECT 
             r.article_no,
-            COALESCE(
-                (SELECT STRING_AGG(DISTINCT pm.commercial_name, ', ')
-                 FROM priyatextile_product_master pm
-                 WHERE CAST(pm.product_code AS TEXT) = CAST(r.article_no AS TEXT)
-                   AND pm.commercial_name IS NOT NULL),
-                '-'
-            ) AS product_name,
+            r.article_no AS product_name,
             r.abc_category,
             r.xyz_category,
             r.total_revenue,
@@ -486,8 +481,7 @@ async def export_forecast():
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' 
-        AND table_name LIKE 'demand_forecast_%_%'
-        ORDER BY table_name DESC
+        AND table_name = 'final_sales_forecasts'
         LIMIT 1
     """
 
@@ -500,21 +494,15 @@ async def export_forecast():
 
     table_name = result["table_name"]
 
-    # Use exact same query as forecast.py with product names
+    # Fetch forecast data from final_sales_forecasts
     sql = f"""
         SELECT 
-            f."ProductID",
-            COALESCE(
-                (SELECT STRING_AGG(DISTINCT pm.commercial_name, ', ')
-                 FROM priyatextile_product_master pm
-                 WHERE CAST(pm.product_code AS TEXT) = CAST(f."ProductID" AS TEXT)
-                   AND pm.commercial_name IS NOT NULL),
-                '-'
-            ) AS "ProductName",
-            f."ForecastMonth",
-            f."PredictedQuantity" 
+            f.article_no,
+            f.article_no AS "ProductName",
+            f.prediction_month::text AS "ForecastMonth",
+            f.final_forecast AS "PredictedQuantity"
         FROM public."{table_name}" f
-        ORDER BY f."ProductID"
+        ORDER BY f.article_no
     """
 
     rows = query_all(sql)
@@ -544,12 +532,12 @@ async def export_cross_sell():
     Export Cross-Sell Recommendations as CSV.
     Downloads Distributor Code, Products Bought Together, and Suggested Product from the latest cross-sell table.
     """
-    # Find latest cross_sell_recommendations table
+    # Find latest cross_sell table
     table_query = """
         SELECT tablename
         FROM pg_catalog.pg_tables
         WHERE schemaname = 'public'
-          AND tablename ~ '^cross_sell_recommendations_[0-9]{4}_[0-9]{2}$'
+          AND tablename ~ '^cross_sell_[0-9]{4}_[0-9]{2}$'
         ORDER BY tablename DESC
         LIMIT 1
     """
@@ -564,17 +552,14 @@ async def export_cross_sell():
 
     table_name = result["tablename"]
 
-    # Use exact same query as cross_sell.py with customer names
+    # Use new Spoorthi cross-sell table structure
     data_query = f"""
         SELECT 
-            cr."Distributor_Code",
-            COALESCE(cm.customer, '-') AS "Customer_Name",
-            cr."Products_Bought_Together",
-            cr."Suggested_Product"
+            cr."Customer" AS "Customer_Name",
+            cr."Trigger_Items_Antecedents" AS "Products_Bought_Together",
+            cr."Recommended_Items_Consequents" AS "Suggested_Product"
         FROM public."{table_name}" cr
-        LEFT JOIN priyatextile_customer_master cm 
-            ON CAST(cr."Distributor_Code" AS TEXT) = CAST(cm.customer_code AS TEXT)
-        ORDER BY cr."Distributor_Code"
+        ORDER BY cr."Customer"
     """
 
     rows = query_all(data_query)
@@ -600,53 +585,95 @@ async def export_cross_sell():
     )
 
 
-@router.get("/category-breakup", response_model=List[CategoryBreakupItem])
-async def get_category_breakup(time_id: Optional[int] = None):
+def _find_latest_table(pattern: str):
+    """Find the latest table matching a regex pattern (e.g. '^customer_abc_xyz_fy_')."""
+    sql = """
+        SELECT tablename
+        FROM pg_catalog.pg_tables
+        WHERE schemaname = 'public'
+          AND tablename ~ %s
+        ORDER BY tablename DESC
+        LIMIT 1
     """
-    Get revenue and quantity breakdown by product category (Monofilaments, Trading, MISC).
+    row = query_one(sql, (pattern,))
+    return row["tablename"] if row else None
 
-    Args:
-        time_id: Optional TimeID. If not provided, uses latest month.
 
-    Returns:
-        [
-            {"category": "Monofilaments", "revenue": 12345678.90, "quantity": 5000},
-            {"category": "Trading", "revenue": 9876543.21, "quantity": 3000},
-            {"category": "MISC", "revenue": 1234567.89, "quantity": 1000}
-        ]
+@router.get("/export/customer-abc-xyz-fy")
+async def export_customer_abc_xyz_fy():
+    """Export the latest Customer ABC/XYZ FY results as CSV."""
+    table_name = _find_latest_table(r"^customer_abc_xyz_fy_")
+    if not table_name:
+        raise HTTPException(status_code=404, detail="No Customer ABC/XYZ FY table found.")
+
+    rows = query_all(f'SELECT * FROM public."{table_name}" ORDER BY total_revenue DESC')
+    if not rows:
+        raise HTTPException(status_code=404, detail="No data available for export.")
+
+    df = pd.DataFrame(rows)
+    output = io.StringIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={table_name}.csv"},
+    )
+
+
+@router.get("/export/rfm-monthly")
+async def export_rfm_monthly():
+    """Export the latest RFM Monthly Scores as CSV."""
+    table_name = _find_latest_table(r"^rfm_results_prediction_")
+    if not table_name:
+        raise HTTPException(status_code=404, detail="No RFM Monthly table found.")
+
+    rows = query_all(f'SELECT * FROM public."{table_name}"')
+    if not rows:
+        raise HTTPException(status_code=404, detail="No data available for export.")
+
+    df = pd.DataFrame(rows)
+    output = io.StringIO()
+    df.to_csv(output, index=False)
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={table_name}.csv"},
+    )
+
+
+@router.get("/category-breakup", response_model=List[CategoryBreakupItem])
+async def get_category_breakup(time_id: Optional[str] = None):
+    """
+    Get revenue and quantity breakdown by product category.
     """
     if time_id is None:
-        time_id = get_latest_time_id()
-
-    if not time_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
-        )
+        # find the max month
+        max_date_sql = """
+            SELECT MAX(invoice_date) as max_date
+            FROM public."spoorthi_dataset_without_spares"
+        """
+        row = query_one(max_date_sql)
+        if not row or not row["max_date"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
+            )
+        max_date = row["max_date"]
+        time_id = f"{max_date.year}-{max_date.month:02d}"
+    else:
+        # If numeric time_id sent by frontend, convert to YYYY-MM
+        if time_id.isdigit():
+            time_id = time_id_to_yyyy_mm(int(time_id))
 
     sql = """
         SELECT 
-            CASE 
-                WHEN pm.clean_cat IN ('MCF', 'WMF', 'INSECT NET', 'INSECT NET BAG', 'HAPPA', 'YARN') THEN 'Monofilaments'
-                WHEN pm.clean_cat IN ('MSN', 'TSN', 'PP WOVEN SACK', 'WMT', 'BIRD NET', 'KNITTED FABRIC', 'KNOTTED NETTING', 'MULCH FILM', 'OTHERS') THEN 'Trading'
-                WHEN pm.clean_cat IN ('HDPE', 'CP', 'MB') THEN 'RM'
-                WHEN pm.clean_cat IN ('WASTE', 'SUNDRY', 'ROPE') THEN 'MISC'
-            END as category,
-            SUM(ad."Revenue") as revenue,
-            SUM(ad."Quantity") as quantity
-        FROM public."Aggregated Data" ad
-        LEFT JOIN (
-            SELECT product_code, MAX(category) as clean_cat
-            FROM priyatextile_product_master
-            GROUP BY product_code
-        ) pm ON ad."ProductID" = pm.product_code
-        WHERE ad."TimeID" = %s
-          AND pm.clean_cat IN (
-              'MCF', 'WMF', 'INSECT NET', 'INSECT NET BAG', 'HAPPA', 'YARN',
-              'MSN', 'TSN', 'PP WOVEN SACK', 'WMT', 'BIRD NET', 'KNITTED FABRIC', 'KNOTTED NETTING', 'MULCH FILM', 'OTHERS',
-              'HDPE', 'CP', 'MB',
-              'WASTE', 'SUNDRY', 'ROPE'
-          )
-        GROUP BY category
+            COALESCE(ad.category, 'Uncategorized') as category,
+            SUM(ad.ass_value) as revenue,
+            SUM(ad.inv_quantity) as quantity
+        FROM public."spoorthi_dataset_without_spares" ad
+        WHERE TO_CHAR(ad.invoice_date, 'YYYY-MM') = %s
+        GROUP BY ad.category
         ORDER BY revenue DESC
     """
 
@@ -737,46 +764,43 @@ async def get_abc_xyz_matrix(time_id: Optional[int] = None):
     return ABCXYZMatrixResponse(cells=cells, period_label=period_label)
 
 
-@router.get("/abc-xyz-products", response_model=List[ABCXYZProductItem])
-async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None):
+@router.get("/abc-xyz-products", response_model=List[ABCXYZArticleItem])
+async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[str] = None):
     """
     Get product IDs and names for a specific ABC×XYZ cell.
     Used for the popup when clicking a matrix cell or bar chart bar.
     """
-    table_name = None
     if time_id is None:
-        table_name = get_latest_rolling_table()
-    else:
-        table_name = get_rolling_table_for_time_id(time_id)
-        if not table_name:
-            table_name = get_latest_rolling_table()
-
-    if not table_name:
-        raise HTTPException(status_code=404, detail="No rolling table found")
-
-    table = safe_table_name(table_name)
+        # find the max month
+        max_date_sql = """
+            SELECT MAX(invoice_date) as max_date
+            FROM public."spoorthi_dataset_without_spares"
+        """
+        row = query_one(max_date_sql)
+        if not row or not row["max_date"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
+            )
+        max_date = row["max_date"]
+        time_id = f"{max_date.year}-{max_date.month:02d}"
 
     sql = f"""
         SELECT 
-            r.article_no as product_id,
-            pm.commercial_name as product_name
-        FROM {table} r
-        LEFT JOIN (
-            SELECT product_code, MAX(commercial_name) as commercial_name
-            FROM priyatextile_product_master
-            GROUP BY product_code
-        ) pm ON r.article_no = pm.product_code
-        WHERE r.abc_category = %s AND r.xyz_category = %s
-        ORDER BY r.total_revenue DESC
+            DISTINCT abc.article_no,
+            abc.article_no as product_name
+        FROM public."spoorthi_abc_xyz_datamart" abc
+        WHERE abc.year_month = '{time_id}'
+          AND abc.abc = '{abc.upper()}' AND abc.xyz = '{xyz.upper()}'
+        ORDER BY abc.article_no
     """
 
-    rows = query_all(sql, (abc.upper(), xyz.upper()))
+    rows = query_all(sql)
 
     return (
         [
-            ABCXYZProductItem(
-                product_id=int(row["product_id"]),
-                product_name=row.get("product_name") or "-",
+            ABCXYZArticleItem(
+                article_no=str(row["article_no"]),
+                article_name=row.get("product_name") or "-",
             )
             for row in rows
         ]
@@ -787,28 +811,24 @@ async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None
 
 @router.get("/category-hierarchy", response_model=Dict[str, Any])
 async def get_category_hierarchy(
-    time_id: Optional[int] = None, metric: str = "revenue"
+    time_id: Optional[str] = None, metric: str = "revenue"
 ):
     """
     Get hierarchical category data for dual-circle pie chart.
-
-    Args:
-        time_id: Optional TimeID. If not provided, uses latest month.
-        metric: "revenue" or "quantity"
-
-    Returns:
-        {
-            "main_categories": [{"id": "Monofilaments", "label": "Monofilaments", "value": 12345678.90, "color": "#..."}],
-            "subcategories": [{"id": "MCF", "label": "MCF", "value": 5000000, "parent_category": "Monofilaments", "color": "#..."}]
-        }
     """
     if time_id is None:
-        time_id = get_latest_time_id()
-
-    if not time_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
-        )
+        # find the max month
+        max_date_sql = """
+            SELECT MAX(invoice_date) as max_date
+            FROM public."spoorthi_dataset_without_spares"
+        """
+        row = query_one(max_date_sql)
+        if not row or not row["max_date"]:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
+            )
+        max_date = row["max_date"]
+        time_id = f"{max_date.year}-{max_date.month:02d}"
 
     # Main category colors
     category_colors = {
@@ -846,87 +866,36 @@ async def get_category_hierarchy(
         return f"rgba({r}, {g}, {b}, {opacity})"
 
     # Determine the column to aggregate
-    value_column = '"Revenue"' if metric.lower() == "revenue" else '"Quantity"'
+    value_column = 'ass_value' if metric.lower() == "revenue" else 'inv_quantity'
 
-    # Query for main categories - aggregate subcategories into main groups
+    # Spoorthi DB has no product category master table.
+    # Return a single "All Products" aggregation for the selected month.
     main_sql = f"""
-        WITH categorized_data AS (
-            SELECT 
-                CASE 
-                    WHEN pm.category IN ('MCF', 'WMF', 'INH', 'INB', 'Happa') THEN 'Monofilaments'
-                    WHEN pm.category IN ('MSN', 'TSN', 'PP Woven Sack', 'WMT', 'Bird Net', 'Knitted Fabric', 'Knotted Netting', 'Mulch Film', 'Others') THEN 'Trading'
-                    ELSE 'MISC'
-                END as main_category,
-                ad.{value_column} as value
-            FROM public."Aggregated Data" ad
-            LEFT JOIN (
-                SELECT DISTINCT ON (product_code) product_code, category
-                FROM priyatextile_product_master
-            ) pm ON CAST(ad."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
-            WHERE ad."TimeID" = %s
-        )
         SELECT 
-            main_category as category,
-            SUM(value) as value
-        FROM categorized_data
-        GROUP BY main_category
-        ORDER BY value DESC
+            'All Products' as category,
+            SUM({value_column}) as value
+        FROM public."spoorthi_dataset_without_spares"
+        WHERE TO_CHAR(invoice_date, 'YYYY-MM') = '{time_id}'
     """
 
-    main_rows = query_all(main_sql, (time_id,))
+    main_rows = query_all(main_sql)
 
-    # Query for subcategories
-    sub_sql = f"""
-        SELECT 
-            pm.category as subcategory,
-            SUM(ad.{value_column}) as value
-        FROM public."Aggregated Data" ad
-        INNER JOIN (
-            SELECT DISTINCT ON (product_code) product_code, category
-            FROM priyatextile_product_master
-        ) pm ON CAST(ad."ProductID" AS TEXT) = CAST(pm.product_code AS TEXT)
-        WHERE ad."TimeID" = %s
-          AND pm.category IS NOT NULL
-        GROUP BY pm.category
-        ORDER BY value DESC
-    """
-
-    sub_rows = query_all(sub_sql, (time_id,))
+    # No subcategories available without product master
+    sub_rows = []
 
     # Build main categories response
     main_categories = [
         CategoryHierarchyItem(
-            id=row["category"] or "MISC",
-            label=row["category"] or "MISC",
+            id=row["category"] or "All Products",
+            label=row["category"] or "All Products",
             value=float(row["value"] or 0),
-            color=category_colors.get(row["category"] or "MISC", "#9e9e9e"),
+            color="#4caf50",
         )
         for row in main_rows
     ]
 
-    # Build subcategories response with color based on parent
+    # No subcategories
     subcategories = []
-    for row in sub_rows:
-        subcat = row["subcategory"]
-        if subcat in subcategory_info:
-            parent = subcategory_info[subcat]["parent"]
-            opacity = subcategory_info[subcat]["opacity"]
-            base_color = category_colors.get(parent, "#9e9e9e")
-            color = hex_to_rgba(base_color, opacity)
-        else:
-            # MISC subcategories
-            parent = "MISC"
-            color = hex_to_rgba(category_colors["MISC"], 0.5)
-
-        subcategories.append(
-            CategoryHierarchyItem(
-                id=subcat,
-                label=subcat,
-                value=float(row["value"] or 0),
-                color=color,
-                parent_category=parent,
-            )
-        )
 
     return {
         "main_categories": [item.dict() for item in main_categories],

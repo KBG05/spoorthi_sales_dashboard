@@ -107,10 +107,17 @@ async def get_rfm_analysis(
     """
     
     try:
-        # Query all data from Aggregated Data
+        # Query all data from spoorthi_dataset_without_spares
+        # Calculate 'TimeID' based on invoice_date matching R logic
         sql = '''
-            SELECT "TimeID", "CustomerID", "ProductID", "Quantity", "Revenue"
-            FROM public."Aggregated Data"
+            SELECT 
+                Extract(Year from invoice_date) * 12 + Extract(Month from invoice_date) as time_id, 
+                customer_name, 
+                article_no, 
+                inv_quantity, 
+                ass_value
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date IS NOT NULL
         '''
         
         rows = query_all(sql)  # type: ignore
@@ -122,13 +129,13 @@ async def get_rfm_analysis(
         data = []
         max_time_id = 0
         for row in rows:
-            time_id = int(row["TimeID"])
-            customer_id = int(row["CustomerID"])
-            revenue = float(row["Revenue"] or 0)
+            time_id = int(row["time_id"])
+            customer_name = str(row["customer_name"])
+            revenue = float(row["ass_value"] or 0)
             
             data.append({
                 "TimeID": time_id,
-                "CustomerID": customer_id,
+                "customer_name": customer_name,
                 "Revenue": revenue
             })
             
@@ -146,7 +153,7 @@ async def get_rfm_analysis(
         from collections import defaultdict
         from typing import Dict, Set
         
-        customer_data: Dict[int, Dict] = defaultdict(lambda: {
+        customer_data: Dict[str, Dict] = defaultdict(lambda: {
             "time_ids": set(),
             "transactions": 0,
             "revenue": 0.0,
@@ -154,18 +161,18 @@ async def get_rfm_analysis(
         })
         
         for d in filtered_data:
-            cust_id = d["CustomerID"]
-            time_ids: Set[int] = customer_data[cust_id]["time_ids"]
+            cust_name = d["customer_name"]
+            time_ids: Set[int] = customer_data[cust_name]["time_ids"]
             time_ids.add(d["TimeID"])
-            customer_data[cust_id]["transactions"] = int(customer_data[cust_id]["transactions"]) + 1
-            customer_data[cust_id]["revenue"] = float(customer_data[cust_id]["revenue"]) + d["Revenue"]
-            last_time_id = int(customer_data[cust_id]["last_time_id"])
+            customer_data[cust_name]["transactions"] = int(customer_data[cust_name]["transactions"]) + 1
+            customer_data[cust_name]["revenue"] = float(customer_data[cust_name]["revenue"]) + d["Revenue"]
+            last_time_id = int(customer_data[cust_name]["last_time_id"])
             if d["TimeID"] > last_time_id:
-                customer_data[cust_id]["last_time_id"] = d["TimeID"]
+                customer_data[cust_name]["last_time_id"] = d["TimeID"]
         
         # Calculate RFM values for all customers
         rfm_values = []
-        for cust_id, cust_data in customer_data.items():
+        for cust_name, cust_data in customer_data.items():
             last_time_id = int(cust_data["last_time_id"])
             recency = max_time_id - last_time_id
             time_ids: Set[int] = cust_data["time_ids"]
@@ -175,7 +182,7 @@ async def get_rfm_analysis(
             avg_order_value = monetary / transactions if transactions > 0 else 0
             
             rfm_values.append({
-                "customer_id": cust_id,
+                "customer_name": cust_name,
                 "recency": recency,
                 "frequency": frequency,
                 "monetary": monetary,
@@ -201,7 +208,7 @@ async def get_rfm_analysis(
             segment = assign_segment(r_score, f_score, m_score)
             
             result.append(RFMMetrics(
-                customer_id=rfm["customer_id"],
+                customer_id=rfm["customer_name"],
                 recency=rfm["recency"],
                 frequency=rfm["frequency"],
                 monetary=round(rfm["monetary"], 2),

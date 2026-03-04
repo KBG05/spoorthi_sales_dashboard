@@ -57,47 +57,21 @@ const TransitionAnalysis: React.FC = () => {
         let bgColor = 'inherit';
         let textColor = 'inherit';
         
-        // Apply color coding for ABC_XYZ combined category column
-        if (header.toLowerCase().includes('abc_xyz') || header.toLowerCase().includes('abc xyz')) {
-          const strValue = String(value).toUpperCase();
-          // Check for combined ABC-XYZ (e.g., AX, AY, AZ, BX, BY, BZ, CX, CY, CZ)
-          if (strValue.length === 2 && ABC_XYZ_COLORS[strValue]) {
-            const color = ABC_XYZ_COLORS[strValue];
-            bgColor = withAlpha(color, 0.15);
-            textColor = color;
-          }
-        }
-        // Apply color coding for Category columns (ABC, XYZ, or combined)
-        else if (header.includes('Category') || header.includes('Class')) {
-          const strValue = String(value).toUpperCase();
+        // Color code all ABC_ prefixed columns (transition month columns)
+        if (header.startsWith('ABC_')) {
+          const strValue = String(value || '').toUpperCase().trim();
           
-          // Check for combined ABC-XYZ (e.g., AX, AY, AZ, etc.)
+          // Products: combined ABC-XYZ (e.g., AZ, BY, CX)
           if (strValue.length === 2 && ABC_XYZ_COLORS[strValue]) {
             const color = ABC_XYZ_COLORS[strValue];
             bgColor = withAlpha(color, 0.15);
             textColor = color;
           }
-          // ABC categories
-          else if (strValue === 'A') {
-            bgColor = withAlpha(ABC_COLORS.A, 0.15);
-            textColor = ABC_COLORS.A;
-          } else if (strValue === 'B') {
-            bgColor = withAlpha(ABC_COLORS.B, 0.15);
-            textColor = ABC_COLORS.B;
-          } else if (strValue === 'C') {
-            bgColor = withAlpha(ABC_COLORS.C, 0.15);
-            textColor = ABC_COLORS.C;
-          }
-          // XYZ categories
-          else if (strValue === 'X') {
-            bgColor = withAlpha(XYZ_COLORS.X, 0.15);
-            textColor = XYZ_COLORS.X;
-          } else if (strValue === 'Y') {
-            bgColor = withAlpha(XYZ_COLORS.Y, 0.15);
-            textColor = XYZ_COLORS.Y;
-          } else if (strValue === 'Z') {
-            bgColor = withAlpha(XYZ_COLORS.Z, 0.15);
-            textColor = XYZ_COLORS.Z;
+          // Customers: single ABC (A, B, C)
+          else if (strValue.length === 1 && ABC_COLORS[strValue]) {
+            const color = ABC_COLORS[strValue];
+            bgColor = withAlpha(color, 0.15);
+            textColor = color;
           }
         }
 

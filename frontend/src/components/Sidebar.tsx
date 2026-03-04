@@ -26,6 +26,8 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Analytics as AnalyticsIcon,
+  ListAlt as ListAltIcon,
+  Compare as CompareIcon,
 } from '@mui/icons-material';
 import { DRAWER_WIDTH } from '../constants/constants';
 
@@ -39,7 +41,8 @@ const navItems: NavItem[] = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/trend-analysis', label: 'Trend Analysis', icon: <TrendingUpIcon /> },
   { path: '/customer-behaviour', label: 'Customer Behavior', icon: <PeopleIcon /> },
-  { path: '/product-behaviour', label: 'Product Behavior', icon: <InventoryIcon /> },
+  { path: '/customer-comparison', label: 'Customer Comparison', icon: <CompareIcon /> },
+  { path: '/product-behaviour', label: 'Article Behavior', icon: <InventoryIcon /> },
   { path: '/cba', label: 'Customer Behaviour Analysis', icon: <AnalyticsIcon /> },
   // { path: '/customer-class-comparison', label: 'Class Comparison', icon: <CompareIcon /> }, // Hidden for now
   { path: '/ticket-size', label: 'Ticket Size Analysis', icon: <ReceiptIcon /> },
@@ -47,6 +50,7 @@ const navItems: NavItem[] = [
   { path: '/forecast', label: 'Demand Forecast', icon: <ShowChartIcon /> },
   { path: '/top-performance', label: 'Top Performers', icon: <StarIcon /> },
   { path: '/cross-sell', label: 'Cross-Sell Analysis', icon: <ShoppingCartIcon /> },
+  { path: '/customer-product', label: 'Customer Product List', icon: <ListAltIcon /> },
   { path: '/export-data', label: 'Export Data', icon: <CompareArrowsIcon /> },
 ];
 

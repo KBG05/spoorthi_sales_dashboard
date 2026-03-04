@@ -10,8 +10,8 @@ Provides customer purchase behaviour analysis with product-level details.
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
-from ..database import query_all
-from ..schemas import CustomerListItem, ProductListItem, CustomerBehaviourDataPoint, User
+from ..database import query_all, parse_fy
+from ..schemas import CustomerListItem, ArticleListItem, CustomerBehaviourDataPoint, User
 from ..endpoints.auth import get_current_user
 
 router = APIRouter(prefix="/customer-behaviour", tags=["Customer Behaviour"], dependencies=[Depends(get_current_user)])
@@ -22,17 +22,13 @@ BASE_DATE = datetime(2021, 1, 1)
 @router.get("/available-years")
 async def get_available_years():
     """
-    Get list of available financial years based on customer_ABC_FY* tables.
+    Get list of available financial years based on spoorthi_abc_xyz_datamart.
     """
-    import re
-    
     table_query = """
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name LIKE 'customer_ABC_FY%'
-        AND table_name ~ 'customer_ABC_FY[0-9]+_[0-9]+'
-        ORDER BY table_name DESC
+        SELECT DISTINCT fin_year_label 
+        FROM public.spoorthi_abc_xyz_datamart 
+        WHERE fin_year_label IS NOT NULL
+        ORDER BY fin_year_label DESC
     """
     
     rows = query_all(table_query)  # type: ignore
@@ -40,125 +36,119 @@ async def get_available_years():
     if not rows:
         return {"financial_years": []}
     
-    fy_years = []
-    for row in rows:
-        table_name = row["table_name"]
-        match = re.search(r'FY(\d{2})_(\d{2})$', table_name)
-        if match:
-            fy_key = f"FY{match.group(1)}-{match.group(2)}"
-            fy_years.append(fy_key)
+    fy_years = [row["fin_year_label"] for row in rows if row["fin_year_label"]]
     
-    return {"financial_years": sorted(set(fy_years), reverse=True)}
+    return {"financial_years": fy_years}
 
 
 @router.get("/customers", response_model=List[CustomerListItem])
 async def get_customers_by_class(
-    financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
+    financial_year: str = Query(..., description="Financial year label (e.g., '2024-25')"),
     abc_classes: str = Query("A,B,C", description="Comma-separated ABC classes")
 ):
     """
     Get list of customers for selected ABC classes in a financial year.
-    
-    Matches: customer_behaviour_server.R -> customers_in_class reactive
-    
-    SQL Query:
-        SELECT DISTINCT "CustomerID"
-        FROM public."customer_ABC_{table_suffix}"
-        WHERE "Category" IN (...)
-        ORDER BY "CustomerID"
-    
-    Returns:
-        [{"customer_id": 101}, {"customer_id": 102}, ...]
+    Uses customer_abc_xyz_fy_YYYY_YYYY table for customer-ABC mapping,
+    falling back to spoorthi_dataset_without_spares if the table doesn't exist.
     """
-    # Parse FY to get table suffix
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
-        raise HTTPException(status_code=400, detail="Invalid financial year format")
-    
-    table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
+    fy_label = financial_year.replace("FY", "")
     
     # Parse classes
     class_list = [cls.strip().upper() for cls in abc_classes.split(",")]
     class_in = ",".join([f"'{cls}'" for cls in class_list])
     
+    # Build the customer ABC table name: customer_abc_xyz_fy_YYYY_YYYY
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+        customer_table = f"customer_abc_xyz_fy_{start_year}_{end_year}"
+    except ValueError:
+        customer_table = None
+    
+    # Try the customer ABC table first
+    if customer_table:
+        try:
+            sql = f'''
+                SELECT DISTINCT customer_name
+                FROM public."{customer_table}"
+                WHERE abc_category IN ({class_in})
+                ORDER BY customer_name
+            '''
+            rows = query_all(sql)
+            if rows:
+                return [
+                    CustomerListItem(
+                        customer_id=str(row["customer_name"]),
+                        customer_name=str(row["customer_name"])
+                    ) 
+                    for row in rows
+                    if row["customer_name"]
+                ]
+        except Exception:
+            pass  # Fall through to alternative query
+    
+    # Fallback: get customers from dataset, join with datamart for ABC
+    # Filter by FY date range so only customers with actual purchases appear
     sql = f'''
-        SELECT DISTINCT c."CustomerID", cm.customer
-        FROM public."customer_ABC_{table_suffix}" c
-        LEFT JOIN priyatextile_customer_master cm ON CAST(c."CustomerID" AS TEXT) = CAST(cm.customer_code AS TEXT)
-        WHERE c."Category" IN ({class_in})
-        ORDER BY c."CustomerID"
+        SELECT DISTINCT d.customer_name
+        FROM public."spoorthi_dataset_without_spares" d
+        INNER JOIN public."spoorthi_abc_xyz_datamart" m
+            ON d.article_no = m.article_no
+            AND m.fin_year_label = '{fy_label}'
+        WHERE m.abc IN ({class_in})
+            AND d.invoice_date BETWEEN '{start_year}-04-01' AND '{end_year}-03-31'
+        ORDER BY d.customer_name
     '''
     
-    rows = query_all(sql)  # type: ignore
+    rows = query_all(sql)
     
     return [
         CustomerListItem(
-            customer_id=int(row["CustomerID"]),
-            customer_name=row.get("customer")
+            customer_id=str(row["customer_name"]),
+            customer_name=str(row["customer_name"])
         ) 
         for row in rows
+        if row["customer_name"]
     ]
 
 
-@router.get("/products", response_model=List[ProductListItem])
-async def get_products_for_customers(
+@router.get("/articles", response_model=List[ArticleListItem])
+async def get_articles_for_customers(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
-    customer_ids: str = Query(..., description="Comma-separated customer IDs")
+    customer_ids: str = Query(..., description="Comma-separated customer names")
 ):
     """
-    Get list of products purchased by selected customers in a financial year.
-    
-    Matches: customer_behaviour_server.R -> products_for_customers reactive
-    
-    SQL Query:
-        SELECT DISTINCT "ProductID"
-        FROM public."Aggregated Data"
-        WHERE
-            "TimeID" BETWEEN {start} AND {end}
-            AND "CustomerID" IN (...)
-        ORDER BY "ProductID"
-    
-    Returns:
-        [{"product_id": 201}, {"product_id": 202}, ...]
+    Get list of articles purchased by selected customers in a financial year.
     """
-    # Parse FY to get TimeID range
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid financial year format")
     
-    start_year = int(f"20{fy_parts[0]}")
-    end_year = int(f"20{fy_parts[1]}")
-    
-    start_date = datetime(start_year, 4, 1)
-    end_date = datetime(end_year, 3, 31)
-    
-    start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
-                     (start_date.month - BASE_DATE.month) + 1)
-    end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
-                   (end_date.month - BASE_DATE.month) + 1)
+    start_date = f"{start_year}-04-01"
+    end_date = f"{end_year}-03-31"
     
     # Parse customer IDs
-    cust_list = [cid.strip() for cid in customer_ids.split(",")]
-    cust_in = ",".join(cust_list)
+    cust_list = [cid.strip().replace("'", "''") for cid in customer_ids.split(",")]
+    cust_in = ",".join([f"'{c}'" for c in cust_list])
     
     sql = f'''
-        SELECT DISTINCT ad."ProductID", pm.commercial_name
-        FROM public."Aggregated Data" ad
-        LEFT JOIN priyatextile_product_master pm ON ad."ProductID" = pm.product_code
+        SELECT DISTINCT article_no
+        FROM public."spoorthi_dataset_without_spares"
         WHERE
-            ad."TimeID" BETWEEN {start_time_id} AND {end_time_id}
-            AND ad."CustomerID" IN ({cust_in})
-        ORDER BY ad."ProductID"
+            invoice_date BETWEEN '{start_date}' AND '{end_date}'
+            AND customer_name IN ({cust_in})
+        ORDER BY article_no
     '''
     
     rows = query_all(sql)  # type: ignore
     
     return [
-        ProductListItem(
-            product_id=int(row["ProductID"]),
-            product_name=row.get("commercial_name")
+        ArticleListItem(
+            article_no=str(row["article_no"]),
+            article_name=str(row["article_no"])
         ) 
         for row in rows
+        if row["article_no"]
     ]
 
 
@@ -166,101 +156,48 @@ async def get_products_for_customers(
 async def get_customer_behaviour_trend(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
     abc_classes: str = Query("A,B,C", description="Comma-separated ABC classes"),
-    customer_ids: str = Query(..., description="Comma-separated customer IDs (max 2)"),
-    product_ids: str = Query("", description="Single product ID for comparison"),
+    customer_ids: str = Query(..., description="Comma-separated customer names (max 2)"),
+    article_ids: str = Query("", description="Single article ID for comparison"),
     metric: str = Query("Revenue", description="'Revenue' or 'Quantity'")
 ):
     """
     Get customer behaviour trend data with dual-axis support.
-    
-    Returns both:
-    1. Overall customer revenue/qty (all products) - for left axis
-    2. Selected product revenue/qty (specific product) - for right axis
-    
-    For each customer, returns separate series:
-    - "Customer {id} Overall"
-    - "Customer {id} Product {product_id}"
-    
-    SQL Query:
-        SELECT
-            t1."TimeID",
-            t1."CustomerID",
-            t1."ProductID", 
-            t2."Category" AS "ABC_Category",
-            t1."Quantity",
-            t1."Revenue"
-        FROM public."Aggregated Data" AS t1
-        INNER JOIN public."customer_ABC_{table_suffix}" AS t2 
-            ON t1."CustomerID" = t2."CustomerID"
-        WHERE
-            t1."TimeID" BETWEEN {start} AND {end}
-            AND t2."Category" IN (...)
-            AND t1."CustomerID" IN (...)
-        ORDER BY t1."TimeID"
-    
-    Returns:
-        [
-            {"month": "2024-04-01", "value": 12.5, "type": "Customer 101 Overall", "product_id": null, "customer_id": 101},
-            {"month": "2024-04-01", "value": 3.2, "type": "Customer 101 Product 201", "product_id": 201, "customer_id": 101},
-            {"month": "2024-04-01", "value": 15.8, "type": "Customer 102 Overall", "product_id": null, "customer_id": 102},
-            {"month": "2024-04-01", "value": 4.1, "type": "Customer 102 Product 201", "product_id": 201, "customer_id": 102},
-            ...
-        ]
     """
     # Parse FY
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid financial year format")
     
-    table_suffix = f"FY{fy_parts[0]}_{fy_parts[1]}"
-    
-    start_year = int(f"20{fy_parts[0]}")
-    end_year = int(f"20{fy_parts[1]}")
-    
-    start_date = datetime(start_year, 4, 1)
-    end_date = datetime(end_year, 3, 31)
-    
-    start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
-                     (start_date.month - BASE_DATE.month) + 1)
-    end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
-                   (end_date.month - BASE_DATE.month) + 1)
+    start_date = f"{start_year}-04-01"
+    end_date = f"{end_year}-03-31"
     
     # Parse inputs
     class_list = [cls.strip().upper() for cls in abc_classes.split(",")]
-    class_in = ",".join([f"'{cls}'" for cls in class_list])
     
     cust_list = [cid.strip() for cid in customer_ids.split(",")]
-    cust_in = ",".join(cust_list)
+    cust_in = ",".join([f"'{c.replace(chr(39), chr(39)+chr(39))}'" for c in cust_list])
     
     # Validate customer limit
     if len(cust_list) > 2:
         raise HTTPException(status_code=400, detail="Maximum 2 customers allowed")
     
-    # Parse product ID (single product only)
-    selected_product_id = None
-    if product_ids.strip():
-        try:
-            selected_product_id = int(product_ids.strip())
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid product ID format")
+    # Parse article ID (single article only)
+    selected_article_id = article_ids.strip() if article_ids.strip() else None
     
     # Query data
     sql = f'''
         SELECT
-            t1."TimeID",
-            t1."CustomerID",
-            t1."ProductID", 
-            t2."Category" AS "ABC_Category",
-            t1."Quantity",
-            t1."Revenue"
-        FROM public."Aggregated Data" AS t1
-        INNER JOIN public."customer_ABC_{table_suffix}" AS t2 
-            ON t1."CustomerID" = t2."CustomerID"
+            TO_CHAR(invoice_date, 'YYYY-MM') AS "TimeID",
+            customer_name AS "CustomerID",
+            article_no AS "ProductID", 
+            inv_quantity AS "Quantity",
+            ass_value AS "Revenue"
+        FROM public."spoorthi_dataset_without_spares"
         WHERE
-            t1."TimeID" BETWEEN {start_time_id} AND {end_time_id}
-            AND t2."Category" IN ({class_in})
-            AND t1."CustomerID" IN ({cust_in})
-        ORDER BY t1."TimeID"
+            invoice_date BETWEEN '{start_date}' AND '{end_date}'
+            AND customer_name IN ({cust_in})
+        ORDER BY TO_CHAR(invoice_date, 'YYYY-MM')
     '''
     
     rows = query_all(sql)  # type: ignore
@@ -274,57 +211,51 @@ async def get_customer_behaviour_trend(
     metric_col = "Revenue" if metric == "Revenue" else "Quantity"
     
     # Separate data structures for each customer
-    # customer_overall[customer_id][time_id] = value (all products)
-    # customer_product[customer_id][time_id] = value (specific product only)
     customer_overall = defaultdict(lambda: defaultdict(float))
     customer_product = defaultdict(lambda: defaultdict(float))
     
+    all_time_ids = set()
+    
     for row in rows:
-        time_id = row["TimeID"]
+        time_id = row["TimeID"] # 'YYYY-MM' format
         customer_id = row["CustomerID"]
         product_id = row["ProductID"]
         value = float(row[metric_col] or 0)
+        
+        all_time_ids.add(time_id)
         
         # Add to overall (all products)
         customer_overall[customer_id][time_id] += value
         
         # Add to product-specific if it matches selected product
-        if selected_product_id and product_id == selected_product_id:
+        if selected_article_id and product_id == selected_article_id:
             customer_product[customer_id][time_id] += value
     
     # Build response
     result = []
     
-    # Generate all months in the financial year range
-    for time_id in range(start_time_id, end_time_id + 1):
-        # Calculate proper month/year from TimeID
-        months_offset = time_id - 1
-        year = BASE_DATE.year + (BASE_DATE.month + months_offset - 1) // 12
-        month = (BASE_DATE.month + months_offset - 1) % 12 + 1
-        month_date = datetime(year, month, 1)
-        month_str = month_date.strftime("%Y-%m-%d")
+    for time_id in sorted(list(all_time_ids)):
+        month_str = f"{time_id}-01"
         
         # Add data for each customer
         for customer_id in cust_list:
-            cust_id_int = int(customer_id)
-            
-            # Overall line for this customer (always include, even if zero)
-            overall_value = customer_overall[cust_id_int].get(time_id, 0.0)
+            # Overall line for this customer
+            overall_value = customer_overall[customer_id].get(time_id, 0.0)
             result.append(CustomerBehaviourDataPoint(
                 month=month_str,
                 value=round(overall_value, 2),
-                type=f"Customer {cust_id_int} Overall",
-                product_id=None
+                type=f"Customer {customer_id} Overall",
+                article_no=None
             ))
             
-            # Product-specific line for this customer (if product selected, always include even if zero)
-            if selected_product_id:
-                product_value = customer_product[cust_id_int].get(time_id, 0.0)
+            # Product-specific line for this customer
+            if selected_article_id:
+                product_value = customer_product[customer_id].get(time_id, 0.0)
                 result.append(CustomerBehaviourDataPoint(
                     month=month_str,
                     value=round(product_value, 2),
-                    type=f"Customer {cust_id_int} Product {selected_product_id}",
-                    product_id=selected_product_id
+                    type=f"Customer {customer_id} Article {selected_article_id}",
+                    article_no=selected_article_id
                 ))
     
     return result

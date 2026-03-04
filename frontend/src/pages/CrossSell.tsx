@@ -76,12 +76,12 @@ const CrossSell = () => {
 
   const handleDownload = () => {
     const csvContent = [
-      ['Distributor Code', 'Distributor Name', 'Products Purchased', 'Product Names', 'Recommendations', 'Recommendation Names'],
+      ['Distributor Code', 'Distributor Name', 'Articles Purchased', 'Article Names', 'Recommendations', 'Recommendation Names'],
       ...filteredRows.map(row => [
         row.customer,
         row.customer_name,
-        row.products_purchased,
-        row.product_names_purchased,
+        row.articles_purchased,
+        row.article_names_purchased,
         row.recommendations,
         row.recommendation_names,
       ])
@@ -108,8 +108,8 @@ const CrossSell = () => {
       minWidth: 150,
     },
     {
-      field: 'products_purchased',
-      headerName: 'Products Purchased (Codes)',
+      field: 'articles_purchased',
+      headerName: 'Articles Purchased (Codes)',
       flex: 1,
       minWidth: 200,
       renderCell: (params) => {
@@ -142,12 +142,12 @@ const CrossSell = () => {
       },
     },
     {
-      field: 'product_names_purchased',
-      headerName: 'Products Purchased (Names)',
+      field: 'article_names_purchased',
+      headerName: 'Articles Purchased (Names)',
       flex: 1,
       minWidth: 250,
       renderCell: (params) => {
-        const value = params.value || params.row.products_purchased;
+        const value = params.value || params.row.articles_purchased;
         const { displayValue, hasMore, totalCount } = limitValues(value, params.row.id);
         return (
           <Box 
@@ -253,8 +253,8 @@ const CrossSell = () => {
     id: index,
     customer: rec.customer,
     customer_name: rec.customer_name || '',
-    products_purchased: rec.products_purchased,
-    product_names_purchased: rec.product_names_purchased || '',
+    articles_purchased: rec.articles_purchased,
+    article_names_purchased: rec.article_names_purchased || '',
     recommendations: rec.recommendations,
     recommendation_names: rec.recommendation_names || '',
   }));

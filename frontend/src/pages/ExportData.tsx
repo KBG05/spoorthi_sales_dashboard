@@ -31,7 +31,15 @@ const ExportData = () => {
       buttonText: 'DOWNLOAD ROLLING ABC/XYZ',
       endpoint: 'rolling-abc-xyz',
       filename: 'rolling_abc_xyz_analysis.csv',
-      buttonColor: '#0288d1', // Blue
+      buttonColor: '#0288d1',
+    },
+    {
+      title: 'Customer ABC/XYZ (FY)',
+      description: 'Downloads the Customer ABC/XYZ classification for the latest financial year.',
+      buttonText: 'DOWNLOAD CUSTOMER ABC/XYZ FY',
+      endpoint: 'customer-abc-xyz-fy',
+      filename: 'customer_abc_xyz_fy.csv',
+      buttonColor: '#7b1fa2',
     },
     {
       title: 'Demand Forecast',
@@ -39,7 +47,7 @@ const ExportData = () => {
       buttonText: 'DOWNLOAD FORECAST',
       endpoint: 'forecast',
       filename: 'demand_forecast.csv',
-      buttonColor: '#2e7d32', // Green
+      buttonColor: '#2e7d32',
     },
     {
       title: 'Cross-Sell Recommendations',
@@ -47,7 +55,15 @@ const ExportData = () => {
       buttonText: 'DOWNLOAD CROSS-SELL',
       endpoint: 'cross-sell',
       filename: 'cross_sell_recommendations.csv',
-      buttonColor: '#00acc1', // Cyan
+      buttonColor: '#00acc1',
+    },
+    {
+      title: 'RFM Monthly Scores',
+      description: 'Downloads the latest monthly RFM (Recency, Frequency, Monetary) segmentation scores.',
+      buttonText: 'DOWNLOAD RFM SCORES',
+      endpoint: 'rfm-monthly',
+      filename: 'rfm_monthly_scores.csv',
+      buttonColor: '#ef6c00',
     },
   ];
 

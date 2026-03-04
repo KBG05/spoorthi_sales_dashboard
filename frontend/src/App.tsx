@@ -16,6 +16,8 @@ import TransitionAnalysis from './pages/TransitionAnalysis';
 import ExportData from './pages/ExportData';
 import CBA from './pages/CBA';
 import CustomerClassComparison from './pages/CustomerClassComparison';
+import CustomerProduct from './pages/CustomerProduct';
+import CustomerComparison from './pages/CustomerComparison';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -46,6 +48,8 @@ function App() {
         <Route path="forecast" element={<Forecast />} />
         <Route path="top-performance" element={<TopPerformance />} />
         <Route path="cross-sell" element={<CrossSell />} />
+        <Route path="customer-product" element={<CustomerProduct />} />
+        <Route path="customer-comparison" element={<CustomerComparison />} />
         <Route path="export-data" element={<ExportData />} />
       </Route>
     </Routes>

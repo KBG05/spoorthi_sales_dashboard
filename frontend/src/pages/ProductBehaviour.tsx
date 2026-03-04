@@ -32,7 +32,7 @@ const ProductBehaviour: React.FC = () => {
   const [abcClass, setAbcClass] = useState<'A' | 'B' | 'C'>('A');
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [showLabels, setShowLabels] = useState(true);
   const [data, setData] = useState<ProductBehaviourDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -67,8 +67,8 @@ const ProductBehaviour: React.FC = () => {
         const result = await productBehaviourApi.getProducts(financialYear, abcClass);
         setProducts(result);
         // Keep existing selections that are still valid
-        const validProductIds = result.map(p => p.product_id);
-        setSelectedProducts(prev => prev.filter(id => validProductIds.includes(id)));
+        const validArticleNos = result.map(p => p.article_no);
+        setSelectedProducts(prev => prev.filter(id => validArticleNos.includes(id)));
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
@@ -78,20 +78,20 @@ const ProductBehaviour: React.FC = () => {
     fetchProducts();
   }, [financialYear, abcClass]);
 
-  // Group products by product_id and combine their names
+  // Group products by article_no and combine their names
   const groupedProducts = useMemo(() => {
-    const productMap = new Map<number, { product_id: number; product_names: string[] }>();
+    const productMap = new Map<string, { article_no: string; article_names: string[] }>();
     
     products.forEach(product => {
-      if (productMap.has(product.product_id)) {
-        const existing = productMap.get(product.product_id)!;
-        if (product.product_name && !existing.product_names.includes(product.product_name)) {
-          existing.product_names.push(product.product_name);
+      if (productMap.has(product.article_no)) {
+        const existing = productMap.get(product.article_no)!;
+        if (product.article_name && !existing.article_names.includes(product.article_name)) {
+          existing.article_names.push(product.article_name);
         }
       } else {
-        productMap.set(product.product_id, {
-          product_id: product.product_id,
-          product_names: product.product_name ? [product.product_name] : []
+        productMap.set(product.article_no, {
+          article_no: product.article_no,
+          article_names: product.article_name ? [product.article_name] : []
         });
       }
     });
@@ -111,8 +111,8 @@ const ProductBehaviour: React.FC = () => {
       try {
         // Fetch data for each selected product and combine
         const allResults = await Promise.all(
-          selectedProducts.map(productId =>
-            productBehaviourApi.getTrend(financialYear, abcClass, productId, metric)
+          selectedProducts.map(articleNo =>
+            productBehaviourApi.getTrend(financialYear, abcClass, articleNo, metric)
           )
         );
         // Convert month dates to month names
@@ -133,7 +133,7 @@ const ProductBehaviour: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="100%" p={2.5}>
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-        Product Behavior vs Class Trend
+        Article Behavior vs Class Trend
       </Typography>
       {/* Filter Section */}
       <Box 
@@ -193,16 +193,16 @@ const ProductBehaviour: React.FC = () => {
               sx={{ minWidth: 300, flex: 1 }}
               options={groupedProducts}
               getOptionLabel={(option) => {
-                const names = option.product_names.length > 0 
-                  ? option.product_names.join(', ') 
+                const names = option.article_names.length > 0 
+                  ? option.article_names.join(', ') 
                   : 'No Name';
-                return `${option.product_id} - ${names}`;
+                return `${option.article_no} - ${names}`;
               }}
-              value={groupedProducts.filter(p => selectedProducts.includes(p.product_id))}
+              value={groupedProducts.filter(p => selectedProducts.includes(p.article_no))}
               onChange={(_, newValue) => {
-                // Limit to max 4 products
+                // Limit to max 4 articles
                 if (newValue.length <= 4) {
-                  setSelectedProducts(newValue.map(v => v.product_id));
+                  setSelectedProducts(newValue.map(v => v.article_no));
                 }
               }}
               loading={loadingProducts}
@@ -210,8 +210,8 @@ const ProductBehaviour: React.FC = () => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Select Products (max 4)"
-                  placeholder={selectedProducts.length >= 4 ? 'Max 4 reached' : 'Search products...'}
+                  label="Select Articles (max 4)"
+                  placeholder={selectedProducts.length >= 4 ? 'Max 4 reached' : 'Search articles...'}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -227,7 +227,7 @@ const ProductBehaviour: React.FC = () => {
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setSelectedProducts(groupedProducts.map(p => p.product_id))}
+              onClick={() => setSelectedProducts(groupedProducts.map(p => p.article_no))}
               disabled={loadingProducts || groupedProducts.length === 0}
             >
               Select All
@@ -263,7 +263,7 @@ const ProductBehaviour: React.FC = () => {
       ) : selectedProducts.length === 0 ? (
         <Box display="flex" justifyContent="center" alignItems="center" flex={1}>
           <Typography color="text.secondary">
-            Select up to 4 products to view behavior analysis
+            Select up to 4 articles to view behavior analysis
           </Typography>
         </Box>
       ) : data.length === 0 ? (
@@ -273,19 +273,19 @@ const ProductBehaviour: React.FC = () => {
       ) : (
         <Box flex={1} minHeight={0}>
           <Grid container spacing={2}>
-            {selectedProducts.map((productId, index) => {
+            {selectedProducts.map((articleNo, index) => {
               const productData = data.filter(d => 
-                d.type === `Product ${productId}` || d.type.startsWith('Class')
+                d.type === `Article ${articleNo}` || d.type.startsWith('Class')
               );
               const productColor = PRODUCT_COLORS[index % PRODUCT_COLORS.length];
-              const productInfo = groupedProducts.find(p => p.product_id === productId);
-              const productLabel = productInfo?.product_names.length ? productInfo.product_names.join(', ') : `Product ${productId}`;
+              const productInfo = groupedProducts.find(p => p.article_no === articleNo);
+              const productLabel = productInfo?.article_names.length ? productInfo.article_names.join(', ') : `Article ${articleNo}`;
               
               return (
-                <Grid size={{ xs: 12, md: selectedProducts.length === 1 ? 12 : 6 }} key={productId}>
+                <Grid size={{ xs: 12, md: selectedProducts.length === 1 ? 12 : 6 }} key={articleNo}>
                   <Paper sx={{ p: 2, height: selectedProducts.length === 1 ? 500 : 350 }}>
                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: productColor }}>
-                      {productId} - {productLabel}
+                      {articleNo} - {productLabel}
                     </Typography>
                     {productData.length === 0 ? (
                       <Box display="flex" justifyContent="center" alignItems="center" height="80%">
@@ -324,7 +324,7 @@ const ProductBehaviour: React.FC = () => {
                           },
                           {
                             id: 'productAxis',
-                            label: metric === 'Revenue' ? 'Product' : 'Product',
+                            label: metric === 'Revenue' ? 'Article' : 'Article',
                             width: 110,
                             position: 'right',
                             valueFormatter: (value: number, context: AxisValueFormatterContext) => {
@@ -379,7 +379,7 @@ const ProductBehaviour: React.FC = () => {
                             
                             return {
                               data: alignedData,
-                              label: type === `Product ${productId}` ? productLabel : type,
+                              label: type === `Article ${articleNo}` ? productLabel : type,
                               curve: 'linear' as const,
                               showMark: showLabels,
                               yAxisId: isClassTotal ? 'classAxis' : 'productAxis',

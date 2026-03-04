@@ -4,10 +4,14 @@ Forecast Endpoints
 Replicates: server/forecast_server.R
 UI Reference: ui/forecast_ui.R
 
-Provides demand forecast data from the latest forecast table.
+Provides demand forecast data from the final_sales_forecasts table,
+enriched with category, ABC/XYZ class, unique customers, and
+last-3-month individual quantities from the datamart and raw data.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends
+from typing import Optional
+from datetime import datetime
 from ..database import query_one, query_all
 from ..schemas import ForecastResponse, ForecastRow, User
 from ..endpoints.auth import get_current_user
@@ -15,265 +19,159 @@ from ..endpoints.auth import get_current_user
 router = APIRouter(prefix="/forecast", tags=["Forecast"], dependencies=[Depends(get_current_user)])
 
 
-@router.get("/available-months")
-async def get_available_forecast_months():
-    """
-    Get list of available forecast months from demand_forecast tables.
-    Returns list of formatted month strings.
-    """
-    table_query = """
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name LIKE 'demand_forecast_%_%'
-        ORDER BY table_name DESC
-    """
-    
-    rows = query_all(table_query)  # type: ignore
-    
-    if not rows:
-        return {"months": []}
-    
-    import re
-    from datetime import datetime
-    
-    months = []
-    for row in rows:
-        table_name = row["table_name"]
-        match = re.search(r'(\d{4})_(\d{2})$', table_name)
-        if match:
-            year = match.group(1)
-            month = int(match.group(2))
-            try:
-                month_date = datetime(int(year), month, 1)
-                months.append({
-                    "table_name": table_name,
-                    "display": month_date.strftime("%B %Y"),
-                    "year": year,
-                    "month": f"{month:02d}"
-                })
-            except ValueError:
-                continue
-    
-    return {"months": months}
-
-
 @router.get("/demand", response_model=ForecastResponse)
-async def get_demand_forecast():
+async def get_demand_forecast(
+    granularity: Optional[str] = Query("monthly", description="Granularity: monthly, bimonthly, or quarterly"),
+):
     """
-    Get latest demand forecast data.
-    
-    Matches: forecast_server.R -> latest_forecast reactive
-    
-    SQL Queries:
-        1. Find latest forecast table:
-            SELECT table_name 
-            FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name LIKE 'demand_forecast_%_%'
-        
-        2. Fetch forecast data:
-            SELECT "ProductID", "ForecastMonth", "PredictedQuantity" 
-            FROM public."{latest_table_name}" 
-            ORDER BY "ProductID"
-    
-    Returns:
-        {
-            "table_name": "demand_forecast_2025_03",
-            "display_month": "Displaying forecast generated for: 2025-03",
-            "data": [
-                {"product_id": 101, "forecast_month": "2025-04", "predicted_quantity": 1250.5},
-                ...
-            ]
-        }
+    Get demand forecast data enriched with category, unique customers,
+    and last 3-month individual + average quantities.
     """
-    # Find latest forecast table
-    table_query = """
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name LIKE 'demand_forecast_%_%'
-        ORDER BY table_name DESC
+    # Check table exists
+    table_check = query_one("""
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'final_sales_forecasts'
         LIMIT 1
+    """)
+    if not table_check:
+        raise HTTPException(status_code=404, detail="No forecast table found")
+
+    # Validate granularity
+    valid_granularities = ("monthly", "bimonthly", "quarterly")
+    if granularity not in valid_granularities:
+        granularity = "monthly"
+
+    # Get available granularities
+    gran_rows = query_all("""
+        SELECT DISTINCT granularity FROM public."final_sales_forecasts" ORDER BY granularity
+    """)
+    available_granularities = [r["granularity"] for r in gran_rows] if gran_rows else []
+
+    # Find the last 3 months in raw data (for enrichment)
+    last3_sql = """
+        SELECT DISTINCT TO_CHAR(invoice_date, 'YYYY-MM') AS ym
+        FROM spoorthi_dataset_without_spares
+        ORDER BY ym DESC LIMIT 3
     """
-    
-    result = query_one(table_query)  # type: ignore
-    
-    if not result or not result.get("table_name"):
-        raise HTTPException(
-            status_code=404,
-            detail="No demand forecast table found"
+    last3_rows = query_all(last3_sql)
+    last3_months = sorted([r["ym"] for r in last3_rows]) if last3_rows else []
+
+    # Derive month labels (e.g. "Nov 2025")
+    month_labels = []
+    for ym in last3_months:
+        parts = ym.split("-")
+        dt = datetime(int(parts[0]), int(parts[1]), 1)
+        month_labels.append(dt.strftime("%b %Y"))
+
+    month_1_name = month_labels[0] if len(month_labels) > 0 else "Month 1"
+    month_2_name = month_labels[1] if len(month_labels) > 1 else "Month 2"
+    month_3_name = month_labels[2] if len(month_labels) > 2 else "Month 3"
+
+    # Build the enriched query:
+    # - Category + ABC/XYZ from datamart (latest month per article)
+    # - Unique customers from raw data (last 3 months)
+    # - Individual month quantities from raw data
+    month_clauses = []
+    for i, ym in enumerate(last3_months, 1):
+        month_clauses.append(
+            f"COALESCE(SUM(CASE WHEN TO_CHAR(r.invoice_date,'YYYY-MM')='{ym}' THEN r.inv_quantity END),0) AS month_{i}_quantity"
         )
-    
-    table_name = result["table_name"]
-    
-    # Extract month from table name (e.g., demand_forecast_2025_07 -> July 2025)
-    import re
-    from datetime import datetime
-    match = re.search(r'(\d{4})_(\d{2})$', table_name)
-    if match:
-        year = match.group(1)
-        month = int(match.group(2))
-        try:
-            month_date = datetime(int(year), month, 1)
-            display_month = f"Forecast Generated: {month_date.strftime('%B %Y')}"
-        except ValueError:
-            display_month = f"Forecast Generated: {year}-{match.group(2)}"
-    else:
-        display_month = f"Forecast Table: {table_name}"
-    
-    # Fetch forecast data with enriched information
-    # Get latest 3 TimeIDs that have actual data
-    latest_time_query = '''
-        SELECT DISTINCT "TimeID"
-        FROM public."Aggregated Data"
-        WHERE "TimeID" IS NOT NULL
-        ORDER BY "TimeID" DESC
-        LIMIT 3
-    '''
-    time_results = query_all(latest_time_query)  # type: ignore
-    
-    print(f"DEBUG: TimeID query results: {time_results}")
-    
-    if time_results and len(time_results) >= 3:
-        latest_time_id = time_results[0]["TimeID"]
-        time_2_months_back = time_results[1]["TimeID"]
-        time_3_months_back = time_results[2]["TimeID"]
-        print(f"DEBUG: Using latest TimeIDs - Month1: {latest_time_id}, Month2: {time_2_months_back}, Month3: {time_3_months_back}")
-    elif time_results and len(time_results) >= 1:
-        latest_time_id = time_results[0]["TimeID"]
-        time_2_months_back = max(1, latest_time_id - 1)
-        time_3_months_back = max(1, latest_time_id - 2)
-    else:
-        latest_time_id = 1
-        time_2_months_back = 1
-        time_3_months_back = 1
-    
-    # Determine financial year from the forecast month
-    # If forecast is generated in, say, 2025_07 (July), we're in FY25-26 (Apr 2025 - Mar 2026)
-    if match:
-        year = int(match.group(1))
-        month = int(match.group(2))
-        # FY starts in April. If month >= 4, FY is year to year+1. Otherwise year-1 to year
-        if month >= 4:
-            fy_start = year
-            fy_end = year + 1
-        else:
-            fy_start = year - 1
-            fy_end = year
-        # Format: FY24_25
-        fy_parts = [str(fy_start)[-2:], str(fy_end)[-2:]]
-    else:
-        # Default to FY24-25 if we can't parse
-        fy_parts = ["24", "25"]
-    
-    # Build ABC/XYZ table name - use uppercase pattern
-    abc_xyz_table = f"product_ABC_XYZ_FY{fy_parts[0]}_{fy_parts[1]}"
-    
-    data_query = f'''
-        WITH product_names_agg AS (
-            SELECT 
-                CAST(product_code AS TEXT) as product_code,
-                ARRAY_AGG(DISTINCT commercial_name) FILTER (WHERE commercial_name IS NOT NULL) as product_names
-            FROM priyatextile_product_master
-            GROUP BY product_code
+    # Pad if fewer than 3 months
+    while len(month_clauses) < 3:
+        month_clauses.append(f"0 AS month_{len(month_clauses)+1}_quantity")
+
+    month_cols = ", ".join(month_clauses)
+
+    three_months_ago = last3_months[0] + "-01" if last3_months else "2000-01-01"
+
+    data_query = f"""
+        WITH forecast AS (
+            SELECT
+                f.prediction_month::date AS prediction_month,
+                f.article_no,
+                f.granularity,
+                f.final_forecast AS predicted_quantity
+            FROM public."final_sales_forecasts" f
+            WHERE f.granularity = %s
+        ),
+        latest_dm AS (
+            SELECT DISTINCT ON (article_no)
+                article_no, category, abc, xyz
+            FROM public."spoorthi_abc_xyz_datamart"
+            ORDER BY article_no, year_month DESC
+        ),
+        enrichment AS (
+            SELECT
+                r.article_no,
+                COUNT(DISTINCT r.customer_name) AS unique_customers,
+                {month_cols}
+            FROM public."spoorthi_dataset_without_spares" r
+            WHERE r.invoice_date >= '{three_months_ago}'
+            GROUP BY r.article_no
         )
-        SELECT 
-            f."ProductID",
-            pn.product_names,
-            pabc."ABC_Category",
-            pabc."XYZ_Category",
-            f."ForecastMonth",
-            f."PredictedQuantity",
-            COUNT(DISTINCT ad."CustomerID") as unique_customers,
-            COALESCE(SUM(ad."Quantity"), 0) as last_3_months_quantity,
-            COALESCE(SUM(CASE WHEN ad."TimeID" = {latest_time_id} THEN ad."Quantity" ELSE 0 END), 0) as month_1_quantity,
-            COALESCE(SUM(CASE WHEN ad."TimeID" = {time_2_months_back} THEN ad."Quantity" ELSE 0 END), 0) as month_2_quantity,
-            COALESCE(SUM(CASE WHEN ad."TimeID" = {time_3_months_back} THEN ad."Quantity" ELSE 0 END), 0) as month_3_quantity
-        FROM public."{table_name}" f
-        LEFT JOIN product_names_agg pn ON CAST(f."ProductID" AS TEXT) = pn.product_code
-        LEFT JOIN (
-            SELECT DISTINCT ON ("ProductID") "ProductID", "ABC_Category", "XYZ_Category"
-            FROM public."{abc_xyz_table}"
-        ) pabc ON f."ProductID" = pabc."ProductID"
-        LEFT JOIN public."Aggregated Data" ad ON f."ProductID" = ad."ProductID"
-            AND ad."TimeID" IN ({latest_time_id}, {time_2_months_back}, {time_3_months_back})
-        GROUP BY f."ProductID", pn.product_names, pabc."ABC_Category", pabc."XYZ_Category", f."ForecastMonth", f."PredictedQuantity"
-        ORDER BY f."ProductID"
-    '''
-    
-    rows = query_all(data_query)  # type: ignore
-    
+        SELECT
+            fc.prediction_month,
+            fc.article_no,
+            fc.granularity,
+            fc.predicted_quantity,
+            dm.category,
+            CONCAT(dm.abc, dm.xyz) AS abc_xyz,
+            COALESCE(en.unique_customers, 0) AS unique_customers,
+            COALESCE(en.month_1_quantity, 0) AS month_1_quantity,
+            COALESCE(en.month_2_quantity, 0) AS month_2_quantity,
+            COALESCE(en.month_3_quantity, 0) AS month_3_quantity
+        FROM forecast fc
+        LEFT JOIN latest_dm dm ON dm.article_no = fc.article_no
+        LEFT JOIN enrichment en ON en.article_no = fc.article_no
+        ORDER BY fc.prediction_month DESC, fc.article_no
+    """
+
+    rows = query_all(data_query, (granularity,))
+
     if not rows:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No forecast data found in table {table_name}"
+        raise HTTPException(status_code=404, detail="No forecast data found for this granularity")
+
+    forecast_data = []
+    for row in rows:
+        pm = row["prediction_month"]
+        if pm:
+            if isinstance(pm, str):
+                pm = datetime.strptime(pm[:10], "%Y-%m-%d")
+            pm_str = pm.strftime("%Y-%m-%d")
+        else:
+            pm_str = ""
+
+        m1 = float(row["month_1_quantity"] or 0)
+        m2 = float(row["month_2_quantity"] or 0)
+        m3 = float(row["month_3_quantity"] or 0)
+        avg_3m = round((m1 + m2 + m3) / 3, 1) if (m1 + m2 + m3) > 0 else 0.0
+
+        forecast_data.append(
+            ForecastRow(
+                article_no=str(row["article_no"]),
+                prediction_month=pm_str,
+                granularity=row["granularity"],
+                predicted_quantity=float(row["predicted_quantity"] or 0),
+                category=row["category"] or "",
+                abc_xyz=row["abc_xyz"] or "",
+                unique_customers=int(row["unique_customers"] or 0),
+                last_3_months_quantity=avg_3m,
+                month_1_quantity=m1,
+                month_2_quantity=m2,
+                month_3_quantity=m3,
+            )
         )
-    
-    # Debug: Check first few rows
-    if rows and len(rows) > 0:
-        print(f"DEBUG: First forecast row - ProductID: {rows[0].get('ProductID')}, "
-              f"Last3M: {rows[0].get('last_3_months_quantity')}, "
-              f"M1: {rows[0].get('month_1_quantity')}, "
-              f"M2: {rows[0].get('month_2_quantity')}, "
-              f"M3: {rows[0].get('month_3_quantity')}")
-        
-        # Verify with direct query for this product
-        test_product_id = rows[0].get('ProductID')
-        verify_query = f'''
-            SELECT 
-                "TimeID",
-                COUNT(*) as row_count,
-                SUM("Quantity") as total_quantity
-            FROM public."Aggregated Data"
-            WHERE "ProductID" = {test_product_id}
-            AND "TimeID" IN ({latest_time_id}, {time_2_months_back}, {time_3_months_back})
-            GROUP BY "TimeID"
-            ORDER BY "TimeID" DESC
-        '''
-        verify_results = query_all(verify_query)  # type: ignore
-        print(f"DEBUG: Verification for ProductID {test_product_id}:")
-        for vr in verify_results:
-            print(f"  TimeID {vr['TimeID']}: {vr['row_count']} rows, Total Qty: {vr['total_quantity']}")
-    
-    # Get month names from TimeID
-    # TimeID is sequential based on calendar months (not financial year)
-    # TimeID 1 = Jan (first year), TimeID 2 = Feb, ..., TimeID 12 = Dec, TimeID 13 = Jan (next year), etc.
-    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
-    month_1_index = (latest_time_id - 1) % 12
-    month_2_index = (time_2_months_back - 1) % 12
-    month_3_index = (time_3_months_back - 1) % 12
-    
-    month_1_name = month_names[month_1_index]
-    month_2_name = month_names[month_2_index]
-    month_3_name = month_names[month_3_index]
-    
-    print(f"DEBUG: Month indices - M1: {month_1_index}, M2: {month_2_index}, M3: {month_3_index}")
-    print(f"DEBUG: Month names - Month1: {month_1_name}, Month2: {month_2_name}, Month3: {month_3_name}")
-    
-    # Build response
-    forecast_data = [
-        ForecastRow(
-            product_id=int(row["ProductID"]),
-            product_names=row.get("product_names"),
-            category=f"{row.get('ABC_Category', '')}{row.get('XYZ_Category', '')}" if row.get('ABC_Category') and row.get('XYZ_Category') else None,
-            forecast_month=str(row["ForecastMonth"]),
-            predicted_quantity=float(row["PredictedQuantity"] or 0),
-            unique_customers=int(row.get("unique_customers", 0)),
-            last_3_months_quantity=float(row.get("last_3_months_quantity", 0)) / 3,  # Average instead of total
-            month_1_quantity=float(row.get("month_1_quantity", 0)),
-            month_2_quantity=float(row.get("month_2_quantity", 0)),
-            month_3_quantity=float(row.get("month_3_quantity", 0))
-        )
-        for row in rows
-    ]
-    
+
+    display_month = f"Sales Forecast — {granularity.title()}"
+
     return ForecastResponse(
-        table_name=table_name,
+        table_name="final_sales_forecasts",
         display_month=display_month,
         data=forecast_data,
+        available_granularities=available_granularities,
         month_1_name=month_1_name,
         month_2_name=month_2_name,
-        month_3_name=month_3_name
+        month_3_name=month_3_name,
     )

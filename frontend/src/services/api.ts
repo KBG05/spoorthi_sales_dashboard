@@ -86,7 +86,7 @@ export const customerBehaviourAPI = {
   getProducts: (params: {
     financial_year: string;
     customer_ids: string;
-  }) => apiClient.get<API.ProductListItem[]>('/customer-behaviour/products', { params }),
+  }) => apiClient.get<API.ProductListItem[]>('/customer-behaviour/articles', { params }),
   
   getTrend: (params: {
     financial_year: string;
@@ -115,14 +115,14 @@ export const productBehaviourAPI = {
   getProducts: (params: {
     financial_year: string;
     abc_class: string;
-  }) => apiClient.get<API.ProductListItem[]>('/product-behaviour/products', { params }),
+  }) => apiClient.get<API.ProductListItem[]>('/article-behaviour/articles', { params }),
   
   getTrend: (params: {
     financial_year: string;
     abc_class: string;
-    product_id: number;
+    article_no: string;
     metric?: string;
-  }) => apiClient.get<API.ProductBehaviourDataPoint[]>('/product-behaviour/trend', { params }),
+  }) => apiClient.get<API.ProductBehaviourDataPoint[]>('/article-behaviour/trend', { params }),
 };
 
 // ===================================

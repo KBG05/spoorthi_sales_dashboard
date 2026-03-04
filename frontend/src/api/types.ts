@@ -26,8 +26,8 @@ export interface ABCXYZMatrixResponse {
 }
 
 export interface ABCXYZProductItem {
-  product_id: number;
-  product_name?: string;
+  article_no: string;
+  article_name?: string;
 }
 
 export interface CategoryHierarchyItem {
@@ -64,8 +64,8 @@ export interface CustomerTrendDataPoint {
 export interface CrossSellRecommendation {
   customer: string;
   customer_name?: string;
-  products_purchased: string;
-  product_names_purchased?: string;
+  articles_purchased: string;
+  article_names_purchased?: string;
   recommendations: string;
   recommendation_names?: string;
 }
@@ -74,16 +74,16 @@ export interface CustomerBehaviourDataPoint {
   month: string;
   value: number;
   type: string;
-  product_id?: number;
+  article_no?: string;
 }
 
 export interface ProductListItem {
-  product_id: number;
-  product_name?: string;
+  article_no: string;
+  article_name?: string;
 }
 
 export interface CustomerListItem {
-  customer_id: number;
+  customer_id: string;
   customer_name?: string;
   abc_category?: string;
 }
@@ -93,11 +93,11 @@ export interface ProductBehaviourDataPoint {
   value: number;
   scaled_value: number;
   type: string;
-  product_id?: number;
+  article_no?: string;
 }
 
 export interface TopPerformerItem {
-  id: number;
+  id: string;
   revenue: number;
   name?: string;
 }
@@ -116,25 +116,27 @@ export interface TicketSizeBand {
 }
 
 export interface ForecastRow {
-  product_id: number;
-  product_names?: string[];
-  category?: string;
-  forecast_month: string;
+  article_no: string;
+  prediction_month: string;
+  granularity: string;
   predicted_quantity: number;
-  unique_customers?: number;
-  last_3_months_quantity?: number;
-  month_1_quantity?: number;
-  month_2_quantity?: number;
-  month_3_quantity?: number;
+  category: string;
+  abc_xyz: string;
+  unique_customers: number;
+  last_3_months_quantity: number;
+  month_1_quantity: number;
+  month_2_quantity: number;
+  month_3_quantity: number;
 }
 
 export interface ForecastResponse {
   table_name: string;
   display_month: string;
   data: ForecastRow[];
-  month_1_name?: string;
-  month_2_name?: string;
-  month_3_name?: string;
+  available_granularities: string[];
+  month_1_name: string;
+  month_2_name: string;
+  month_3_name: string;
 }
 
 export interface TransitionAnalysisResponse {
@@ -148,7 +150,7 @@ export interface TransitionAnalysisResponse {
 // ============================================================================
 
 export interface RFMMetrics {
-  customer_id: number;
+  customer_id: string;
   recency: number;
   frequency: number;
   monetary: number;
@@ -184,6 +186,22 @@ export interface DistributionBin {
 // ============================================================================
 // Customer Class Comparison Types
 // ============================================================================
+
+// ============================================================================
+// Customer Product List Types
+// ============================================================================
+
+export interface CustomerProductRow {
+  customer_name: string;
+  article_no: string;
+  last_purchase_date: string;
+}
+
+export interface CustomerProductResponse {
+  data: CustomerProductRow[];
+  total: number;
+  calculation_date: string;
+}
 
 export interface ClassComparisonDataPoint {
   month: string;  // Format: "YYYY-MM"

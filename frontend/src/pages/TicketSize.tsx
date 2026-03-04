@@ -143,7 +143,7 @@ const TicketSize: React.FC = () => {
                     countData.labels[dataIndex] || value?.toString() || '0',
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 80 }}
+              margin={{ top: 0, right: 30, bottom: 50, left: 80 }}
               grid={{ vertical: false, horizontal: true }}
               barLabel="value"
               slotProps={{
@@ -201,7 +201,7 @@ const TicketSize: React.FC = () => {
                     revenueData.labels[dataIndex] || `₹${value?.toFixed(2)}Cr`,
                 },
               ]}
-              margin={{ top: 50, right: 30, bottom: 50, left: 100 }}
+              margin={{ top: 0, right: 30, bottom: 50, left: 100 }}
               barLabel={(item) => `₹${item.value?.toFixed(1)}Cr`}
               slotProps={{
                 barLabel: {

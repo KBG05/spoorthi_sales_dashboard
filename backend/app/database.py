@@ -1,5 +1,5 @@
 """
-Lightweight database module for Priya Textile Analytics.
+Lightweight database module for Spoorthi Analytics.
 Provides connection pooling and query helpers for PostgreSQL.
 """
 
@@ -24,12 +24,56 @@ logger = logging.getLogger(__name__)
 DB_CONFIG = {
     "host": os.getenv("DB_HOST", "localhost"),
     "port": int(os.getenv("DB_PORT", 5432)),
-    "database": os.getenv("DB_NAME", "priya_textile"),
+    "database": os.getenv("DB_NAME", "spoorthi_db"),
     "user": os.getenv("DB_USER", "kbg"),
     "password": os.getenv("DB_PASSWORD", "kbg"),
 }
 
 _connection_pool: Optional[pool.SimpleConnectionPool] = None
+
+
+# =============================================
+# FINANCIAL YEAR PARSING HELPER
+# =============================================
+
+def parse_fy(financial_year: str) -> tuple:
+    """
+    Parse financial year string in any format to (start_year, end_year, fin_year_label).
+    
+    Handles: "FY24-25", "24-25", "2024-25", "2024-2025"
+    Returns: (2024, 2025, "2024-25")
+    
+    - start_year: int, e.g. 2024 (also matches fin_year bigint in datamart)
+    - end_year: int, e.g. 2025
+    - fin_year_label: str, e.g. "2024-25" (matches fin_year_label in datamart)
+    """
+    cleaned = financial_year.replace("FY", "").strip()
+    parts = cleaned.split("-")
+    if len(parts) != 2:
+        raise ValueError(f"Invalid financial year format: {financial_year}")
+    
+    p0, p1 = parts[0].strip(), parts[1].strip()
+    
+    # Parse start year
+    if len(p0) == 2:
+        start_year = 2000 + int(p0)
+    elif len(p0) == 4:
+        start_year = int(p0)
+    else:
+        raise ValueError(f"Invalid financial year format: {financial_year}")
+    
+    # Parse end year
+    if len(p1) == 2:
+        end_year = 2000 + int(p1)
+    elif len(p1) == 4:
+        end_year = int(p1)
+    else:
+        raise ValueError(f"Invalid financial year format: {financial_year}")
+    
+    fin_year_label = f"{start_year}-{str(end_year)[-2:]}"
+    
+    return (start_year, end_year, fin_year_label)
+
 
 # =============================================
 # CONNECTION POOL
@@ -120,7 +164,7 @@ def query_scalar(sql: str, params: tuple = None) -> Any:  # type: ignore
     Execute SELECT and return single scalar value.
     
     Example:
-        max_id = query_scalar('SELECT MAX("TimeID") FROM "Aggregated Data"')
+        max_date = query_scalar("SELECT MAX(invoice_date) FROM spoorthi_dataset_without_spares")
     """
     with get_cursor() as cur:
         cur.execute(sql, params)
@@ -133,7 +177,7 @@ def query_df(sql: str, params: tuple = None) -> pd.DataFrame:  # type: ignore
     Execute SELECT and return pandas DataFrame.
     
     Example:
-        df = query_df('SELECT * FROM "Aggregated Data" WHERE "TimeID" > %s', (50,))
+        df = query_df("SELECT * FROM spoorthi_dataset_without_spares WHERE invoice_date > %s", ('2024-01-01',))
     """
     with get_connection() as conn:
         return pd.read_sql_query(sql, conn, params=params)  # type: ignore
@@ -199,14 +243,14 @@ def get_rolling_table_for_time_id(time_id: int) -> Optional[str]:
     return row['tablename'] if row else None
 
 
-def get_latest_time_id() -> Optional[int]:
+def get_latest_time_id() -> Optional[str]:
     """
-    Get the maximum TimeID from Aggregated Data table.
+    Get the latest year-month from the main dataset.
     
     Returns:
-        Latest TimeID (int) or None
+        Latest month as 'YYYY-MM' string or None
     """
-    return query_scalar('SELECT MAX("TimeID") FROM public."Aggregated Data"')
+    return query_scalar("SELECT TO_CHAR(MAX(invoice_date), 'YYYY-MM') FROM public.spoorthi_dataset_without_spares")
 
 
 def safe_table_name(table_name: str) -> str:

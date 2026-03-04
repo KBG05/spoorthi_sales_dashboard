@@ -10,7 +10,7 @@ Provides revenue band analysis for customers or products.
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Literal
 from datetime import datetime
-from ..database import query_all
+from ..database import query_all, parse_fy
 from ..schemas import TicketSizeBand, User
 from ..endpoints.auth import get_current_user
 
@@ -32,55 +32,27 @@ async def get_ticket_size_bands(
 ):
     """
     Get revenue band distribution for products or customers.
-    
-    Matches: ticket_size_server.R -> binned_data reactive
-    
-    SQL Query:
-        SELECT
-          {group_by_col} AS "ID",
-          SUM("Revenue") AS "Total_Revenue"
-        FROM public."Aggregated Data"
-        WHERE
-          "TimeID" BETWEEN {start} AND {end}
-        GROUP BY {group_by_col}
-    
-    Then bins data into revenue ranges and calculates count and total revenue per band.
-    
-    Returns:
-        [
-            {"band": "0-5L", "metric": "Count", "value": 150, "plot_label": "150"},
-            {"band": "0-5L", "metric": "Revenue", "value": 45000000, "plot_label": "₹4.5 CR"},
-            {"band": "5L-20L", "metric": "Count", "value": 80, "plot_label": "80"},
-            ...
-        ]
+    Uses spoorthi_dataset_without_spares with date-based filtering.
     """
-    # Parse FY to get TimeID range
-    fy_parts = financial_year.replace("FY", "").split("-")
-    if len(fy_parts) != 2:
+    # Parse FY to get date range
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
         raise HTTPException(status_code=400, detail="Invalid financial year format")
     
-    start_year = int(f"20{fy_parts[0]}")
-    end_year = int(f"20{fy_parts[1]}")
-    
-    start_date = datetime(start_year, 4, 1)
-    end_date = datetime(end_year, 3, 31)
-    
-    start_time_id = ((start_date.year - BASE_DATE.year) * 12 + 
-                     (start_date.month - BASE_DATE.month) + 1)
-    end_time_id = ((end_date.year - BASE_DATE.year) * 12 + 
-                   (end_date.month - BASE_DATE.month) + 1)
+    start_date = f"{start_year}-04-01"
+    end_date = f"{end_year}-03-31"
     
     # Determine grouping column
-    group_by_col = '"ProductID"' if dimension == "Products" else '"CustomerID"'
+    group_by_col = "article_no" if dimension == "Products" else "customer_name"
     
     # Query total revenue per entity
     sql = f'''
         SELECT
           {group_by_col} AS "ID",
-          SUM("Revenue") AS "Total_Revenue"
-        FROM public."Aggregated Data"
-        WHERE
-          "TimeID" BETWEEN {start_time_id} AND {end_time_id}
+          SUM(ass_value) AS "Total_Revenue"
+        FROM public."spoorthi_dataset_without_spares"
+        WHERE invoice_date BETWEEN '{start_date}' AND '{end_date}'
         GROUP BY {group_by_col}
     '''
     

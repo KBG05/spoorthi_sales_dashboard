@@ -810,15 +810,15 @@ const Dashboard = () => {
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Product ID</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Product Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Article No</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Article Name</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {productPopup.products.map((p) => (
-                    <TableRow key={p.product_id} hover>
-                      <TableCell>{p.product_id}</TableCell>
-                      <TableCell>{p.product_name || '-'}</TableCell>
+                    <TableRow key={p.article_no} hover>
+                      <TableCell>{p.article_no}</TableCell>
+                      <TableCell>{p.article_name || '-'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

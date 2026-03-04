@@ -15,13 +15,15 @@ from .endpoints import (
     cross_sell,
     customer_behaviour,
     customer_trend,
-    product_behaviour,
+    article_behaviour,
     top_performance,
     ticket_size,
     forecast,
     transition_analysis,
     cba,
     customer_class_comparison,
+    customer_product,
+    customer_comparison,
     masters,
 )
 
@@ -44,8 +46,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Priyafil Analytics API",
-    description="Backend API for Priyafil Analytics Dashboard",
+    title="Spoorthi Analytics API",
+    description="Backend API for Spoorthi Analytics Dashboard",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -71,19 +73,21 @@ app.include_router(abc.router)
 app.include_router(cross_sell.router)
 app.include_router(customer_behaviour.router)
 app.include_router(customer_trend.router)
-app.include_router(product_behaviour.router)
+app.include_router(article_behaviour.router)
 app.include_router(top_performance.router)
 app.include_router(ticket_size.router)
 app.include_router(forecast.router)
 app.include_router(transition_analysis.router)
 app.include_router(cba.router)
 app.include_router(customer_class_comparison.router)
+app.include_router(customer_product.router)
+app.include_router(customer_comparison.router)
 
 
 @app.get("/")
 async def root():
     """Root endpoint"""
-    return {"message": "Priyafil Analytics API", "version": "1.0.0", "docs": "/docs"}
+    return {"message": "Spoorthi Analytics API", "version": "1.0.0", "docs": "/docs"}
 
 
 @app.get("/health")

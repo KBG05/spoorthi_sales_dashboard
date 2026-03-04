@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: kbg
       POSTGRES_PASSWORD: kbg
-      POSTGRES_DB: priya_textile
+      POSTGRES_DB: spoorthi_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -22,7 +22,7 @@ services:
       DB_PORT: 5432
       DB_USER: kbg
       DB_PASSWORD: kbg
-      DB_NAME: priya_textile
+      DB_NAME: spoorthi_db
       DB_HOST: db
     depends_on:
       - db

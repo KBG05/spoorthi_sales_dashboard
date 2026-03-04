@@ -35,10 +35,10 @@ const CustomerBehaviour: React.FC = () => {
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [customers, setCustomers] = useState<CustomerListItem[]>([]);
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<number | null>(null);
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [showLabels, setShowLabels] = useState(true);
-  const [productData, setProductData] = useState<Map<number, CustomerBehaviourDataPoint[]>>(new Map());
+  const [productData, setProductData] = useState<Map<string, CustomerBehaviourDataPoint[]>>(new Map());
   const [loading, setLoading] = useState(false);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -117,7 +117,7 @@ const CustomerBehaviour: React.FC = () => {
         );
         setProducts(result);
         // Reset product selections if they're not in the new product list
-        const validIds = result.map(p => p.product_id);
+        const validIds = result.map(p => p.article_no);
         setSelectedProducts(prev => prev.filter(id => validIds.includes(id)));
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -128,20 +128,20 @@ const CustomerBehaviour: React.FC = () => {
     fetchProducts();
   }, [financialYear, selectedCustomer]);
 
-  // Group products by product_id and combine their names
+  // Group products by article_no and combine their names
   const groupedProducts = useMemo(() => {
-    const productMap = new Map<number, { product_id: number; product_names: string[] }>();
+    const productMap = new Map<string, { article_no: string; article_names: string[] }>();
     
     products.forEach(product => {
-      if (productMap.has(product.product_id)) {
-        const existing = productMap.get(product.product_id)!;
-        if (product.product_name && !existing.product_names.includes(product.product_name)) {
-          existing.product_names.push(product.product_name);
+      if (productMap.has(product.article_no)) {
+        const existing = productMap.get(product.article_no)!;
+        if (product.article_name && !existing.article_names.includes(product.article_name)) {
+          existing.article_names.push(product.article_name);
         }
       } else {
-        productMap.set(product.product_id, {
-          product_id: product.product_id,
-          product_names: product.product_name ? [product.product_name] : []
+        productMap.set(product.article_no, {
+          article_no: product.article_no,
+          article_names: product.article_name ? [product.article_name] : []
         });
       }
     });
@@ -162,15 +162,15 @@ const CustomerBehaviour: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const newProductData = new Map<number, CustomerBehaviourDataPoint[]>();
+        const newProductData = new Map<string, CustomerBehaviourDataPoint[]>();
         
         // Fetch data for each selected product
         await Promise.all(
-          selectedProducts.map(async (productId) => {
+          selectedProducts.map(async (articleNo) => {
             const result = await customerBehaviourApi.getTrend(
               financialYear,
               selectedCustomer.toString(),
-              productId.toString(),
+              articleNo.toString(),
               metric
             );
             // Convert month dates to month names
@@ -178,7 +178,7 @@ const CustomerBehaviour: React.FC = () => {
               ...item,
               month: new Date(item.month).toLocaleDateString('en-US', { month: 'short' })
             }));
-            newProductData.set(productId, dataWithMonths);
+            newProductData.set(articleNo, dataWithMonths);
           })
         );
         
@@ -312,15 +312,15 @@ const CustomerBehaviour: React.FC = () => {
               sx={{ minWidth: 350, flex: 1 }}
               options={groupedProducts}
               getOptionLabel={(option) => {
-                const names = option.product_names.length > 0 
-                  ? option.product_names.join(', ') 
+                const names = option.article_names.length > 0 
+                  ? option.article_names.join(', ') 
                   : 'No Name';
-                return `${option.product_id} - ${names}`;
+                return `${option.article_no} - ${names}`;
               }}
-              value={groupedProducts.filter(p => selectedProducts.includes(p.product_id))}
+              value={groupedProducts.filter(p => selectedProducts.includes(p.article_no))}
               onChange={(_, newValue) => {
-                // Deduplicate by product_id
-                const uniqueProducts = new Map(newValue.map(p => [p.product_id, p]));
+                // Deduplicate by article_no
+                const uniqueProducts = new Map(newValue.map(p => [p.article_no, p]));
                 const uniqueIds = Array.from(uniqueProducts.keys());
                 setSelectedProducts(uniqueIds.slice(0, 4));
               }}
@@ -329,17 +329,17 @@ const CustomerBehaviour: React.FC = () => {
               limitTags={2}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => {
-                  const label = option.product_names.length > 0 
-                    ? option.product_names.join(', ') 
-                    : `Product ${option.product_id}`;
+                  const label = option.article_names.length > 0 
+                    ? option.article_names.join(', ') 
+                    : `Article ${option.article_no}`;
                   return (
                     <Chip
                       {...getTagProps({ index })}
-                      key={option.product_id}
+                      key={option.article_no}
                       label={label}
                       size="small"
                       sx={{
-                        backgroundColor: PRODUCT_COLORS[selectedProducts.indexOf(option.product_id) % PRODUCT_COLORS.length],
+                        backgroundColor: PRODUCT_COLORS[selectedProducts.indexOf(option.article_no) % PRODUCT_COLORS.length],
                         color: 'white',
                       }}
                     />
@@ -349,8 +349,8 @@ const CustomerBehaviour: React.FC = () => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Select Products (max 4)"
-                  placeholder={selectedProducts.length >= 4 ? 'Max 4 reached' : 'Search products...'}
+                  label="Select Articles (max 4)"
+                  placeholder={selectedProducts.length >= 4 ? 'Max 4 reached' : 'Search articles...'}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
@@ -405,18 +405,18 @@ const CustomerBehaviour: React.FC = () => {
       ) : (
         <Box flex={1} minHeight={0}>
           <Grid container spacing={2}>
-            {selectedProducts.map((productId, index) => {
-              const data = productData.get(productId) || [];
+            {selectedProducts.map((articleNo, index) => {
+              const data = productData.get(articleNo) || [];
               const productColor = PRODUCT_COLORS[index % PRODUCT_COLORS.length];
               const overallColor = getOverallColor();
-              const productInfo = groupedProducts.find(p => p.product_id === productId);
-              const productLabel = productInfo?.product_names.length ? productInfo.product_names.join(', ') : `Product ${productId}`;
+              const productInfo = groupedProducts.find(p => p.article_no === articleNo);
+              const productLabel = productInfo?.article_names.length ? productInfo.article_names.join(', ') : `Article ${articleNo}`;
               
               return (
-                <Grid size={{ xs: 12, md: selectedProducts.length === 1 ? 12 : 6 }} key={productId}>
+                <Grid size={{ xs: 12, md: selectedProducts.length === 1 ? 12 : 6 }} key={articleNo}>
                   <Paper sx={{ p: 2, height: selectedProducts.length === 1 ? 500 : 350 }}>
                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: productColor }}>
-                      {productId} - {productLabel}
+                      {articleNo} - {productLabel}
                     </Typography>
                     {data.length === 0 ? (
                       <Box display="flex" justifyContent="center" alignItems="center" height="80%">
@@ -458,7 +458,7 @@ const CustomerBehaviour: React.FC = () => {
                           },
                           {
                             id: 'productAxis',
-                            label: metric === 'Revenue' ? 'Product' : 'Product',
+                            label: metric === 'Revenue' ? 'Article' : 'Article',
                             width: 110,
                             position: 'right',
                             valueFormatter: (value: number, context: AxisValueFormatterContext) => {
@@ -517,8 +517,8 @@ const CustomerBehaviour: React.FC = () => {
                             });
                           }
                           
-                          // Product-specific series
-                          const productDataFiltered = data.filter(d => d.type.includes('Product'));
+                          // Article-specific series
+                          const productDataFiltered = data.filter(d => d.type.includes('Article'));
                           if (productDataFiltered.length > 0) {
                             const monthValueMap = new Map(productDataFiltered.map(d => [d.month, d.value]));
                             const alignedData = months.map(month => monthValueMap.get(month) || null);

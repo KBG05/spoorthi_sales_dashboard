@@ -4,6 +4,8 @@ import {
   CircularProgress,
   Typography,
   Paper,
+  ToggleButton,
+  ToggleButtonGroup,
   FormControl,
   Select,
   MenuItem,
@@ -18,11 +20,18 @@ import type { GridColDef } from '@mui/x-data-grid';
 import { forecastApi } from '../api';
 import type { ForecastResponse } from '../api/types';
 
-import { ABC_COLORS, formatQuantity } from '../constants/constants';
+import { ABC_XYZ_COLORS, formatQuantity, withAlpha } from '../constants/constants';
+
+const GRANULARITY_LABELS: Record<string, string> = {
+  monthly: 'Monthly',
+  bimonthly: 'Bimonthly',
+  quarterly: 'Quarterly',
+};
 
 const Forecast: React.FC = () => {
   const [data, setData] = useState<ForecastResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [granularity, setGranularity] = useState('monthly');
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [searchTexts, setSearchTexts] = useState<Record<string, string>>({});
 
@@ -30,9 +39,7 @@ const Forecast: React.FC = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const result = await forecastApi.getDemandForecast();
-        console.log('Forecast data received:', result);
-        console.log('Month names:', result.month_1_name, result.month_2_name, result.month_3_name);
+        const result = await forecastApi.getDemandForecast(granularity);
         setData(result);
       } catch (error) {
         console.error('Error fetching forecast:', error);
@@ -41,36 +48,31 @@ const Forecast: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [granularity]);
 
   const columns: GridColDef[] = useMemo(() => [
     {
-      field: 'product_id',
-      headerName: 'Product ID',
+      field: 'article_no',
+      headerName: 'Article No',
       flex: 1,
-      minWidth: 120,
-    },
-    {
-      field: 'product_names',
-      headerName: 'Product Names',
-      flex: 3,
-      minWidth: 200,
-      valueFormatter: (value: string[]) => value?.join(', ') ?? '-',
+      minWidth: 130,
     },
     {
       field: 'category',
       headerName: 'Category',
-      flex: 0.7,
+      flex: 1,
+      minWidth: 130,
+    },
+    {
+      field: 'abc_xyz',
+      headerName: 'ABC/XYZ',
+      flex: 0.6,
       minWidth: 80,
       renderCell: (params) => {
-        const value = String(params.value || '').toUpperCase();
-        let color = ABC_COLORS.Unknown;
-        // AZ is red (danger), CX is orange (low risk), others green
-        if (value === 'AZ') color = ABC_COLORS.A;
-        else if (value === 'CX') color = ABC_COLORS.C;
-        else if (value && value.length === 2) color = ABC_COLORS.B;
+        const val = String(params.value || '').toUpperCase();
+        const color = ABC_XYZ_COLORS[val];
         return (
-          <Box sx={{ fontWeight: 600, color }}>
+          <Box sx={{ fontWeight: 600, color: color || 'inherit', bgcolor: color ? withAlpha(color, 0.12) : 'inherit', px: 1, borderRadius: 1, display: 'flex', alignItems: 'center', height: '100%' }}>
             {params.value || '-'}
           </Box>
         );
@@ -79,7 +81,7 @@ const Forecast: React.FC = () => {
     {
       field: 'unique_customers',
       headerName: 'Unique Customers',
-      flex: 1,
+      flex: 0.8,
       minWidth: 120,
       type: 'number',
       align: 'right',
@@ -89,80 +91,85 @@ const Forecast: React.FC = () => {
     {
       field: 'last_3_months_quantity',
       headerName: 'Avg Last 3M Qty',
-      flex: 1,
-      minWidth: 130,
+      flex: 0.9,
+      minWidth: 120,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: (value: number) => 
-        value !== undefined && value !== null 
+      valueFormatter: (value: number) =>
+        value !== undefined && value !== null
           ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'month_1_quantity',
       headerName: data?.month_1_name ? `${data.month_1_name} Qty` : 'Month 1 Qty',
-      flex: 1,
+      flex: 0.8,
       minWidth: 110,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: (value: number) => 
-        value !== undefined && value !== null 
+      valueFormatter: (value: number) =>
+        value !== undefined && value !== null
           ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'month_2_quantity',
       headerName: data?.month_2_name ? `${data.month_2_name} Qty` : 'Month 2 Qty',
-      flex: 1,
+      flex: 0.8,
       minWidth: 110,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: (value: number) => 
-        value !== undefined && value !== null 
+      valueFormatter: (value: number) =>
+        value !== undefined && value !== null
           ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
       field: 'month_3_quantity',
       headerName: data?.month_3_name ? `${data.month_3_name} Qty` : 'Month 3 Qty',
-      flex: 1,
+      flex: 0.8,
       minWidth: 110,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: (value: number) => 
-        value !== undefined && value !== null 
+      valueFormatter: (value: number) =>
+        value !== undefined && value !== null
           ? value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
           : '-',
     },
     {
+      field: 'prediction_month',
+      headerName: 'Prediction Month',
+      flex: 0.9,
+      minWidth: 130,
+    },
+    {
       field: 'predicted_quantity',
       headerName: 'Predicted Quantity',
-      flex: 1.1,
+      flex: 0.9,
       minWidth: 130,
       type: 'number',
       align: 'right',
       headerAlign: 'right',
-      valueFormatter: (value: number) => 
-        value !== undefined && value !== null 
-          ? formatQuantity(value)
-          : '-',
+      valueFormatter: (value: number) =>
+        value !== undefined && value !== null ? formatQuantity(value) : '-',
     },
   ], [data]);
 
   const rows = data?.data.map((row, index) => ({
     id: index,
-    product_id: row.product_id,
-    product_names: row.product_names,
+    article_no: row.article_no,
     category: row.category || '-',
+    abc_xyz: row.abc_xyz || '-',
     unique_customers: row.unique_customers,
     last_3_months_quantity: row.last_3_months_quantity,
     month_1_quantity: row.month_1_quantity,
     month_2_quantity: row.month_2_quantity,
     month_3_quantity: row.month_3_quantity,
+    prediction_month: row.prediction_month,
     predicted_quantity: row.predicted_quantity,
   })) || [];
 
@@ -185,13 +192,13 @@ const Forecast: React.FC = () => {
     return [...new Set(values)].sort();
   };
 
-  // Only filter by Product ID (removed Forecast Month filter)
   const filterableColumns = [
-    { field: 'product_id', label: 'Product ID' },
+    { field: 'article_no', label: 'Article No' },
     { field: 'category', label: 'Category' },
+    { field: 'abc_xyz', label: 'ABC/XYZ' },
   ];
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
         <CircularProgress />
@@ -210,20 +217,36 @@ const Forecast: React.FC = () => {
   return (
     <Box display="flex" flexDirection="column" height="100%" p={2.5}>
       <Typography variant="h6" gutterBottom>
-        {data.display_month}
+        Demand Forecast
       </Typography>
 
+      {/* Granularity Toggle */}
+      <Box sx={{ mb: 2 }}>
+        <ToggleButtonGroup
+          value={granularity}
+          exclusive
+          onChange={(_, val) => { if (val) setGranularity(val); }}
+          size="small"
+        >
+          {(data.available_granularities ?? ['monthly', 'bimonthly', 'quarterly']).map((g) => (
+            <ToggleButton key={g} value={g} sx={{ textTransform: 'capitalize', px: 3 }}>
+              {GRANULARITY_LABELS[g] || g}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </Box>
+
       {/* Filter Section */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          gap: 2, 
-          mb: 3, 
-          pb: 2, 
+      <Box
+        sx={{
+          display: 'flex',
+          gap: 2,
+          mb: 3,
+          pb: 2,
           borderBottom: '1px solid',
           borderColor: 'divider',
           flexWrap: 'wrap',
-          alignItems: 'center'
+          alignItems: 'center',
         }}
       >
         {filterableColumns.map(({ field, label }) => {
@@ -250,11 +273,7 @@ const Forecast: React.FC = () => {
                 }}
                 MenuProps={{
                   autoFocus: false,
-                  PaperProps: {
-                    style: {
-                      maxHeight: 400,
-                    },
-                  },
+                  PaperProps: { style: { maxHeight: 400 } },
                 }}
               >
                 <ListSubheader>
@@ -272,15 +291,10 @@ const Forecast: React.FC = () => {
                     }}
                     value={searchText}
                     onChange={(e) => {
-                      setSearchTexts(prev => ({
-                        ...prev,
-                        [field]: e.target.value,
-                      }));
+                      setSearchTexts(prev => ({ ...prev, [field]: e.target.value }));
                     }}
                     onKeyDown={(e) => {
-                      if (e.key !== 'Escape') {
-                        e.stopPropagation();
-                      }
+                      if (e.key !== 'Escape') e.stopPropagation();
                     }}
                   />
                 </ListSubheader>
@@ -309,8 +323,8 @@ const Forecast: React.FC = () => {
           </Typography>
         </Paper>
       </Box>
-      
-      <Paper elevation={1} sx={{ width: '100%', height: 'calc(100vh - 280px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+
+      <Paper elevation={1} sx={{ width: '100%', height: 'calc(100vh - 320px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}

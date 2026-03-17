@@ -27,7 +27,7 @@ const ProductBehaviour: React.FC = () => {
   const [abcClass, setAbcClass] = useState<'A' | 'B' | 'C'>('A');
   const [metric, setMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [showLabels, setShowLabels] = useState(true);
   const [data, setData] = useState<ProductBehaviourDataPoint[]>([]);
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ const ProductBehaviour: React.FC = () => {
         const result = await productBehaviourApi.getProducts(financialYear, abcClass);
         setProducts(result);
         // Keep existing selections that are still valid
-        const validProductIds = result.map(p => p.product_id);
+        const validProductIds = result.map(p => p.article_no);
         setSelectedProducts(prev => prev.filter(id => validProductIds.includes(id)));
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -161,9 +161,9 @@ const ProductBehaviour: React.FC = () => {
               size="small"
               sx={{ minWidth: 300, flex: 1 }}
               options={products}
-              getOptionLabel={(option) => `Product ${option.product_id}`}
-              value={products.filter(p => selectedProducts.includes(p.product_id))}
-              onChange={(_, newValue) => setSelectedProducts(newValue.map(v => v.product_id))}
+              getOptionLabel={(option) => `Product ${option.article_no}`}
+              value={products.filter(p => selectedProducts.includes(p.article_no))}
+              onChange={(_, newValue) => setSelectedProducts(newValue.map(v => v.article_no))}
               loading={loadingProducts}
               limitTags={2}
               renderInput={(params) => (
@@ -186,7 +186,7 @@ const ProductBehaviour: React.FC = () => {
             <Button
               size="small"
               variant="outlined"
-              onClick={() => setSelectedProducts(products.map(p => p.product_id))}
+              onClick={() => setSelectedProducts(products.map(p => p.article_no))}
               disabled={loadingProducts || products.length === 0}
             >
               Select All

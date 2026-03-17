@@ -13,17 +13,17 @@ export const FINANCIAL_YEARS = [
 // Every chart / cell / badge must import from here.
 // ──────────────────────────────────────────────────────────────
 
-// ABC Category colors
-// Overall – Blue
-// A – Green  (high-ticket products)
-// B – Orange (mid-range)
-// C – Red    (low-ticket)
+// ABC Category colors – sophisticated, not neon
+// A – Rich green (high-ticket products)
+// B – Warm amber (mid-range)
+// C – Deep red    (low-ticket)
+// Overall – Slate blue
 export const ABC_COLORS: Record<string, string> = {
-  A: '#2ecc71',     // Green
-  B: '#f39c12',     // Orange
-  C: '#e74c3c',     // Red
-  Overall: '#3498db', // Blue
-  Unknown: '#95a5a6', // Gray
+  A: '#2d8659',
+  B: '#d4893d',
+  C: '#b84a42',
+  Overall: '#2f63b8',
+  Unknown: '#7a8fa8',
 };
 
 // XYZ Category colors (demand variability)
@@ -31,9 +31,9 @@ export const ABC_COLORS: Record<string, string> = {
 // Y – Orange (variable demand)
 // Z – Red    (erratic / few customers)
 export const XYZ_COLORS: Record<string, string> = {
-  X: '#2ecc71', // Green
-  Y: '#f39c12', // Orange
-  Z: '#e74c3c', // Red
+  X: '#2d8659',
+  Y: '#d4893d',
+  Z: '#b84a42',
 };
 
 // Combined ABC-XYZ colors — derived from ABC base colors
@@ -41,57 +41,82 @@ export const XYZ_COLORS: Record<string, string> = {
 // B-combos → Orange (B color)
 // C-combos → Red    (C color)
 export const ABC_XYZ_COLORS: Record<string, string> = {
-  AX: '#2ecc71',   // Green (A)
-  AY: '#2ecc71',   // Green (A)
-  AZ: '#2ecc71',   // Green (A)
-  BX: '#f39c12',   // Orange (B)
-  BY: '#f39c12',   // Orange (B)
-  BZ: '#f39c12',   // Orange (B)
-  CX: '#e74c3c',   // Red (C)
-  CY: '#e74c3c',   // Red (C)
-  CZ: '#e74c3c',   // Red (C)
+  AX: '#2d8659',
+  AY: '#2d8659',
+  AZ: '#2d8659',
+  BX: '#d4893d',
+  BY: '#d4893d',
+  BZ: '#d4893d',
+  CX: '#b84a42',
+  CY: '#b84a42',
+  CZ: '#b84a42',
 };
+
+// Top-performer palette – 10 vibrant, distinct colors for both light and dark modes
+// Each color pair is optimized for readability in both contexts
+export const TOP_PERFORMER_PALETTE: readonly [string, string][] = [
+  ['#4667C9', '#6F89DB'],
+  ['#3D95CC', '#66ADD9'],
+  ['#7CD100', '#96D94A'],
+  ['#F44F7A', '#F67D9C'],
+  ['#F9C612', '#FAD651'],
+  ['#22A8C6', '#59BDD4'],
+  ['#3A5CB5', '#627FCC'],
+  ['#68B600', '#85C93C'],
+  ['#E44972', '#EE7392'],
+  ['#D5A700', '#E1BA3D'],
+];
+
+// Bright dashboard chart palette (matches requested reference swatches)
+export const DASHBOARD_CHART_COLORS: readonly string[] = [
+  '#4667C9',
+  '#3D95CC',
+  '#7CD100',
+  '#F44F7A',
+  '#F9C612',
+  '#22A8C6',
+];
 
 // Multi-line chart palette (for multi-product / multi-customer grids)
 export const PRODUCT_COLORS: readonly string[] = [
-  '#3498db', // Blue
-  '#9b59b6', // Purple
-  '#1abc9c', // Teal
-  '#e67e22', // Orange
-  '#34495e', // Charcoal
+  '#3b5a9d',
+  '#2d8659',
+  '#d4893d',
+  '#8b4a7a',
+  '#1a7a8f',
 ];
 
 // RFM / CBA segment colors
 export const SEGMENT_COLORS: Record<string, string> = {
-  Champions: '#2ecc71',
-  'Loyal Customers': '#3498db',
-  'New Customers': '#9b59b6',
-  'Potential Loyalists': '#1abc9c',
-  'At Risk': '#e67e22',
-  'Lost Customers': '#e74c3c',
-  'Regular Customers': '#95a5a6',
+  Champions: '#2d8659',
+  'Loyal Customers': '#2f63b8',
+  'New Customers': '#8b4a7a',
+  'Potential Loyalists': '#1a7a8f',
+  'At Risk': '#d4893d',
+  'Lost Customers': '#b84a42',
+  'Regular Customers': '#7a8fa8',
 };
 
 // RFM histogram / scatter colors
 export const RFM_COLORS = {
-  recency: '#3498db',
-  frequency: '#2ecc71',
-  monetary: '#e74c3c',
-  recencyVsFrequency: '#9b59b6',
+  recency: '#2f63b8',
+  frequency: '#2d8659',
+  monetary: '#b84a42',
+  recencyVsFrequency: '#8b4a7a',
 } as const;
 
 // Comparison palette (class-comparison page, two-FY overlays)
 export const COMPARISON_COLORS = {
-  fy1Class: '#e74c3c',
-  fy1Value: '#3498db',
-  fy2Class: '#9b59b6',
-  fy2Value: '#e67e22',
+  fy1Class: '#b84a42',
+  fy1Value: '#2f63b8',
+  fy2Class: '#8b4a7a',
+  fy2Value: '#d4893d',
 } as const;
 
 // Top-performer chart colors
 export const TOP_PERFORMER_COLORS = {
-  fy: '#9b59b6',
-  latest: '#16a085',
+  fy: '#2f63b8',
+  latest: '#2d8659',
 } as const;
 
 // Helper: get ABC color with CSS alpha (hex → rgba)
@@ -100,6 +125,12 @@ export function withAlpha(hex: string, alpha: number): string {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Helper: get the appropriate color from TOP_PERFORMER_PALETTE based on index and theme mode
+export function getTopPerformerColor(index: number, isDarkMode: boolean): string {
+  const pair = TOP_PERFORMER_PALETTE[index % TOP_PERFORMER_PALETTE.length];
+  return isDarkMode ? pair[1] : pair[0];
 }
 
 // ──────────────────────────────────────────────────────────────

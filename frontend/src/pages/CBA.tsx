@@ -450,8 +450,8 @@ const CBA = () => {
                 barLabel: {
                   placement: 'outside',
                   style: {
-                    fontSize: 12,
-                    fontWeight: 600,
+                    fontSize: 13,
+                    fontWeight: 700,
                   },
                 },
               }}
@@ -505,8 +505,8 @@ const CBA = () => {
                 barLabel: {
                   placement: 'outside',
                   style: {
-                    fontSize: 12,
-                    fontWeight: 600,
+                    fontSize: 13,
+                    fontWeight: 700,
                   },
                 },
               }}

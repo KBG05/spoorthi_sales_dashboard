@@ -16,10 +16,45 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
-import type { GridColDef } from '@mui/x-data-grid';
+import type { GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { transitionAnalysisApi } from '../api';
 import type { TransitionAnalysisResponse } from '../api/types';
-import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS, withAlpha } from '../constants/constants';
+import { ABC_COLORS, ABC_XYZ_COLORS, withAlpha } from '../constants/constants';
+
+const TrendSparkline = ({ values }: { values: number[] }) => {
+  if (!values || values.length === 0) {
+    return <Typography variant="caption" color="text.secondary">-</Typography>;
+  }
+
+  const width = 200;
+  const height = 34;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const points = values.map((value, index) => {
+    const x = (index / Math.max(values.length - 1, 1)) * (width - 4) + 2;
+    const y = height - ((value - min) / range) * (height - 8) - 4;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const trendUp = values[values.length - 1] >= values[0];
+
+  return (
+    <Box sx={{ width, height, display: 'flex', alignItems: 'center' }}>
+      <svg width={width} height={height} aria-hidden="true">
+        <polyline
+          points={points}
+          fill="none"
+          stroke={trendUp ? '#2e7d32' : '#d32f2f'}
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </Box>
+  );
+};
 
 const TransitionAnalysis: React.FC = () => {
   const [analysisType, setAnalysisType] = useState<'Products' | 'Customers'>('Products');
@@ -47,12 +82,14 @@ const TransitionAnalysis: React.FC = () => {
   const columns: GridColDef[] = useMemo(() => {
     if (!data) return [];
 
-    return data.column_headers.map((header, index) => ({
+    const categoryColumns = data.column_headers
+      .filter(header => header !== 'trend_values')
+      .map((header, index) => ({
       field: header,
       headerName: header,
-      width: index === 0 ? 225 : (header.toLowerCase().includes('name') ? 400 : 180),
-      minWidth: index === 0 ? 180 : (header.toLowerCase().includes('name') ? 300 : 150),
-      renderCell: (params) => {
+      width: index === 0 ? 320 : (header.toLowerCase().includes('name') ? 500 : 180),
+      minWidth: index === 0 ? 300 : (header.toLowerCase().includes('name') ? 450 : 150),
+      renderCell: (params: GridRenderCellParams) => {
         const value = params.value;
         let bgColor = 'inherit';
         let textColor = 'inherit';
@@ -93,6 +130,24 @@ const TransitionAnalysis: React.FC = () => {
         );
       },
     }));
+
+    return [
+      ...categoryColumns,
+      {
+        field: 'trend_values',
+        headerName: analysisType==='Products'?'Sales Trend':'Purchase trend',
+        width: 220,
+        minWidth: 220,
+        sortable: false,
+        filterable: false,
+        renderCell: (params: GridRenderCellParams) => {
+          const values = Array.isArray(params.value)
+            ? params.value.map((v: unknown) => Number(v) || 0)
+            : [];
+          return <TrendSparkline values={values} />;
+        },
+      },
+    ];
   }, [data]);
 
   const rows = useMemo(() => {
@@ -138,7 +193,7 @@ const TransitionAnalysis: React.FC = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" p={2.5}>
+    <Box display="flex" flexDirection="column" height="100%" minHeight={0} overflow="hidden" p={2.5}>
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
         ABC Category Transition Analysis
       </Typography>
@@ -181,7 +236,9 @@ const TransitionAnalysis: React.FC = () => {
         </FormControl>
 
         {/* Column Filters */}
-        {data && data.column_headers.map((header) => {
+        {data && data.column_headers
+          .filter(header => header !== 'trend_values')
+          .map((header) => {
           const uniqueValues = getUniqueValues(header);
           const searchText = searchTexts[header] || '';
           const filteredValues = uniqueValues.filter(value =>
@@ -275,9 +332,13 @@ const TransitionAnalysis: React.FC = () => {
             border: 'none',
             '& .MuiDataGrid-cell': {
               fontSize: '0.875rem',
+              fontWeight: 500,
               padding: '8px',
               borderRight: '1px solid',
               borderColor: 'divider',
+            },
+            '& .MuiDataGrid-cellEmpty': {
+              display: 'none',
             },
             '& .MuiDataGrid-columnHeaders': {
               fontWeight: 600,
@@ -292,9 +353,11 @@ const TransitionAnalysis: React.FC = () => {
             '& .MuiDataGrid-columnSeparator': {
               display: 'none',
             },
+
           }}
           disableRowSelectionOnClick
           rowHeight={52}
+          disableColumnMenu
         />
       </Paper>
     </Box>

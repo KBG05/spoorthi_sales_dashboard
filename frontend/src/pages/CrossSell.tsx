@@ -76,14 +76,11 @@ const CrossSell = () => {
 
   const handleDownload = () => {
     const csvContent = [
-      ['Distributor Code', 'Distributor Name', 'Articles Purchased', 'Article Names', 'Recommendations', 'Recommendation Names'],
+      ['Distributor Name', 'Articles Purchased', 'Recommendations'],
       ...filteredRows.map(row => [
-        row.customer,
         row.customer_name,
         row.articles_purchased,
-        row.article_names_purchased,
         row.recommendations,
-        row.recommendation_names,
       ])
     ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
 
@@ -95,12 +92,6 @@ const CrossSell = () => {
   };
 
   const columns: GridColDef[] = [
-    {
-      field: 'customer',
-      headerName: 'Distributor Code',
-      width: 150,
-      minWidth: 120,
-    },
     {
       field: 'customer_name',
       headerName: 'Distributor Name',
@@ -114,41 +105,6 @@ const CrossSell = () => {
       minWidth: 200,
       renderCell: (params) => {
         const { displayValue, hasMore, totalCount } = limitValues(params.value, params.row.id);
-        return (
-          <Box 
-            sx={{ 
-              whiteSpace: 'normal', 
-              lineHeight: '1.5',
-              py: 1,
-              cursor: hasMore || expandedRows.has(params.row.id) ? 'pointer' : 'default',
-              '&:hover': hasMore || expandedRows.has(params.row.id) ? {
-                backgroundColor: 'action.hover',
-              } : {},
-            }}
-            onClick={() => {
-              if (hasMore || expandedRows.has(params.row.id)) {
-                toggleRowExpansion(params.row.id);
-              }
-            }}
-          >
-            {displayValue}
-            {hasMore && (
-              <Box component="span" sx={{ color: 'primary.main', fontWeight: 600, ml: 1 }}>
-                ...and {totalCount - 5} more
-              </Box>
-            )}
-          </Box>
-        );
-      },
-    },
-    {
-      field: 'article_names_purchased',
-      headerName: 'Articles Purchased (Names)',
-      flex: 1,
-      minWidth: 250,
-      renderCell: (params) => {
-        const value = params.value || params.row.articles_purchased;
-        const { displayValue, hasMore, totalCount } = limitValues(value, params.row.id);
         return (
           <Box 
             sx={{ 
@@ -210,43 +166,6 @@ const CrossSell = () => {
         );
       },
     },
-    {
-      field: 'recommendation_names',
-      headerName: 'Recommendations (Names)',
-      flex: 1,
-      minWidth: 250,
-      renderCell: (params) => {
-        const value = params.value || params.row.recommendations;
-        const { displayValue, hasMore, totalCount } = limitValues(value, params.row.id);
-        return (
-          <Box 
-            sx={{ 
-              whiteSpace: 'normal', 
-              lineHeight: '1.5',
-              py: 1,
-              fontWeight: 500, 
-              color: 'primary.main',
-              cursor: hasMore || expandedRows.has(params.row.id) ? 'pointer' : 'default',
-              '&:hover': hasMore || expandedRows.has(params.row.id) ? {
-                backgroundColor: 'action.hover',
-              } : {},
-            }}
-            onClick={() => {
-              if (hasMore || expandedRows.has(params.row.id)) {
-                toggleRowExpansion(params.row.id);
-              }
-            }}
-          >
-            {displayValue}
-            {hasMore && (
-              <Box component="span" sx={{ fontWeight: 600, ml: 1 }}>
-                ...and {totalCount - 5} more
-              </Box>
-            )}
-          </Box>
-        );
-      },
-    },
   ];
 
   const rows = recommendations.map((rec, index) => ({
@@ -275,7 +194,7 @@ const CrossSell = () => {
   };
 
   const filterableColumns = [
-    { field: 'customer', label: 'Distributor' },
+    { field: 'customer_name', label: 'Distributor' },
   ];
 
   if (loading) {
@@ -411,6 +330,7 @@ const CrossSell = () => {
             border: 'none',
             '& .MuiDataGrid-cell': {
               fontSize: '0.875rem',
+              fontWeight: 500,
               borderRight: '1px solid',
               borderColor: 'divider',
               py: 1.5,

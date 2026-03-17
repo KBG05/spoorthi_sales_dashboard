@@ -16,7 +16,6 @@ from ..schemas import (
     CategoryCountResponse,
     CategoryRevenueResponse,
     ComboCountResponse,
-    CategoryBreakupItem,
     ABCXYZMatrixCell,
     ABCXYZMatrixResponse,
     ABCXYZArticleItem,
@@ -88,7 +87,7 @@ async def get_dashboard_kpis(time_id: Optional[str] = None):
             time_id = time_id_to_yyyy_mm(int(time_id))
 
     start_date = f"{time_id}-01"
-    
+
     # Needs to be end of month, but a simple prefix match on TO_CHAR works too
     sql = """
         SELECT 
@@ -104,7 +103,7 @@ async def get_dashboard_kpis(time_id: Optional[str] = None):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No KPI data found for the specified month.",
         )
-        
+
     y, m = map(int, time_id.split("-"))
     month_val = datetime(y, m, 1)
 
@@ -112,7 +111,7 @@ async def get_dashboard_kpis(time_id: Optional[str] = None):
         total_revenue=float(kpi_data["total_revenue"] or 0),
         total_quantity=int(kpi_data["total_quantity"] or 0),
         month_name=month_val.strftime("%B %Y"),
-        time_id=0, # Deprecated
+        time_id=0,  # Deprecated
     )
 
 
@@ -604,7 +603,9 @@ async def export_customer_abc_xyz_fy():
     """Export the latest Customer ABC/XYZ FY results as CSV."""
     table_name = _find_latest_table(r"^customer_abc_xyz_fy_")
     if not table_name:
-        raise HTTPException(status_code=404, detail="No Customer ABC/XYZ FY table found.")
+        raise HTTPException(
+            status_code=404, detail="No Customer ABC/XYZ FY table found."
+        )
 
     rows = query_all(f'SELECT * FROM public."{table_name}" ORDER BY total_revenue DESC')
     if not rows:
@@ -641,55 +642,6 @@ async def export_rfm_monthly():
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename={table_name}.csv"},
     )
-
-
-@router.get("/category-breakup", response_model=List[CategoryBreakupItem])
-async def get_category_breakup(time_id: Optional[str] = None):
-    """
-    Get revenue and quantity breakdown by product category.
-    """
-    if time_id is None:
-        # find the max month
-        max_date_sql = """
-            SELECT MAX(invoice_date) as max_date
-            FROM public."spoorthi_dataset_without_spares"
-        """
-        row = query_one(max_date_sql)
-        if not row or not row["max_date"]:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
-            )
-        max_date = row["max_date"]
-        time_id = f"{max_date.year}-{max_date.month:02d}"
-    else:
-        # If numeric time_id sent by frontend, convert to YYYY-MM
-        if time_id.isdigit():
-            time_id = time_id_to_yyyy_mm(int(time_id))
-
-    sql = """
-        SELECT 
-            COALESCE(ad.category, 'Uncategorized') as category,
-            SUM(ad.ass_value) as revenue,
-            SUM(ad.inv_quantity) as quantity
-        FROM public."spoorthi_dataset_without_spares" ad
-        WHERE TO_CHAR(ad.invoice_date, 'YYYY-MM') = %s
-        GROUP BY ad.category
-        ORDER BY revenue DESC
-    """
-
-    rows = query_all(sql, (time_id,))
-
-    if not rows:
-        return []
-
-    return [
-        CategoryBreakupItem(
-            category=row["category"] or "MISC",
-            revenue=float(row["revenue"] or 0),
-            quantity=int(row["quantity"] or 0),
-        )
-        for row in rows
-    ]
 
 
 @router.get("/abc-xyz-matrix", response_model=ABCXYZMatrixResponse)
@@ -765,11 +717,13 @@ async def get_abc_xyz_matrix(time_id: Optional[int] = None):
 
 
 @router.get("/abc-xyz-products", response_model=List[ABCXYZArticleItem])
-async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[str] = None):
+async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None):
     """
     Get product IDs and names for a specific ABC×XYZ cell.
     Used for the popup when clicking a matrix cell or bar chart bar.
     """
+    # Convert numeric time_id to YYYY-MM format
+    year_month = None
     if time_id is None:
         # find the max month
         max_date_sql = """
@@ -782,19 +736,22 @@ async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[str] = None
                 status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
             )
         max_date = row["max_date"]
-        time_id = f"{max_date.year}-{max_date.month:02d}"
+        year_month = f"{max_date.year}-{max_date.month:02d}"
+    else:
+        # Convert numeric time_id to YYYY-MM format
+        year_month = time_id_to_yyyy_mm(time_id)
 
-    sql = f"""
+    sql = """
         SELECT 
             DISTINCT abc.article_no,
             abc.article_no as product_name
         FROM public."spoorthi_abc_xyz_datamart" abc
-        WHERE abc.year_month = '{time_id}'
-          AND abc.abc = '{abc.upper()}' AND abc.xyz = '{xyz.upper()}'
+        WHERE abc.year_month = %s
+          AND abc.abc = %s AND abc.xyz = %s
         ORDER BY abc.article_no
     """
 
-    rows = query_all(sql)
+    rows = query_all(sql, (year_month, abc.upper(), xyz.upper()))
 
     return (
         [
@@ -866,7 +823,7 @@ async def get_category_hierarchy(
         return f"rgba({r}, {g}, {b}, {opacity})"
 
     # Determine the column to aggregate
-    value_column = 'ass_value' if metric.lower() == "revenue" else 'inv_quantity'
+    value_column = "ass_value" if metric.lower() == "revenue" else "inv_quantity"
 
     # Spoorthi DB has no product category master table.
     # Return a single "All Products" aggregation for the selected month.

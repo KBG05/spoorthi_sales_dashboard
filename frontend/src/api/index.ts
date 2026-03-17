@@ -16,7 +16,6 @@ import type {
   RFMSummary,
   SegmentData,
   ClassComparisonDataPoint,
-  CategoryBreakupItem,
   ABCXYZMatrixResponse,
   ABCXYZProductItem,
   CategoryHierarchyResponse,
@@ -55,11 +54,6 @@ export const dashboardApi = {
   },
   getABCXYZCount: async () => {
     return await apiClient.get('/dashboard/abc-xyz-count');
-  },
-  getCategoryBreakup: async (timeId?: number) => {
-    return await apiClient.get<CategoryBreakupItem[]>('/dashboard/category-breakup', {
-      params: timeId ? { time_id: timeId } : undefined,
-    });
   },
   getABCXYZMatrix: async (timeId?: number) => {
     return await apiClient.get<ABCXYZMatrixResponse>('/dashboard/abc-xyz-matrix', {

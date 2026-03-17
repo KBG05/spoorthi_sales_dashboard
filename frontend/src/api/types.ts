@@ -7,12 +7,6 @@ export interface KPIResponse {
   time_id: number;
 }
 
-export interface CategoryBreakupItem {
-  category: string;
-  revenue: number;
-  quantity: number;
-}
-
 export interface ABCXYZMatrixCell {
   abc: string;
   xyz: string;

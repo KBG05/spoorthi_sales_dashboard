@@ -29,12 +29,6 @@ class ComboCountResponse(BaseModel):
     count: int
 
 
-class CategoryBreakupItem(BaseModel):
-    category: str  # "Monofilaments", "Trading", "MISC"
-    revenue: float
-    quantity: int
-
-
 class ABCXYZMatrixCell(BaseModel):
     abc: str  # "A", "B", or "C"
     xyz: str  # "X", "Y", or "Z"
@@ -278,6 +272,7 @@ class SegmentData(BaseModel):
 # -----------------------
 class CustomerProductRow(BaseModel):
     """Single row of customer-product mapping"""
+
     customer_name: str
     article_no: str
     last_purchase_date: str  # "YYYY-MM-DD"
@@ -285,6 +280,7 @@ class CustomerProductRow(BaseModel):
 
 class CustomerProductResponse(BaseModel):
     """Response for customer product list"""
+
     data: List[CustomerProductRow]
     total: int
     calculation_date: str

@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Box, Typography, Card, CardContent, Paper, CircularProgress, Select, MenuItem, FormControl, InputLabel, ToggleButtonGroup, ToggleButton, Dialog, DialogTitle, DialogContent, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Fragment, useEffect, useState } from 'react';
+import { Box, Typography, Card, CardContent, Paper, CircularProgress, Select, MenuItem, FormControl, InputLabel, Dialog, DialogTitle, DialogContent, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { ShoppingCart, Close as CloseIcon } from '@mui/icons-material';
 import { BarChart } from '@mui/x-charts/BarChart';
-import { PieChart } from '@mui/x-charts/PieChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { dashboardApi } from '../api';
-import type { KPIResponse, CategoryBreakupItem, ABCXYZMatrixCell, ABCXYZProductItem } from '../api/types';
+import type { KPIResponse, ABCXYZMatrixCell, ABCXYZProductItem } from '../api/types';
 import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS, formatQuantity } from '../constants/constants';
 
 // Custom Rupee Icon Component
@@ -40,7 +39,6 @@ const Dashboard = () => {
     { id: 3, name: 'March 2026' },
   ]);
   const [kpiData, setKpiData] = useState<KPIResponse | null>(null);
-  const [categoryBreakup, setCategoryBreakup] = useState<CategoryBreakupItem[]>([]);
   const [abcXyzMatrix, setAbcXyzMatrix] = useState<ABCXYZMatrixCell[]>([]);
   const [matrixPeriodLabel, setMatrixPeriodLabel] = useState<string>('');
   const [abcCount, setAbcCount] = useState<CategoryData[]>([]);
@@ -48,7 +46,6 @@ const Dashboard = () => {
   const [xyzCount, setXyzCount] = useState<CategoryData[]>([]);
   const [xyzRevenue, setXyzRevenue] = useState<CategoryData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pieMetric, setPieMetric] = useState<'revenue' | 'quantity'>('revenue');
   // Product popup state
   const [productPopup, setProductPopup] = useState<{ open: boolean; abc: string; xyz: string; products: ABCXYZProductItem[]; loading: boolean }>({ open: false, abc: '', xyz: '', products: [], loading: false });
 
@@ -78,10 +75,6 @@ const Dashboard = () => {
         .then(res => setKpiData(res.data))
         .catch(err => console.error('Error fetching KPIs:', err));
       
-      const fetchCategoryBreakup = dashboardApi.getCategoryBreakup(timeId)
-        .then(res => setCategoryBreakup(res.data))
-        .catch(err => console.error('Error fetching category breakup:', err));
-      
       const fetchABCXYZMatrix = dashboardApi.getABCXYZMatrix(timeId)
         .then(res => {
           setAbcXyzMatrix(res.data.cells);
@@ -108,7 +101,6 @@ const Dashboard = () => {
       // Wait for all to complete (success or failure)
       await Promise.allSettled([
         fetchKPIs,
-        fetchCategoryBreakup,
         fetchABCXYZMatrix,
         fetchABCCount,
         fetchABCRevenue,
@@ -287,69 +279,10 @@ const Dashboard = () => {
         ))}
       </Box>
 
-      {/* Pie Chart and ABC×XYZ Matrices Row */}
+      {/* ABC×XYZ Matrices Row */}
       <Box sx={{ mb: 1, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-        {/* Pie Chart */}
-        <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
-          <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Category Breakup
-              </Typography>
-              <ToggleButtonGroup
-                value={pieMetric}
-                exclusive
-                onChange={(_, val) => val && setPieMetric(val)}
-                size="small"
-                sx={{ height: 28 }}
-              >
-                <ToggleButton value="revenue" sx={{ px: 1.5, py: 0.25, fontSize: '0.7rem' }}>Revenue</ToggleButton>
-                <ToggleButton value="quantity" sx={{ px: 1.5, py: 0.25, fontSize: '0.7rem' }}>Quantity</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-              {categoryBreakup.length > 0 ? (
-                <PieChart
-                  series={[
-                    {
-                      data: Object.entries(
-                        categoryBreakup.reduce((acc, cat) => {
-                          const category = cat.category || 'MISC';
-                          if (pieMetric === 'revenue') {
-                            acc[category] = (acc[category] || 0) + (cat.revenue / 10000000);
-                          } else {
-                            acc[category] = (acc[category] || 0) + cat.quantity;
-                          }
-                          return acc;
-                        }, {} as Record<string, number>)
-                      ).map(([category, value], index) => ({
-                        id: index,
-                        value: value,
-                        label: category,
-                      })),
-                      highlightScope: { fade: 'global', highlight: 'item' },
-                      valueFormatter: pieMetric === 'revenue'
-                        ? (item) => `₹${(item.value * 10000000).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}  (₹${item.value.toFixed(2)} Cr)`
-                        : (item) => `${item.value.toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`,
-                    },
-                  ]}
-                  height={340}
-                  slotProps={{
-                    legend: {
-                      position: { vertical: 'bottom', horizontal: 'center' },
-                      padding: 0,
-                    } as any,
-                  }}
-                />
-              ) : (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 340 }}>
-                  <Typography color="text.secondary">No data</Typography>
-                </Box>
-              )}
-            </Paper>
-          </Box>
-          
           {/* ABC×XYZ Revenue Matrix */}
-          <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
+          <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 300 }}>
             <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.95rem' }}>
                 ABC×XYZ Revenue Matrix {matrixPeriodLabel && `(${matrixPeriodLabel})`}
@@ -362,7 +295,7 @@ const Dashboard = () => {
                   <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>Z</Box>
                   
                   {['A', 'B', 'C'].map((abc) => (
-                    <>
+                    <Fragment key={`revenue-row-${abc}`}>
                       <Box key={`label-${abc}`} sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', fontSize: '1rem', p: 0.5 }}>
                         {abc}
                       </Box>
@@ -401,7 +334,7 @@ const Dashboard = () => {
                           </Card>
                         );
                       })}
-                    </>
+                    </Fragment>
                   ))}
                 </Box>
               ) : (
@@ -413,7 +346,7 @@ const Dashboard = () => {
           </Box>
           
           {/* ABC×XYZ Quantity Matrix */}
-          <Box sx={{ flex: '1 1 calc(33.333% - 11px)', minWidth: 300 }}>
+          <Box sx={{ flex: '1 1 calc(50% - 8px)', minWidth: 300 }}>
             <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 0.5, fontSize: '0.95rem' }}>
                 ABC×XYZ Quantity Matrix {matrixPeriodLabel && `(${matrixPeriodLabel})`}
@@ -426,7 +359,7 @@ const Dashboard = () => {
                   <Box sx={{ fontWeight: 600, textAlign: 'center', fontSize: '1rem', p: 0.5 }}>Z</Box>
                   
                   {['A', 'B', 'C'].map((abc) => (
-                    <>
+                    <Fragment key={`quantity-row-${abc}`}>
                       <Box key={`label-${abc}`} sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', fontSize: '1rem', p: 0.5 }}>
                         {abc}
                       </Box>
@@ -465,7 +398,7 @@ const Dashboard = () => {
                           </Card>
                         );
                       })}
-                    </>
+                    </Fragment>
                   ))}
                 </Box>
               ) : (
@@ -492,9 +425,10 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: abcCount.map(d => d.category),
+                  label: 'ABC Category',
                   tickLabelStyle: {
-                    fontSize: 14,
-                    fontWeight: 500,
+                    fontSize: 15,
+                    fontWeight: 600,
                   },
                   colorMap: {
                     type: 'ordinal',
@@ -505,6 +439,7 @@ const Dashboard = () => {
                 yAxis={[{
                   tickLabelStyle: {
                     fontSize: 12,
+                    fontWeight: 600,
                   },
                   min: 0,
                   max: Math.ceil(Math.max(...abcCount.map(d => d.count || 0)) * 1.1),
@@ -525,7 +460,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
                   height={310}
-                margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -533,8 +468,8 @@ const Dashboard = () => {
                     placement: 'outside',
                     style: {
                       fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                      fontWeight: 600,
-                      fontSize: 14,
+                      fontWeight: 700,
+                      fontSize: 15,
                       transform: 'translateY(-5px)',
                       zIndex: 2,
                     },
@@ -562,9 +497,10 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: abcRevenue.map(d => d.category),
+                  label: 'ABC Category',
                   tickLabelStyle: {
-                    fontSize: 14,
-                    fontWeight: 500,
+                    fontSize: 15,
+                    fontWeight: 600,
                   },
                   colorMap: {
                     type: 'ordinal',
@@ -575,7 +511,7 @@ const Dashboard = () => {
                 yAxis={[{
                   tickLabelStyle: {
                     fontSize: 12,
-                    fontWeight: 500,
+                    fontWeight: 600,
                   },
                   valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                     if (context.location === 'tick') {
@@ -607,7 +543,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                 }]}
                   height={295}
-                margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
                   const value = item.value as number;
@@ -618,8 +554,8 @@ const Dashboard = () => {
                     placement: 'outside',
                     style: {
                       fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                      fontWeight: 600,
-                      fontSize: 14,
+                      fontWeight: 700,
+                      fontSize: 15,
                       transform: 'translateY(-8px)',
                     },
                   },
@@ -649,14 +585,16 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: xyzCount.map(d => d.category),
+                  label: 'XYZ Category',
                   tickLabelStyle: {
-                    fontSize: 14,
-                    fontWeight: 500,
+                    fontSize: 15,
+                    fontWeight: 600,
                   },
                 }]}
                 yAxis={[{
                   tickLabelStyle: {
                     fontSize: 12,
+                    fontWeight: 600,
                   },
                   width: 70,
                   min: 0,
@@ -679,7 +617,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
                   height={330}
-                margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -687,8 +625,8 @@ const Dashboard = () => {
                     placement: 'outside',
                     style: {
                       fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                      fontWeight: 600,
-                      fontSize: 14,
+                      fontWeight: 700,
+                      fontSize: 15,
                       transform: 'translateY(-8px)',
                     },
                   },
@@ -715,15 +653,16 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: xyzRevenue.map(d => d.category),
+                  label: 'XYZ Category',
                   tickLabelStyle: {
-                    fontSize: 14,
-                    fontWeight: 500,
+                    fontSize: 15,
+                    fontWeight: 600,
                   },
                 }]}
                 yAxis={[{
                   tickLabelStyle: {
                     fontSize: 12,
-                    fontWeight: 500,
+                    fontWeight: 600,
                   },
                   valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                     if (context.location === 'tick') {
@@ -757,7 +696,7 @@ const Dashboard = () => {
                   barLabelPlacement:"outside"
                 }]}
                   height={315}
-                  margin={{ top: 20, bottom: 0, left: 10, right: 10 }}
+                  margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
 
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
@@ -769,8 +708,8 @@ const Dashboard = () => {
                     placement: 'outside',
                     style: {
                       fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                      fontWeight: 600,
-                      fontSize: 14,
+                      fontWeight: 700,
+                      fontSize: 15,
                       transform: 'translateY(-5px)',
                     },
                   },

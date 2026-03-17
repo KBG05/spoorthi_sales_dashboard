@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router';
+import { NavLink } from 'react-router-dom';
 import {
   Drawer,
   List,
@@ -12,6 +12,7 @@ import {
   Box,
   Divider,
 } from '@mui/material';
+import { alpha, useTheme } from '@mui/material/styles';
 import {
   Dashboard as DashboardIcon,
   TrendingUp as TrendingUpIcon,
@@ -25,7 +26,6 @@ import {
   CompareArrows as CompareArrowsIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Analytics as AnalyticsIcon,
   ListAlt as ListAltIcon,
   Compare as CompareIcon,
 } from '@mui/icons-material';
@@ -43,7 +43,6 @@ const navItems: NavItem[] = [
   { path: '/customer-behaviour', label: 'Customer Behavior', icon: <PeopleIcon /> },
   { path: '/customer-comparison', label: 'Customer Comparison', icon: <CompareIcon /> },
   { path: '/product-behaviour', label: 'Article Behavior', icon: <InventoryIcon /> },
-  { path: '/cba', label: 'Customer Behaviour Analysis', icon: <AnalyticsIcon /> },
   // { path: '/customer-class-comparison', label: 'Class Comparison', icon: <CompareIcon /> }, // Hidden for now
   { path: '/ticket-size', label: 'Ticket Size Analysis', icon: <ReceiptIcon /> },
   { path: '/transition-analysis', label: 'Transition Analysis', icon: <SwapHorizIcon /> },
@@ -60,6 +59,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ open, onToggle }: SidebarProps) {
+  const theme = useTheme();
+  const activeAccent = theme.palette.mode === 'light' ? '#a437b0' : '#d16be0';
+  const activeText = theme.palette.mode === 'light' ? '#6d1f7a' : '#f2ccf8';
+
   return (
     <Drawer
       variant="permanent"
@@ -86,7 +89,12 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
           transition: 'justify-content 250ms ease-in-out',
         }}
       >
-        <IconButton onClick={onToggle} size="small">
+        <IconButton
+          onClick={onToggle}
+          size="small"
+          aria-label={open ? 'Collapse sidebar' : 'Expand sidebar'}
+          sx={{ color: theme.palette.mode === 'light' ? theme.palette.text.secondary : 'inherit' }}
+        >
           {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </Box>
@@ -94,7 +102,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
       <Divider />
 
       {/* Navigation List */}
-      <List>
+      <List sx={{ pt: 0.5, pb: 1.5 }}>
         {navItems.map((item) => (
           <Tooltip
             key={item.path}
@@ -111,29 +119,40 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                 {({ isActive }: { isActive: boolean }) => (
                   <ListItemButton
                     sx={{
-                      minHeight: 48,
+                      minHeight: 46,
                       justifyContent: open ? 'initial' : 'center',
-                      px: 2,
-                      mx: open ? 0.5 : 0.5,
+                      px: 1.5,
+                      mx: 0.9,
                       my: 0.5,
-                      borderRadius: 1,
-                      backgroundColor: isActive ? '#8B5CF6' : 'transparent',
-                      color: isActive ? '#FFFFFF' : 'inherit',
-                      border: isActive ? '1.5px solid #8B5CF6' : '1px solid transparent',
-                      transition: 'all 250ms ease-in-out',
+                      borderRadius: 2,
+                      borderLeft: `3px solid ${isActive ? activeAccent : alpha(activeAccent, 0)}`,
+                      backgroundColor: isActive
+                        ? alpha(activeAccent, theme.palette.mode === 'light' ? 0.18 : 0.24)
+                        : 'transparent',
+                      color: isActive
+                        ? activeText
+                        : theme.palette.mode === 'light'
+                          ? theme.palette.text.secondary
+                          : 'inherit',
+                      transition: 'all 220ms ease',
                       '&:hover, &:active, &:focus': {
-                        backgroundColor: isActive ? '#8B5CF6' : 'rgba(255, 255, 255, 0.05)',
-                        borderColor: isActive ? '#8B5CF6' : 'rgba(255, 255, 255, 0.1)',
+                        backgroundColor: isActive
+                          ? alpha(activeAccent, theme.palette.mode === 'light' ? 0.24 : 0.32)
+                          : alpha(activeAccent, theme.palette.mode === 'light' ? 0.1 : 0.16),
                       },
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         minWidth: 0,
-                        mr: open ? 2 : 'auto',
+                        mr: open ? 1.5 : 'auto',
                         justifyContent: 'center',
-                        color: isActive ? '#FFFFFF' : 'inherit',
-                        transition: 'margin 250ms ease-in-out',
+                        color: isActive
+                          ? activeText
+                          : theme.palette.mode === 'light'
+                            ? theme.palette.text.secondary
+                            : 'inherit',
+                        transition: 'margin 220ms ease-in-out',
                       }}
                     >
                       {item.icon}
@@ -143,12 +162,10 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
                       sx={{
                         opacity: open ? 1 : 0,
                         whiteSpace: 'nowrap',
-                        transition: open 
-                          ? 'opacity 250ms ease-in-out 50ms' 
-                          : 'opacity 150ms ease-in-out 0ms',
+                        transition: open ? 'opacity 220ms ease 40ms' : 'opacity 120ms ease',
                         '& .MuiTypography-root': {
-                          fontWeight: isActive ? 600 : 400,
-                          fontSize: '0.9rem',
+                          fontWeight: isActive ? 700 : 500,
+                          fontSize: '0.88rem',
                         },
                       }}
                     />

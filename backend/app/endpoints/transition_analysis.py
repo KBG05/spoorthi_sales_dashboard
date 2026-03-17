@@ -26,9 +26,7 @@ async def get_transitions(
     analysis_type: Literal["Products", "Customers"] = Query(
         ..., description="'Products' or 'Customers'"
     ),
-    financial_year: str = Query(
-        "FY24-25", description="Financial year"
-    ),
+    financial_year: str = Query("FY24-25", description="Financial year"),
 ):
     """
     Get ABC category transition data for products or customers.
@@ -52,9 +50,20 @@ async def get_transitions(
     """
     month_rows = query_all(months_sql, (fin_year,))
     if not month_rows:
-        raise HTTPException(status_code=404, detail="No data found for this financial year")
+        raise HTTPException(
+            status_code=404, detail="No data found for this financial year"
+        )
 
     months = sorted([r["year_month"] for r in month_rows])  # chronological
+    fy_months = [
+        f"{year}-{month:02d}"
+        for year, month in (
+            [(start_year, m) for m in range(4, 13)]
+            + [(end_year, m) for m in range(1, 4)]
+        )
+    ]
+    fy_start_date = f"{start_year}-04-01"
+    fy_end_date = f"{end_year}-04-01"
 
     if analysis_type == "Products":
         # For each month, get article ABC category from datamart
@@ -81,15 +90,38 @@ async def get_transitions(
                 all_articles.add(article)
                 abc_val = (row["abc"] or "").strip()
                 xyz_val = (row["xyz"] or "").strip()
-                combined = f"{abc_val}{xyz_val}" if abc_val and xyz_val else (abc_val or "N/A")
-                month_data[col_name][article] = combined
+                combined = (
+                    f"{abc_val}{xyz_val}" if abc_val and xyz_val else (abc_val or "N/A")
+                )
+                month_data[col_name][article] = combined if combined != "N/A" else "-"
+
+        trend_sql = """
+            SELECT
+                article_no,
+                TO_CHAR(invoice_date, 'YYYY-MM') AS year_month,
+                SUM(ass_value) AS sales
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date >= %s::date
+              AND invoice_date < %s::date
+            GROUP BY article_no, TO_CHAR(invoice_date, 'YYYY-MM')
+        """
+        trend_rows = query_all(trend_sql, (fy_start_date, fy_end_date))
+        trend_map = {}
+        for row in trend_rows:
+            article_key = str(row["article_no"])
+            if article_key not in trend_map:
+                trend_map[article_key] = {}
+            trend_map[article_key][row["year_month"]] = float(row["sales"] or 0)
 
         # Build response
         data = []
         for article in sorted(all_articles):
             row_data = {"article_no": article}
             for col_name in month_col_order:
-                row_data[col_name] = month_data[col_name].get(article, "N/A")
+                row_data[col_name] = month_data[col_name].get(article, "-")
+            row_data["trend_values"] = [
+                trend_map.get(article, {}).get(month, 0.0) for month in fy_months
+            ]
             data.append(row_data)
 
         column_headers = ["article_no"] + month_col_order
@@ -138,12 +170,33 @@ async def get_transitions(
 
                 month_data[col_name][customer] = category
 
+        trend_sql = """
+            SELECT
+                customer_name,
+                TO_CHAR(invoice_date, 'YYYY-MM') AS year_month,
+                SUM(ass_value) AS sales
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date >= %s::date
+              AND invoice_date < %s::date
+            GROUP BY customer_name, TO_CHAR(invoice_date, 'YYYY-MM')
+        """
+        trend_rows = query_all(trend_sql, (fy_start_date, fy_end_date))
+        trend_map = {}
+        for row in trend_rows:
+            customer_key = str(row["customer_name"])
+            if customer_key not in trend_map:
+                trend_map[customer_key] = {}
+            trend_map[customer_key][row["year_month"]] = float(row["sales"] or 0)
+
         # Build response
         data = []
         for customer in sorted(all_customers):
             row_data = {"customer_name": customer}
             for col_name in month_col_order:
-                row_data[col_name] = month_data[col_name].get(customer, "N/A")
+                row_data[col_name] = month_data[col_name].get(customer, "-")
+            row_data["trend_values"] = [
+                trend_map.get(customer, {}).get(month, 0.0) for month in fy_months
+            ]
             data.append(row_data)
 
         column_headers = ["customer_name"] + month_col_order

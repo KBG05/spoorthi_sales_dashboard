@@ -190,7 +190,8 @@ const CustomerClassComparison = () => {
                 },
                 min: 0,
                 tickLabelStyle: { 
-                  fontSize: 11,
+                  fontSize: 12,
+                  fontWeight: 600,
                   textAnchor: 'end',
                 },
               },
@@ -217,7 +218,8 @@ const CustomerClassComparison = () => {
                 },
                 min: 0,
                 tickLabelStyle: { 
-                  fontSize: 11,
+                  fontSize: 12,
+                  fontWeight: 600,
                   textAnchor: 'start',
                 },
               },

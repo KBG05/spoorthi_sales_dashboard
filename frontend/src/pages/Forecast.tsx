@@ -28,6 +28,8 @@ const GRANULARITY_LABELS: Record<string, string> = {
   quarterly: 'Quarterly',
 };
 
+const GRANULARITY_ORDER = ['monthly', 'bimonthly', 'quarterly'];
+
 const Forecast: React.FC = () => {
   const [data, setData] = useState<ForecastResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -141,12 +143,6 @@ const Forecast: React.FC = () => {
           : '-',
     },
     {
-      field: 'prediction_month',
-      headerName: 'Prediction Month',
-      flex: 0.9,
-      minWidth: 130,
-    },
-    {
       field: 'predicted_quantity',
       headerName: 'Predicted Quantity',
       flex: 0.9,
@@ -169,7 +165,6 @@ const Forecast: React.FC = () => {
     month_1_quantity: row.month_1_quantity,
     month_2_quantity: row.month_2_quantity,
     month_3_quantity: row.month_3_quantity,
-    prediction_month: row.prediction_month,
     predicted_quantity: row.predicted_quantity,
   })) || [];
 
@@ -198,6 +193,31 @@ const Forecast: React.FC = () => {
     { field: 'abc_xyz', label: 'ABC/XYZ' },
   ];
 
+  const orderedGranularities = useMemo(() => {
+    const source = data?.available_granularities ?? GRANULARITY_ORDER;
+    return [...source].sort((a, b) => {
+      const aIndex = GRANULARITY_ORDER.indexOf(a);
+      const bIndex = GRANULARITY_ORDER.indexOf(b);
+      const safeA = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+      const safeB = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+      return safeA - safeB;
+    });
+  }, [data?.available_granularities]);
+
+  const forecastedPeriodTitle = useMemo(() => {
+    if (!data) return '';
+    
+    if (granularity === 'monthly') {
+      return `Forecasted quantity: ${data.month_3_name || 'Month 3'}`;
+    } else if (granularity === 'bimonthly') {
+      return `Forecasted quantity: ${data.month_2_name || 'Month 2'} to ${data.month_3_name || 'Month 3'}`;
+    } else if (granularity === 'quarterly') {
+      return `Forecasted quantity: ${data.month_1_name || 'Month 1'} to ${data.month_3_name || 'Month 3'}`;
+    }
+    
+    return `Forecasted quantity: ${data.month_3_name || 'Month 3'}`;
+  }, [data, granularity]);
+
   if (loading && !data) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
@@ -215,7 +235,7 @@ const Forecast: React.FC = () => {
   }
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" p={2.5}>
+    <Box display="flex" flexDirection="column" height="100%" minHeight={0} overflow="hidden" p={2.5}>
       <Typography variant="h6" gutterBottom>
         Demand Forecast
       </Typography>
@@ -228,7 +248,7 @@ const Forecast: React.FC = () => {
           onChange={(_, val) => { if (val) setGranularity(val); }}
           size="small"
         >
-          {(data.available_granularities ?? ['monthly', 'bimonthly', 'quarterly']).map((g) => (
+          {orderedGranularities.map((g) => (
             <ToggleButton key={g} value={g} sx={{ textTransform: 'capitalize', px: 3 }}>
               {GRANULARITY_LABELS[g] || g}
             </ToggleButton>
@@ -313,7 +333,10 @@ const Forecast: React.FC = () => {
       </Box>
 
       {/* Total Predicted Quantity Summary */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+          {forecastedPeriodTitle}
+        </Typography>
         <Paper elevation={1} sx={{ px: 2.5, py: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography variant="body2" color="text.secondary">
             Total Predicted Quantity:
@@ -324,7 +347,7 @@ const Forecast: React.FC = () => {
         </Paper>
       </Box>
 
-      <Paper elevation={1} sx={{ width: '100%', height: 'calc(100vh - 320px)', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+      <Paper elevation={1} sx={{ flex: 1, width: '100%', minHeight: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
@@ -345,6 +368,7 @@ const Forecast: React.FC = () => {
             border: 'none',
             '& .MuiDataGrid-cell': {
               fontSize: '0.875rem',
+              fontWeight: 500,
               borderRight: '1px solid',
               borderColor: 'divider',
               py: 1.5,
@@ -362,6 +386,7 @@ const Forecast: React.FC = () => {
             '& .MuiDataGrid-columnSeparator': {
               display: 'none',
             },
+            height: '100%',
           }}
           disableRowSelectionOnClick
           rowHeight={52}

@@ -152,7 +152,7 @@ const CustomerProduct: React.FC = () => {
     : 'Showing Product List for All Customers';
 
   return (
-    <Box display="flex" flexDirection="column" height="100%" p={2.5}>
+    <Box display="flex" flexDirection="column" height="100%" minHeight={0} overflow="hidden" p={2.5}>
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
         Customer Product List
       </Typography>
@@ -279,8 +279,10 @@ const CustomerProduct: React.FC = () => {
           getRowId={(row) => row.id}
           sx={{
             border: 'none',
+            height: '100%',
             '& .MuiDataGrid-cell': {
               fontSize: '0.875rem',
+              fontWeight: 500,
               borderRight: '1px solid',
               borderColor: 'divider',
               py: 1.5,

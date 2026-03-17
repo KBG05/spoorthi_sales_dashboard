@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet } from 'react-router';
+import { Outlet } from 'react-router-dom';
 import {
   Box,
   AppBar,
@@ -107,7 +107,7 @@ export const AppLayout = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex', height: '100vh', bgcolor: 'background.default', overflow: 'hidden' }}>
       <Sidebar open={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
       
       <Box
@@ -120,13 +120,18 @@ export const AppLayout = () => {
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box',
+          height: '100vh',
+          overflow: 'hidden',
           transition: 'margin-left 150ms cubic-bezier(0.4, 0, 0.6, 1) 0ms',
         }}
       >
         <AppBar
-          position="static"
+          position="sticky"
           elevation={0}
           sx={{
+            borderRadius: 0,
+            top: 0,
+            zIndex: (theme) => theme.zIndex.drawer + 2,
             bgcolor: 'background.paper',
             color: 'text.primary',
             borderBottom: 1,
@@ -135,7 +140,22 @@ export const AppLayout = () => {
         >
           <Toolbar sx={{ minHeight: 64, px: { xs: 2, sm: 3 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <img src={Logo1} alt="Spoorthi Logo" style={{ height: 40, marginRight: 12 }} />
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: 50,
+                  px: 1.75,
+                  mr: 1.5,
+                  borderRadius: 1.5,
+                    bgcolor: mode === 'light' ? 'rgba(36, 92, 130, 0.1)' : 'rgba(255, 255, 255, 0.5)',
+                  border: '1px solid',
+                    borderColor: mode === 'light' ? 'rgba(36, 92, 130, 0.25)' : 'rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <img src={Logo1} alt="Spoorthi Logo" style={{ height: 136, width: 'auto', display: 'block' }} />
+              </Box>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Spoorthi Analytics
               </Typography>
@@ -248,6 +268,7 @@ export const AppLayout = () => {
             display: 'flex',
             flexDirection: 'column',
             minHeight: 0,
+            overflow: 'hidden auto',
           }}
         >
           <Outlet />
@@ -256,6 +277,9 @@ export const AppLayout = () => {
         <Box
           component="footer"
           sx={{
+            position: 'sticky',
+            bottom: 0,
+            zIndex: (theme) => theme.zIndex.drawer + 1,
             py: 2,
             px: 3,
             mt: 'auto',
@@ -265,8 +289,8 @@ export const AppLayout = () => {
             textAlign: 'center',
           }}
         >
-          <Typography variant="body2" color="text.secondary">
-            © Copyright Lumin AI Systems
+          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 500 }}>
+            © Copyright {new Date().getFullYear()} Lumin AI Systems
           </Typography>
         </Box>
       </Box>

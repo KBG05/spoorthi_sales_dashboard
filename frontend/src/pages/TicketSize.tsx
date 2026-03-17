@@ -151,8 +151,8 @@ const TicketSize: React.FC = () => {
                   placement: 'outside',
                   style: {
                     fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                    fontWeight: 600,
-                    fontSize: 14,
+                    fontWeight: 700,
+                    fontSize: 15,
                     transform: 'translateY(-8px)',
                   },
                 },

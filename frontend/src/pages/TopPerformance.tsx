@@ -122,8 +122,8 @@ const TopPerformance: React.FC = () => {
               yAxis={[{ 
                 scaleType: 'band', 
                 data: fyChartData.labels, 
-                tickLabelStyle: { fontSize: 12 },
-                width: 200
+                tickLabelStyle: { fontSize: 12, fontWeight: 600 },
+                width: 300
               }]}
               xAxis={[{ 
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
@@ -144,15 +144,15 @@ const TopPerformance: React.FC = () => {
                   valueFormatter: (value) => `₹${value?.toFixed(2)} Cr`,
                 },
               ]}
-              margin={{ top: 20, right: 80, bottom: 40, left: 150 }}
+              margin={{ top: 20, right: 80, bottom: 40, left: 220 }}
               grid={{ vertical: true, horizontal: false }}
               barLabel={(item) => `₹${item.value?.toFixed(2)} Cr`}
               slotProps={{
                 barLabel: {
                   style: {
                     fill: theme.palette.mode === 'dark' ? '#fff' : '#000',
-                    fontWeight: 600,
-                    fontSize: 12,
+                    fontWeight: 700,
+                    fontSize: 13,
                   },
                 },
               }}
@@ -170,8 +170,8 @@ const TopPerformance: React.FC = () => {
               yAxis={[{ 
                 scaleType: 'band', 
                 data: latestChartData.labels, 
-                tickLabelStyle: { fontSize: 12 },
-                width: 200
+                tickLabelStyle: { fontSize: 12, fontWeight: 600 },
+                width: 300
               }]}
               xAxis={[{ 
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
@@ -192,7 +192,7 @@ const TopPerformance: React.FC = () => {
                   valueFormatter: (value) => `₹${value?.toFixed(2)} Cr`,
                 },
               ]}
-              margin={{ top: 20, right: 80, bottom: 40, left: 150 }}
+              margin={{ top: 20, right: 80, bottom: 40, left: 220 }}
               grid={{ vertical: true, horizontal: false }}
               barLabel={(item) => `₹${item.value?.toFixed(2)} Cr`}
               slotProps={{

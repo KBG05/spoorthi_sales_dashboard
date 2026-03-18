@@ -131,11 +131,6 @@ const ExportData = () => {
         ))}
       </Box>
 
-      <Box sx={{ mt: 4, p: 2, bgcolor: 'action.hover', borderRadius: 1 }}>
-        <Typography variant="caption" color="text.secondary">
-          © Numentrix
-        </Typography>
-      </Box>
     </Box>
   );
 };

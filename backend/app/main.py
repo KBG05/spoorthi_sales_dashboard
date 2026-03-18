@@ -46,8 +46,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Spoorthi Analytics API",
-    description="Backend API for Spoorthi Analytics Dashboard",
+    title="Sphoorti Analytics API",
+    description="Backend API for Sphoorti Analytics Dashboard",
     version="1.0.0",
     lifespan=lifespan,
 )

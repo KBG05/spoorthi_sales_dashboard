@@ -70,7 +70,7 @@ const Login = () => {
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Spoorthi Analytics
+            Sphoorti Analytics
           </Typography>
           <IconButton onClick={toggleTheme} color="inherit">
             {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}

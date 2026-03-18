@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import { Brightness4, Brightness7, AccountCircle, Logout, Lock } from '@mui/icons-material';
 import Logo1 from '../../public/Spoorthi-Logo.png';
-import Logo2 from '../../public/logo1.png';
+// import Logo2 from '../../public/logo1.png';
 import Sidebar from '../components/Sidebar';
 import { useThemeMode } from '../theme/ThemeProvider';
 import { useAuth } from '../contexts/AuthContext';
@@ -157,11 +157,11 @@ export const AppLayout = () => {
                 <img src={Logo1} alt="Spoorthi Logo" style={{ height: 136, width: 'auto', display: 'block' }} />
               </Box>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Spoorthi Analytics
+                Sphoorti Analytics
               </Typography>
             </Box>
             <Box sx={{ flexGrow: 1 }} />
-            <img src={Logo2} alt="Spoorthi Logo" style={{ height: 40, marginRight: 12 }} />
+            {/* <img src={Logo2} alt="Spoorthi Logo" style={{ height: 40, marginRight: 12 }} /> */}
             <IconButton onClick={toggleTheme} color="inherit" sx={{ mr: 1 }}>
               {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
             </IconButton>

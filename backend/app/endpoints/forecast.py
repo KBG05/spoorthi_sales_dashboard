@@ -16,25 +16,31 @@ from ..database import query_one, query_all
 from ..schemas import ForecastResponse, ForecastRow, User
 from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/forecast", tags=["Forecast"], dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/forecast", tags=["Forecast"], dependencies=[Depends(get_current_user)]
+)
 
 
 @router.get("/demand", response_model=ForecastResponse)
 async def get_demand_forecast(
-    granularity: Optional[str] = Query("monthly", description="Granularity: monthly, bimonthly, or quarterly"),
+    granularity: Optional[str] = Query(
+        "monthly", description="Granularity: monthly, bimonthly, or quarterly"
+    ),
 ):
     """
     Get demand forecast data enriched with category, unique customers,
     and last 3-month individual + average quantities.
     """
     # Check table exists
-    table_check = query_one("""
+    table_check = query_one(
+        """
         SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public'
         AND table_name = 'final_sales_forecasts'
         LIMIT 1
-    """)
+    """
+    )
     if not table_check:
         raise HTTPException(status_code=404, detail="No forecast table found")
 
@@ -44,9 +50,11 @@ async def get_demand_forecast(
         granularity = "monthly"
 
     # Get available granularities
-    gran_rows = query_all("""
+    gran_rows = query_all(
+        """
         SELECT DISTINCT granularity FROM public."final_sales_forecasts" ORDER BY granularity
-    """)
+    """
+    )
     available_granularities = [r["granularity"] for r in gran_rows] if gran_rows else []
 
     # Find the last 3 months in raw data (for enrichment)
@@ -89,10 +97,15 @@ async def get_demand_forecast(
     data_query = f"""
         WITH forecast AS (
             SELECT
-                f.prediction_month::date AS prediction_month,
+                f.forecast_period,
                 f.article_no,
                 f.granularity,
-                f.final_forecast AS predicted_quantity
+                f.final_forecast AS predicted_quantity,
+                CASE
+                    WHEN f.granularity = 'monthly' THEN TO_DATE(f.forecast_period, 'DD-MM-YYYY')
+                    WHEN f.granularity IN ('bimonthly', 'quarterly') THEN TO_DATE(SPLIT_PART(f.forecast_period, ' - ', 1), 'MM-YYYY')
+                    ELSE NULL
+                END AS sort_period
             FROM public."final_sales_forecasts" f
             WHERE f.granularity = %s
         ),
@@ -112,7 +125,7 @@ async def get_demand_forecast(
             GROUP BY r.article_no
         )
         SELECT
-            fc.prediction_month,
+            fc.forecast_period,
             fc.article_no,
             fc.granularity,
             fc.predicted_quantity,
@@ -125,23 +138,19 @@ async def get_demand_forecast(
         FROM forecast fc
         LEFT JOIN latest_dm dm ON dm.article_no = fc.article_no
         LEFT JOIN enrichment en ON en.article_no = fc.article_no
-        ORDER BY fc.prediction_month DESC, fc.article_no
+        ORDER BY fc.sort_period DESC NULLS LAST, fc.article_no
     """
 
     rows = query_all(data_query, (granularity,))
 
     if not rows:
-        raise HTTPException(status_code=404, detail="No forecast data found for this granularity")
+        raise HTTPException(
+            status_code=404, detail="No forecast data found for this granularity"
+        )
 
     forecast_data = []
     for row in rows:
-        pm = row["prediction_month"]
-        if pm:
-            if isinstance(pm, str):
-                pm = datetime.strptime(pm[:10], "%Y-%m-%d")
-            pm_str = pm.strftime("%Y-%m-%d")
-        else:
-            pm_str = ""
+        fp = row["forecast_period"] or ""
 
         m1 = float(row["month_1_quantity"] or 0)
         m2 = float(row["month_2_quantity"] or 0)
@@ -151,7 +160,7 @@ async def get_demand_forecast(
         forecast_data.append(
             ForecastRow(
                 article_no=str(row["article_no"]),
-                prediction_month=pm_str,
+                forecast_period=str(fp),
                 granularity=row["granularity"],
                 predicted_quantity=float(row["predicted_quantity"] or 0),
                 category=row["category"] or "",

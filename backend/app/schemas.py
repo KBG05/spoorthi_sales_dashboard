@@ -202,7 +202,7 @@ class ForecastRow(BaseModel):
     """Single forecast row"""
 
     article_no: str
-    prediction_month: str  # "YYYY-MM-DD"
+    forecast_period: str  # "DD-MM-YYYY" or "MM-YYYY - MM-YYYY"
     granularity: str  # "monthly", "bimonthly", "quarterly"
     predicted_quantity: float
     category: str = ""

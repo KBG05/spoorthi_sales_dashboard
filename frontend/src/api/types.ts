@@ -111,7 +111,7 @@ export interface TicketSizeBand {
 
 export interface ForecastRow {
   article_no: string;
-  prediction_month: string;
+  forecast_period: string;
   granularity: string;
   predicted_quantity: number;
   category: string;

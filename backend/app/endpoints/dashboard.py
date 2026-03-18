@@ -498,7 +498,7 @@ async def export_forecast():
         SELECT 
             f.article_no,
             f.article_no AS "ProductName",
-            f.prediction_month::text AS "ForecastMonth",
+            f.forecast_period::text AS "ForecastPeriod",
             f.final_forecast AS "PredictedQuantity"
         FROM public."{table_name}" f
         ORDER BY f.article_no

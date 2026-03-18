@@ -3,7 +3,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
-import { AppLayout } from './layouts/AppLayout';
+import { AppLayout } from './layouts/AppLayout.tsx';
 import Dashboard from './pages/Dashboard';
 import TrendAnalysis from './pages/TrendAnalysis';
 import CustomerBehaviour from './pages/CustomerBehaviour';

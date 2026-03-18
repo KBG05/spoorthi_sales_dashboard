@@ -205,18 +205,11 @@ const Forecast: React.FC = () => {
   }, [data?.available_granularities]);
 
   const forecastedPeriodTitle = useMemo(() => {
-    if (!data) return '';
+    if (!data || !data.data || data.data.length === 0) return '';
     
-    if (granularity === 'monthly') {
-      return `Forecasted quantity: ${data.month_3_name || 'Month 3'}`;
-    } else if (granularity === 'bimonthly') {
-      return `Forecasted quantity: ${data.month_2_name || 'Month 2'} to ${data.month_3_name || 'Month 3'}`;
-    } else if (granularity === 'quarterly') {
-      return `Forecasted quantity: ${data.month_1_name || 'Month 1'} to ${data.month_3_name || 'Month 3'}`;
-    }
-    
-    return `Forecasted quantity: ${data.month_3_name || 'Month 3'}`;
-  }, [data, granularity]);
+    const forecastPeriod = data.data[0].forecast_period;
+    return `Forecast Period: ${forecastPeriod}`;
+  }, [data]);
 
   if (loading && !data) {
     return (

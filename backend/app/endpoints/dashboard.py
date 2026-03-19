@@ -437,12 +437,14 @@ async def export_rolling_abc_xyz():
     sql = f"""
         SELECT 
             r.article_no,
-            r.article_no AS product_name,
+            COALESCE(dm.category, 'Unknown') AS category,
             r.abc_category,
             r.xyz_category,
             r.total_revenue,
             r.total_quantity
         FROM {table} r
+        LEFT JOIN public."spoorthi_abc_xyz_datamart" dm 
+            ON r.article_no = dm.article_no
         ORDER BY r.abc_category, r.xyz_category, r.total_revenue DESC
     """
 
@@ -498,7 +500,7 @@ async def export_forecast():
         SELECT 
             f.article_no,
             f.article_no AS "ProductName",
-            f.forecast_period::text AS "ForecastPeriod",
+            REPLACE(f.forecast_period::text, ' - ', ', ') AS "ForecastPeriod",
             f.final_forecast AS "PredictedQuantity"
         FROM public."{table_name}" f
         ORDER BY f.article_no

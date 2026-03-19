@@ -178,6 +178,22 @@ const getCommonThemeOptions = (mode: 'light' | 'dark'): ThemeOptions => {
             ? 'radial-gradient(circle at 10% -15%, rgba(64, 91, 130, 0.1), transparent 42%), radial-gradient(circle at 92% 6%, rgba(85, 120, 164, 0.09), transparent 38%)'
             : 'radial-gradient(circle at 8% -10%, rgba(30, 55, 90, 0.50), transparent 45%)',
         },
+        '.MuiDataGrid-columnHeaders': {
+          // backgroundColor: mode === 'light' ? alpha(palette.primary.main, 0.1) : alpha(palette.primary.main, 0.2),
+          // borderBottom: `1px solid ${alpha(palette.primary.main, mode === 'light' ? 0.24 : 0.32)}`,
+        },
+        '.MuiDataGrid-columnHeaderTitle': {
+          color: '#C1121F',
+          fontWeight: 900,
+          fontVariationSettings: '"wght" 900',
+          fontSize: '0.825rem',
+          letterSpacing: '0.02em',
+          textTransform: 'uppercase',
+          textAlign: 'left',
+        },
+        '.MuiDataGrid-columnHeaderTitleContainer': {
+          justifyContent: 'flex-start',
+        },
       },
     },
     MuiAppBar: {
@@ -282,8 +298,13 @@ const getCommonThemeOptions = (mode: 'light' | 'dark'): ThemeOptions => {
           borderBottom: `1px solid ${palette.divider}`,
         },
         head: {
-          fontWeight: 700,
-          backgroundColor: alpha(palette.primary.main, mode === 'light' ? 0.05 : 0.12),
+          color: '#C1121F',
+          fontWeight: 900,
+          fontVariationSettings: '"wght" 900',
+          fontSize: '0.925rem',
+          letterSpacing: '0.02em',
+          textTransform: 'uppercase',
+          textAlign: 'left',
         },
       },
     },

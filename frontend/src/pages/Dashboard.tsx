@@ -442,7 +442,7 @@ const Dashboard = () => {
                     fontWeight: 600,
                   },
                   min: 0,
-                  max: Math.ceil(Math.max(...abcCount.map(d => d.count || 0)) * 1.1),
+                  max: Math.ceil(Math.max(...abcCount.map(d => d.count || 0)) * 1.28),
                   tickMinStep: (() => {
                     const counts = abcCount.map(d => d.count || 0);
                     const maxVal = Math.max(...counts);
@@ -460,7 +460,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
                   height={310}
-                margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 74, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -525,7 +525,7 @@ const Dashboard = () => {
                     return `₹${value.toFixed(2)}M`;
                   },
                   min: 0,
-                  max: Math.ceil(Math.max(...abcRevenue.map(d => d.revenue || 0)) * 1.1),
+                  max: Math.ceil(Math.max(...abcRevenue.map(d => d.revenue || 0)) * 1.28),
                   tickMinStep: (() => {
                     const revenues = abcRevenue.map(d => d.revenue || 0);
                     const maxVal = Math.max(...revenues);
@@ -543,7 +543,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                 }]}
                   height={295}
-                margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 76, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
                   const value = item.value as number;
@@ -598,7 +598,7 @@ const Dashboard = () => {
                   },
                   width: 70,
                   min: 0,
-                  max: Math.ceil(Math.max(...xyzCount.map(d => d.count || 0)) * 1.1),
+                  max: Math.ceil(Math.max(...xyzCount.map(d => d.count || 0)) * 1.28),
                   tickMinStep: (() => {
                     const counts = xyzCount.map(d => d.count || 0);
                     const maxVal = Math.max(...counts);
@@ -617,7 +617,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
                   height={330}
-                margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 74, bottom: 0, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -676,7 +676,7 @@ const Dashboard = () => {
                     return `₹${value.toFixed(2)}M`;
                   },
                   min: 0,
-                  max: Math.ceil(Math.max(...xyzRevenue.map(d => d.revenue || 0)) * 1.1),
+                  max: Math.ceil(Math.max(...xyzRevenue.map(d => d.revenue || 0)) * 1.28),
                   tickMinStep: (() => {
                     const revenues = xyzRevenue.map(d => d.revenue || 0);
                     const maxVal = Math.max(...revenues);
@@ -696,7 +696,7 @@ const Dashboard = () => {
                   barLabelPlacement:"outside"
                 }]}
                   height={315}
-                  margin={{ top: 50, bottom: 0, left: 10, right: 10 }}
+                  margin={{ top: 76, bottom: 0, left: 10, right: 10 }}
 
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {

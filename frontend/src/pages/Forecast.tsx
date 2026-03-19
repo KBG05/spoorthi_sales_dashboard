@@ -208,7 +208,8 @@ const Forecast: React.FC = () => {
     if (!data || !data.data || data.data.length === 0) return '';
     
     const forecastPeriod = data.data[0].forecast_period;
-    return `Forecast Period: ${forecastPeriod}`;
+    const formattedPeriod = forecastPeriod.replace(' - ', ' to ');
+    return `Forecast Period: ${formattedPeriod}`;
   }, [data]);
 
   if (loading && !data) {

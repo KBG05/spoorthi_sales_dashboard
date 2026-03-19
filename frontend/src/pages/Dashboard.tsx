@@ -438,9 +438,11 @@ const Dashboard = () => {
                 }]}
                 yAxis={[{
                   tickLabelStyle: {
+                    width: 96,
                     fontSize: 12,
                     fontWeight: 600,
                   },
+                  width: 96,
                   min: 0,
                   max: Math.ceil(Math.max(...abcCount.map(d => d.count || 0)) * 1.28),
                   tickMinStep: (() => {
@@ -509,20 +511,21 @@ const Dashboard = () => {
                   },
                 }]}
                 yAxis={[{
+                  width: 96,
                   tickLabelStyle: {
                     fontSize: 12,
                     fontWeight: 600,
                   },
                   valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                    const crValue = value / 10;
                     if (context.location === 'tick') {
-                      // Short format for axis ticks
-                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
-                      if (value >= 100) return `₹${value.toFixed(0)}`;
-                      if (value >= 10) return `₹${value.toFixed(0)}`;
-                      return `₹${value.toFixed(0)}`;
+                      // Show y-axis tick labels in Crores
+                      if (crValue >= 100) return `₹${crValue.toFixed(0)}Cr`;
+                      if (crValue >= 10) return `₹${crValue.toFixed(1)}Cr`;
+                      return `₹${crValue.toFixed(2)}Cr`;
                     }
-                    // Full format for tooltips
-                    return `₹${value.toFixed(2)}M`;
+                    // Full format for tooltips in Crores
+                    return `₹${crValue.toFixed(2)} Cr`;
                   },
                   min: 0,
                   max: Math.ceil(Math.max(...abcRevenue.map(d => d.revenue || 0)) * 1.28),
@@ -543,7 +546,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                 }]}
                   height={295}
-                margin={{ top: 76, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 76, bottom: 0, left: 36, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
                   const value = item.value as number;
@@ -660,20 +663,21 @@ const Dashboard = () => {
                   },
                 }]}
                 yAxis={[{
+                  width: 96,
                   tickLabelStyle: {
                     fontSize: 12,
                     fontWeight: 600,
                   },
                   valueFormatter: (value: number, context: AxisValueFormatterContext) => {
+                    const crValue = value / 10;
                     if (context.location === 'tick') {
-                      // Short format for axis ticks
-                      if (value >= 1000) return `₹${(value / 1000).toFixed(0)}K`;
-                      if (value >= 100) return `₹${value.toFixed(0)}`;
-                      if (value >= 10) return `₹${value.toFixed(0)}`;
-                      return `₹${value.toFixed(0)}`;
+                      // Show y-axis tick labels in Crores
+                      if (crValue >= 100) return `₹${crValue.toFixed(0)}Cr`;
+                      if (crValue >= 10) return `₹${crValue.toFixed(1)}Cr`;
+                      return `₹${crValue.toFixed(2)}Cr`;
                     }
-                    // Full format for tooltips
-                    return `₹${value.toFixed(2)}M`;
+                    // Full format for tooltips in Crores
+                    return `₹${crValue.toFixed(2)} Cr`;
                   },
                   min: 0,
                   max: Math.ceil(Math.max(...xyzRevenue.map(d => d.revenue || 0)) * 1.28),
@@ -696,7 +700,7 @@ const Dashboard = () => {
                   barLabelPlacement:"outside"
                 }]}
                   height={315}
-                  margin={{ top: 76, bottom: 0, left: 10, right: 10 }}
+                  margin={{ top: 76, bottom: 0, left: 36, right: 10 }}
 
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {

@@ -187,7 +187,6 @@ const Dashboard = () => {
             label="Month Filter"
             onChange={(e) => setSelectedMonth(e.target.value as number | '')}
           >
-            <MenuItem value="">All Months</MenuItem>
             {availableMonths.map((month) => (
               <MenuItem key={month.id} value={month.id}>
                 {month.name}

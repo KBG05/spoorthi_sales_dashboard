@@ -70,6 +70,7 @@ async def get_transitions(
         all_articles = set()
         month_data = {}
         month_col_order = []
+        article_desc_map = {}
 
         for ym in months:
             parts = ym.split("-")
@@ -95,6 +96,17 @@ async def get_transitions(
                 )
                 month_data[col_name][article] = combined if combined != "N/A" else "-"
 
+        desc_rows = query_all(
+            """
+            SELECT
+                article_no,
+                COALESCE(NULLIF(description, ''), NULLIF(article_name, ''), article_no) AS article_description
+            FROM public.sphoorti_product_master
+            """
+        )
+        for row in desc_rows:
+            article_desc_map[str(row["article_no"])] = str(row["article_description"])
+
         trend_sql = """
             SELECT
                 article_no,
@@ -116,7 +128,10 @@ async def get_transitions(
         # Build response
         data = []
         for article in sorted(all_articles):
-            row_data = {"article_no": article}
+            row_data = {
+                "article_no": article,
+                "article_description": article_desc_map.get(article, article),
+            }
             for col_name in month_col_order:
                 row_data[col_name] = month_data[col_name].get(article, "-")
             row_data["trend_values"] = [
@@ -124,7 +139,7 @@ async def get_transitions(
             ]
             data.append(row_data)
 
-        column_headers = ["article_no"] + month_col_order
+        column_headers = ["article_no", "article_description"] + month_col_order
 
     else:  # Customers
         # For each month, compute customer ABC from raw invoice data

@@ -20,7 +20,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 import { forecastApi } from '../api';
 import type { ForecastResponse } from '../api/types';
 
-import { ABC_XYZ_COLORS, formatQuantity, withAlpha } from '../constants/constants';
+import { ABC_COLORS, formatQuantity, withAlpha } from '../constants/constants';
 
 const GRANULARITY_LABELS: Record<string, string> = {
   monthly: 'Monthly',
@@ -66,19 +66,13 @@ const Forecast: React.FC = () => {
       minWidth: 260,
     },
     {
-      field: 'category',
-      headerName: 'Category',
-      flex: 0.8,
-      minWidth: 130,
-    },
-    {
-      field: 'abc_xyz',
-      headerName: 'ABC/XYZ',
+      field: 'abc_category',
+      headerName: 'ABC',
       flex: 0.6,
       minWidth: 80,
       renderCell: (params) => {
         const val = String(params.value || '').toUpperCase();
-        const color = ABC_XYZ_COLORS[val];
+        const color = ABC_COLORS[val];
         return (
           <Box sx={{ fontWeight: 600, color: color || 'inherit', bgcolor: color ? withAlpha(color, 0.12) : 'inherit', px: 1, borderRadius: 1, display: 'flex', alignItems: 'center', height: '100%' }}>
             {params.value || '-'}
@@ -165,8 +159,7 @@ const Forecast: React.FC = () => {
     id: index,
     article_no: row.article_no,
     article_description: row.article_description || '-',
-    category: row.category || '-',
-    abc_xyz: row.abc_xyz || '-',
+    abc_category: row.abc_category || '-',
     unique_customers: row.unique_customers,
     last_3_months_quantity: row.last_3_months_quantity,
     month_1_quantity: row.month_1_quantity,
@@ -197,8 +190,7 @@ const Forecast: React.FC = () => {
   const filterableColumns = [
     { field: 'article_no', label: 'Article No' },
     { field: 'article_description', label: 'Article Description' },
-    { field: 'category', label: 'Category' },
-    { field: 'abc_xyz', label: 'ABC/XYZ' },
+    { field: 'abc_category', label: 'ABC' },
   ];
 
   const orderedGranularities = useMemo(() => {

@@ -206,8 +206,7 @@ class ForecastRow(BaseModel):
     forecast_period: str  # "DD-MM-YYYY" or "MM-YYYY - MM-YYYY"
     granularity: str  # "monthly", "bimonthly", "quarterly"
     predicted_quantity: float
-    category: str = ""
-    abc_xyz: str = ""
+    abc_category: str = ""
     unique_customers: int = 0
     last_3_months_quantity: float = 0.0
     month_1_quantity: float = 0.0

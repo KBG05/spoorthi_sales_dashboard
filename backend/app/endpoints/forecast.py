@@ -5,14 +5,14 @@ Replicates: server/forecast_server.R
 UI Reference: ui/forecast_ui.R
 
 Provides demand forecast data from the final_sales_forecasts table,
-enriched with ABC/XYZ class, unique customers, and
-last-3-month individual quantities from rolling tables and raw data.
+enriched with ABC class, unique customers, and
+last-3-month individual quantities from raw data.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional
 from datetime import datetime
-from ..database import query_one, query_all, get_latest_rolling_table
+from ..database import query_one, query_all
 from ..schemas import ForecastResponse, ForecastRow, User
 from ..endpoints.auth import get_current_user
 
@@ -28,7 +28,7 @@ async def get_demand_forecast(
     ),
 ):
     """
-    Get demand forecast data enriched with category, unique customers,
+    Get demand forecast data enriched with ABC category, unique customers,
     and last 3-month individual + average quantities.
     """
     # Check table exists
@@ -78,7 +78,7 @@ async def get_demand_forecast(
     month_3_name = month_labels[2] if len(month_labels) > 2 else "Month 3"
 
     # Build the enriched query:
-    # - ABC/XYZ from latest rolling table (latest month per article)
+    # - ABC category from forecast table
     # - Unique customers from raw data (last 3 months)
     # - Individual month quantities from raw data
     month_clauses = []
@@ -94,11 +94,6 @@ async def get_demand_forecast(
 
     three_months_ago = last3_months[0] + "-01" if last3_months else "2000-01-01"
 
-    # Get latest rolling table for ABC/XYZ data
-    rolling_table = get_latest_rolling_table()
-    if not rolling_table:
-        raise HTTPException(status_code=404, detail="No rolling ABC/XYZ table found")
-
     data_query = f"""
         WITH forecast AS (
             SELECT
@@ -106,6 +101,7 @@ async def get_demand_forecast(
                 f.article_no,
                 f.granularity,
                 f.final_forecast AS predicted_quantity,
+                f.abc_category,
                 CASE
                     WHEN f.granularity = 'monthly' THEN TO_DATE(f.forecast_period, 'DD-MM-YYYY')
                     WHEN f.granularity IN ('bimonthly', 'quarterly') THEN TO_DATE(SPLIT_PART(f.forecast_period, ' - ', 1), 'MM-YYYY')
@@ -113,12 +109,6 @@ async def get_demand_forecast(
                 END AS sort_period
             FROM public."final_sales_forecasts" f
             WHERE f.granularity = %s
-        ),
-        latest_rolling AS (
-            SELECT DISTINCT ON (article_no)
-                article_no, abc_category as abc, xyz_category as xyz
-            FROM public."{rolling_table}"
-            ORDER BY article_no
         ),
         enrichment AS (
             SELECT
@@ -135,15 +125,13 @@ async def get_demand_forecast(
             COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), fc.article_no) AS article_description,
             fc.granularity,
             fc.predicted_quantity,
-            COALESCE(pm.category, '') AS category,
-            CONCAT(rolling.abc, rolling.xyz) AS abc_xyz,
+            COALESCE(fc.abc_category, '') AS abc_category,
             COALESCE(en.unique_customers, 0) AS unique_customers,
             COALESCE(en.month_1_quantity, 0) AS month_1_quantity,
             COALESCE(en.month_2_quantity, 0) AS month_2_quantity,
             COALESCE(en.month_3_quantity, 0) AS month_3_quantity
         FROM forecast fc
         LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = fc.article_no
-        LEFT JOIN latest_rolling rolling ON rolling.article_no = fc.article_no
         LEFT JOIN enrichment en ON en.article_no = fc.article_no
         ORDER BY fc.sort_period DESC NULLS LAST, fc.article_no
     """
@@ -171,8 +159,7 @@ async def get_demand_forecast(
                 forecast_period=str(fp),
                 granularity=row["granularity"],
                 predicted_quantity=float(row["predicted_quantity"] or 0),
-                category=row["category"] or "",
-                abc_xyz=row["abc_xyz"] or "",
+                abc_category=row["abc_category"] or "",
                 unique_customers=int(row["unique_customers"] or 0),
                 last_3_months_quantity=avg_3m,
                 month_1_quantity=m1,

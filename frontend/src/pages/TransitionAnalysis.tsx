@@ -87,8 +87,8 @@ const TransitionAnalysis: React.FC = () => {
       .map((header, index) => ({
       field: header,
       headerName: header,
-      width: index === 0 ? 320 : (header.toLowerCase().includes('name') ? 500 : 180),
-      minWidth: index === 0 ? 300 : (header.toLowerCase().includes('name') ? 450 : 150),
+      width: index === 0 ? 320 : (header.toLowerCase().includes('name') || header.toLowerCase().includes('description') ? 500 : 180),
+      minWidth: index === 0 ? 300 : (header.toLowerCase().includes('name') || header.toLowerCase().includes('description') ? 450 : 150),
       renderCell: (params: GridRenderCellParams) => {
         const value = params.value;
         let bgColor = 'inherit';
@@ -311,7 +311,19 @@ const TransitionAnalysis: React.FC = () => {
       </Box>
 
       {/* Table Section */}
-      <Paper elevation={1} sx={{ flex: 1, width: '100%', maxWidth: 1200, mx: 'auto', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <Paper
+        elevation={1}
+        sx={{
+          flex: 1,
+          width: '100%',
+          maxWidth: 'none',
+          mx: 0,
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+        }}
+      >
         <DataGrid
           rows={filteredRows}
           columns={columns}

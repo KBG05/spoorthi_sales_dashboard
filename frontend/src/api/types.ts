@@ -115,8 +115,7 @@ export interface ForecastRow {
   forecast_period: string;
   granularity: string;
   predicted_quantity: number;
-  category: string;
-  abc_xyz: string;
+  abc_category: string;
   unique_customers: number;
   last_3_months_quantity: number;
   month_1_quantity: number;

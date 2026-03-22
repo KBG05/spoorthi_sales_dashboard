@@ -393,7 +393,7 @@ export const customerProductApi = {
     return response.data;
   },
   getArticles: async (calculationDate: string, customerName?: string) => {
-    const response = await apiClient.get<{ articles: string[] }>('/customer-product/articles', {
+    const response = await apiClient.get<{ articles: ProductListItem[] }>('/customer-product/articles', {
       params: { calculation_date: calculationDate, ...(customerName ? { customer_name: customerName } : {}) },
     });
     return response.data;

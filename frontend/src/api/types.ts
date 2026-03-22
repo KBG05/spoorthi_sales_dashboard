@@ -111,6 +111,7 @@ export interface TicketSizeBand {
 
 export interface ForecastRow {
   article_no: string;
+  article_description?: string;
   forecast_period: string;
   granularity: string;
   predicted_quantity: number;
@@ -188,6 +189,7 @@ export interface DistributionBin {
 export interface CustomerProductRow {
   customer_name: string;
   article_no: string;
+  article_description?: string;
   last_purchase_date: string;
 }
 

@@ -64,24 +64,41 @@ async def get_articles(
     if customer_name:
         rows = query_all(
             """
-            SELECT DISTINCT article_no
-            FROM public.customer_product_list
-            WHERE calculation_date = %s AND customer_name = %s
-            ORDER BY article_no
+            SELECT DISTINCT
+                cpl.article_no,
+                COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), cpl.article_no) AS article_description
+            FROM public.customer_product_list cpl
+            LEFT JOIN public.sphoorti_product_master pm
+                ON pm.article_no = cpl.article_no
+            WHERE cpl.calculation_date = %s AND cpl.customer_name = %s
+            ORDER BY cpl.article_no
             """,
             (calculation_date, customer_name),
         )
     else:
         rows = query_all(
             """
-            SELECT DISTINCT article_no
-            FROM public.customer_product_list
-            WHERE calculation_date = %s
-            ORDER BY article_no
+            SELECT DISTINCT
+                cpl.article_no,
+                COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), cpl.article_no) AS article_description
+            FROM public.customer_product_list cpl
+            LEFT JOIN public.sphoorti_product_master pm
+                ON pm.article_no = cpl.article_no
+            WHERE cpl.calculation_date = %s
+            ORDER BY cpl.article_no
             """,
             (calculation_date,),
         )
-    return {"articles": [r["article_no"] for r in rows if r["article_no"]]}
+    return {
+        "articles": [
+            {
+                "article_no": r["article_no"],
+                "article_name": r.get("article_description") or r["article_no"],
+            }
+            for r in rows
+            if r["article_no"]
+        ]
+    }
 
 
 @router.get("/data", response_model=CustomerProductResponse)
@@ -91,25 +108,31 @@ async def get_data(
     article_no: Optional[str] = Query(None, description="Filter by article"),
 ):
     """Return the customer-product list filtered by date, customer, article."""
-    conditions = ["calculation_date = %s"]
+    conditions = ["cpl.calculation_date = %s"]
     params: list = [calculation_date]
 
     if customer_name:
-        conditions.append("customer_name = %s")
+        conditions.append("cpl.customer_name = %s")
         params.append(customer_name)
 
     if article_no:
-        conditions.append("article_no = %s")
+        conditions.append("cpl.article_no = %s")
         params.append(article_no)
 
     where = " AND ".join(conditions)
 
     rows = query_all(
         f"""
-        SELECT customer_name, article_no, last_purchase_date
-        FROM public.customer_product_list
+        SELECT
+            cpl.customer_name,
+            cpl.article_no,
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), cpl.article_no) AS article_description,
+            cpl.last_purchase_date
+        FROM public.customer_product_list cpl
+        LEFT JOIN public.sphoorti_product_master pm
+            ON pm.article_no = cpl.article_no
         WHERE {where}
-        ORDER BY customer_name, last_purchase_date DESC
+        ORDER BY cpl.customer_name, cpl.last_purchase_date DESC
         """,
         tuple(params),
     )
@@ -118,6 +141,7 @@ async def get_data(
         CustomerProductRow(
             customer_name=r["customer_name"],
             article_no=r["article_no"],
+            article_description=r.get("article_description"),
             last_purchase_date=str(r["last_purchase_date"]),
         )
         for r in rows

@@ -35,7 +35,9 @@ async def get_available_years():
         ORDER BY fin_year_label DESC
         """
     )
-    return {"financial_years": [r["fin_year_label"] for r in rows if r["fin_year_label"]]}
+    return {
+        "financial_years": [r["fin_year_label"] for r in rows if r["fin_year_label"]]
+    }
 
 
 @router.get("/articles", response_model=List[ArticleListItem])
@@ -56,16 +58,23 @@ async def get_articles_by_class(
     class_in = ",".join(f"'{c}'" for c in class_list)
 
     sql = f"""
-        SELECT DISTINCT article_no
-        FROM public.spoorthi_abc_xyz_datamart
-        WHERE fin_year_label = '{fy_label}'
-          AND abc IN ({class_in})
-        ORDER BY article_no
+                SELECT DISTINCT
+                        dm.article_no,
+                        COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), dm.article_no) AS article_description
+                FROM public.spoorthi_abc_xyz_datamart dm
+                LEFT JOIN public.sphoorti_product_master pm
+                        ON pm.article_no = dm.article_no
+                WHERE dm.fin_year_label = '{fy_label}'
+                    AND dm.abc IN ({class_in})
+                ORDER BY dm.article_no
     """
     rows = query_all(sql)
 
     return [
-        ArticleListItem(article_no=r["article_no"], article_name=r["article_no"])
+        ArticleListItem(
+            article_no=r["article_no"],
+            article_name=r.get("article_description") or r["article_no"],
+        )
         for r in rows
         if r["article_no"]
     ]
@@ -110,7 +119,9 @@ async def get_customers_for_article(
 async def get_comparison_trend(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY25-26')"),
     article_no: str = Query(..., description="Article number to compare"),
-    customer_ids: str = Query(..., description="Comma-separated customer names (max 2)"),
+    customer_ids: str = Query(
+        ..., description="Comma-separated customer names (max 2)"
+    ),
     metric: str = Query("Revenue", description="'Revenue' or 'Quantity'"),
 ):
     """

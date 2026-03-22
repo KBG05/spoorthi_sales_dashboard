@@ -16,14 +16,14 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
 import { customerProductApi } from '../api';
-import type { CustomerProductRow } from '../api/types';
+import type { CustomerProductRow, ProductListItem } from '../api/types';
 
 const CustomerProduct: React.FC = () => {
   const [dates, setDates] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [customers, setCustomers] = useState<string[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-  const [articles, setArticles] = useState<string[]>([]);
+  const [articles, setArticles] = useState<ProductListItem[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   const [data, setData] = useState<CustomerProductRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -120,6 +120,7 @@ const CustomerProduct: React.FC = () => {
       (row) =>
         row.customer_name.toLowerCase().includes(q) ||
         row.article_no.toLowerCase().includes(q) ||
+        (row.article_description || '').toLowerCase().includes(q) ||
         row.last_purchase_date.includes(q),
     );
   }, [data, debouncedSearch]);
@@ -134,13 +135,20 @@ const CustomerProduct: React.FC = () => {
     {
       field: 'article_no',
       headerName: 'Article No',
-      flex: 0.8,
-      minWidth: 150,
+      flex: 0.9,
+      minWidth: 140,
+    },
+    {
+      field: 'article_description',
+      headerName: 'Article Description',
+      flex: 1.8,
+      minWidth: 280,
+      valueGetter: (_value, row) => row.article_description || '-',
     },
     {
       field: 'last_purchase_date',
       headerName: 'Last Purchase Date',
-      flex: 1,
+      flex: 0.8,
       minWidth: 150,
     },
   ];
@@ -213,10 +221,16 @@ const CustomerProduct: React.FC = () => {
 
         <Autocomplete
           size="small"
-          sx={{ minWidth: 200 }}
+          sx={{ minWidth: 320 }}
           options={articles}
-          value={selectedArticle}
-          onChange={(_, val) => setSelectedArticle(val)}
+          getOptionLabel={(option) =>
+            option.article_name
+              ? `${option.article_no} - ${option.article_name}`
+              : option.article_no
+          }
+          value={articles.find((a) => a.article_no === selectedArticle) || null}
+          onChange={(_, val) => setSelectedArticle(val?.article_no || null)}
+          isOptionEqualToValue={(option, value) => option.article_no === value.article_no}
           renderInput={(params) => (
             <TextField {...params} label="Select an Article" placeholder="All Articles" />
           )}
@@ -227,7 +241,7 @@ const CustomerProduct: React.FC = () => {
       <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
         <TextField
           size="small"
-          placeholder="Search by customer or article..."
+          placeholder="Search by customer, article, or description..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ minWidth: 350 }}
@@ -258,6 +272,7 @@ const CustomerProduct: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
+          minWidth: 0,
         }}
       >
         <DataGrid
@@ -280,6 +295,7 @@ const CustomerProduct: React.FC = () => {
           sx={{
             border: 'none',
             height: '100%',
+            minWidth: 0,
             '& .MuiDataGrid-cell': {
               fontSize: '0.875rem',
               fontWeight: 500,

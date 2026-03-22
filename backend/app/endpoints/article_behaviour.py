@@ -12,10 +12,20 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from collections import defaultdict
 from ..database import query_all, query_one, parse_fy
-from ..schemas import ArticleListItem, ArticleBehaviourDataPoint, User, CustomerListItem, ProductBehaviourDataPoint
+from ..schemas import (
+    ArticleListItem,
+    ArticleBehaviourDataPoint,
+    User,
+    CustomerListItem,
+    ProductBehaviourDataPoint,
+)
 from ..endpoints.auth import get_current_user
 
-router = APIRouter(prefix="/article-behaviour", tags=["Article Behaviour"], dependencies=[Depends(get_current_user)])
+router = APIRouter(
+    prefix="/article-behaviour",
+    tags=["Article Behaviour"],
+    dependencies=[Depends(get_current_user)],
+)
 
 
 @router.get("/available-years")
@@ -42,7 +52,7 @@ async def get_available_years():
 @router.get("/articles", response_model=List[ArticleListItem])
 async def get_articles_by_class(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
-    abc_class: str = Query("A", description="ABC class (A, B, or C)")
+    abc_class: str = Query("A", description="ABC class (A, B, or C)"),
 ):
     """
     Get list of articles for selected ABC class in a financial year.
@@ -54,11 +64,15 @@ async def get_articles_by_class(
         raise HTTPException(status_code=400, detail="Invalid financial year format")
 
     sql = """
-        SELECT DISTINCT article_no
-        FROM public."spoorthi_abc_xyz_datamart"
-        WHERE fin_year = %s
-          AND abc = %s
-        ORDER BY article_no
+                SELECT DISTINCT
+                        dm.article_no,
+                        COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), dm.article_no) AS article_description
+                FROM public."spoorthi_abc_xyz_datamart" dm
+                LEFT JOIN public.sphoorti_product_master pm
+                        ON pm.article_no = dm.article_no
+                WHERE dm.fin_year = %s
+                    AND dm.abc = %s
+                ORDER BY dm.article_no
     """
 
     rows = query_all(sql, (start_year, abc_class.upper()))
@@ -66,7 +80,7 @@ async def get_articles_by_class(
     return [
         ArticleListItem(
             article_no=str(row["article_no"]),
-            article_name=str(row["article_no"])
+            article_name=str(row.get("article_description") or row["article_no"]),
         )
         for row in rows
     ]
@@ -76,7 +90,7 @@ async def get_articles_by_class(
 async def get_customers_for_article(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
     article_no: str = Query(..., description="Article number"),
-    abc_classes: str = Query("A,B,C", description="Comma-separated ABC classes")
+    abc_classes: str = Query("A,B,C", description="Comma-separated ABC classes"),
 ):
     """
     Get list of customers who purchased a specific article in a financial year.
@@ -99,7 +113,7 @@ async def get_customers_for_article(
     # Check if customer FY table exists
     table_check = query_one(
         "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public' AND tablename = %s",
-        (fy_table,)
+        (fy_table,),
     )
 
     if table_check:
@@ -132,7 +146,7 @@ async def get_customers_for_article(
         CustomerListItem(
             customer_id=str(row["customer_name"]),
             customer_name=row["customer_name"],
-            abc_category=row.get("abc_category")
+            abc_category=row.get("abc_category"),
         )
         for row in rows
     ]
@@ -144,7 +158,9 @@ async def get_article_behaviour_trend(
     abc_class: str = Query("A", description="ABC class (A, B, or C)"),
     article_no: str = Query(..., description="Selected article number"),
     metric: str = Query("Revenue", description="'Revenue' or 'Quantity'"),
-    customer_ids: str = Query("", description="Optional comma-separated customer names")
+    customer_ids: str = Query(
+        "", description="Optional comma-separated customer names"
+    ),
 ):
     """
     Get article behaviour trend data with dual-axis support.
@@ -164,7 +180,8 @@ async def get_article_behaviour_trend(
 
     # Use the DATAMART for class totals — it has per-month ABC classification
     # so articles that switch class between months are counted correctly
-    class_total_sql = """
+    class_total_sql = (
+        """
         SELECT
             year_month as month_key,
             SUM(%s) as class_total
@@ -172,7 +189,9 @@ async def get_article_behaviour_trend(
         WHERE fin_year = %%s AND abc = %%s
         GROUP BY year_month
         ORDER BY year_month
-    """ % dm_value_col
+    """
+        % dm_value_col
+    )
     class_rows = query_all(class_total_sql, (fin_year, abc_class.upper()))
 
     if not class_rows:
@@ -190,7 +209,9 @@ async def get_article_behaviour_trend(
         ORDER BY month_key
     """
     article_rows = query_all(article_sql, (start_date, end_date, article_no))
-    article_by_month = {r["month_key"]: float(r["article_total"] or 0) for r in article_rows}
+    article_by_month = {
+        r["month_key"]: float(r["article_total"] or 0) for r in article_rows
+    }
 
     # Calculate scaling factor for dual axis
     max_class = max(float(r["class_total"] or 0) for r in class_rows)
@@ -204,21 +225,25 @@ async def get_article_behaviour_trend(
         class_value = float(row["class_total"] or 0)
         article_value = article_by_month.get(row["month_key"], 0.0)
 
-        result.append(ArticleBehaviourDataPoint(
-            month=month_date,
-            value=round(class_value, 2),
-            scaled_value=round(class_value, 2),
-            type=f"Class {abc_class} Total",
-            article_no=None
-        ))
+        result.append(
+            ArticleBehaviourDataPoint(
+                month=month_date,
+                value=round(class_value, 2),
+                scaled_value=round(class_value, 2),
+                type=f"Class {abc_class} Total",
+                article_no=None,
+            )
+        )
 
-        result.append(ArticleBehaviourDataPoint(
-            month=month_date,
-            value=round(article_value, 2),
-            scaled_value=round(article_value * scale_factor, 2),
-            type=f"Article {article_no}",
-            article_no=article_no
-        ))
+        result.append(
+            ArticleBehaviourDataPoint(
+                month=month_date,
+                value=round(article_value, 2),
+                scaled_value=round(article_value * scale_factor, 2),
+                type=f"Article {article_no}",
+                article_no=article_no,
+            )
+        )
 
     # Customer-specific data
     if customer_ids:
@@ -240,22 +265,30 @@ async def get_article_behaviour_trend(
                 ORDER BY month_key, customer_name
             """
 
-            customer_rows = query_all(customer_sql, (start_date, end_date, article_no, *customer_list))
+            customer_rows = query_all(
+                customer_sql, (start_date, end_date, article_no, *customer_list)
+            )
 
             customer_data = defaultdict(dict)
             for r in customer_rows:
-                customer_data[r["customer_name"]][r["month_key"]] = float(r["value"] or 0)
+                customer_data[r["customer_name"]][r["month_key"]] = float(
+                    r["value"] or 0
+                )
 
             for row in class_rows:
                 month_date = f"{row['month_key']}-01"
                 for cust_name in customer_list:
-                    cust_value = customer_data.get(cust_name, {}).get(row["month_key"], 0.0)
-                    result.append(ArticleBehaviourDataPoint(
-                        month=month_date,
-                        value=round(cust_value, 2),
-                        scaled_value=round(cust_value, 2),
-                        type=f"Customer {cust_name}",
-                        article_no=article_no
-                    ))
+                    cust_value = customer_data.get(cust_name, {}).get(
+                        row["month_key"], 0.0
+                    )
+                    result.append(
+                        ArticleBehaviourDataPoint(
+                            month=month_date,
+                            value=round(cust_value, 2),
+                            scaled_value=round(cust_value, 2),
+                            type=f"Customer {cust_name}",
+                            article_no=article_no,
+                        )
+                    )
 
     return result

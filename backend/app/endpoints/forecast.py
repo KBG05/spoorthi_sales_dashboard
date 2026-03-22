@@ -5,14 +5,14 @@ Replicates: server/forecast_server.R
 UI Reference: ui/forecast_ui.R
 
 Provides demand forecast data from the final_sales_forecasts table,
-enriched with category, ABC/XYZ class, unique customers, and
-last-3-month individual quantities from the datamart and raw data.
+enriched with ABC/XYZ class, unique customers, and
+last-3-month individual quantities from rolling tables and raw data.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional
 from datetime import datetime
-from ..database import query_one, query_all
+from ..database import query_one, query_all, get_latest_rolling_table
 from ..schemas import ForecastResponse, ForecastRow, User
 from ..endpoints.auth import get_current_user
 
@@ -78,7 +78,7 @@ async def get_demand_forecast(
     month_3_name = month_labels[2] if len(month_labels) > 2 else "Month 3"
 
     # Build the enriched query:
-    # - Category + ABC/XYZ from datamart (latest month per article)
+    # - ABC/XYZ from latest rolling table (latest month per article)
     # - Unique customers from raw data (last 3 months)
     # - Individual month quantities from raw data
     month_clauses = []
@@ -93,6 +93,11 @@ async def get_demand_forecast(
     month_cols = ", ".join(month_clauses)
 
     three_months_ago = last3_months[0] + "-01" if last3_months else "2000-01-01"
+
+    # Get latest rolling table for ABC/XYZ data
+    rolling_table = get_latest_rolling_table()
+    if not rolling_table:
+        raise HTTPException(status_code=404, detail="No rolling ABC/XYZ table found")
 
     data_query = f"""
         WITH forecast AS (
@@ -109,11 +114,11 @@ async def get_demand_forecast(
             FROM public."final_sales_forecasts" f
             WHERE f.granularity = %s
         ),
-        latest_dm AS (
+        latest_rolling AS (
             SELECT DISTINCT ON (article_no)
-                article_no, category, abc, xyz
-            FROM public."spoorthi_abc_xyz_datamart"
-            ORDER BY article_no, year_month DESC
+                article_no, abc_category as abc, xyz_category as xyz
+            FROM public."{rolling_table}"
+            ORDER BY article_no
         ),
         enrichment AS (
             SELECT
@@ -127,16 +132,18 @@ async def get_demand_forecast(
         SELECT
             fc.forecast_period,
             fc.article_no,
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), fc.article_no) AS article_description,
             fc.granularity,
             fc.predicted_quantity,
-            dm.category,
-            CONCAT(dm.abc, dm.xyz) AS abc_xyz,
+            COALESCE(pm.category, '') AS category,
+            CONCAT(rolling.abc, rolling.xyz) AS abc_xyz,
             COALESCE(en.unique_customers, 0) AS unique_customers,
             COALESCE(en.month_1_quantity, 0) AS month_1_quantity,
             COALESCE(en.month_2_quantity, 0) AS month_2_quantity,
             COALESCE(en.month_3_quantity, 0) AS month_3_quantity
         FROM forecast fc
-        LEFT JOIN latest_dm dm ON dm.article_no = fc.article_no
+        LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = fc.article_no
+        LEFT JOIN latest_rolling rolling ON rolling.article_no = fc.article_no
         LEFT JOIN enrichment en ON en.article_no = fc.article_no
         ORDER BY fc.sort_period DESC NULLS LAST, fc.article_no
     """
@@ -160,6 +167,7 @@ async def get_demand_forecast(
         forecast_data.append(
             ForecastRow(
                 article_no=str(row["article_no"]),
+                article_description=row.get("article_description"),
                 forecast_period=str(fp),
                 granularity=row["granularity"],
                 predicted_quantity=float(row["predicted_quantity"] or 0),

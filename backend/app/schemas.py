@@ -202,6 +202,7 @@ class ForecastRow(BaseModel):
     """Single forecast row"""
 
     article_no: str
+    article_description: Optional[str] = None
     forecast_period: str  # "DD-MM-YYYY" or "MM-YYYY - MM-YYYY"
     granularity: str  # "monthly", "bimonthly", "quarterly"
     predicted_quantity: float
@@ -275,6 +276,7 @@ class CustomerProductRow(BaseModel):
 
     customer_name: str
     article_no: str
+    article_description: Optional[str] = None
     last_purchase_date: str  # "YYYY-MM-DD"
 
 

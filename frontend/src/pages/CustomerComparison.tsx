@@ -240,7 +240,11 @@ const CustomerComparison: React.FC = () => {
               size="small"
               sx={{ minWidth: 350, flex: 1 }}
               options={articles}
-              getOptionLabel={(option) => option.article_no}
+              getOptionLabel={(option) =>
+                option.article_name
+                  ? `${option.article_no} - ${option.article_name}`
+                  : option.article_no
+              }
               value={articles.find((a) => a.article_no === selectedArticle) || null}
               onChange={(_, newValue) => {
                 setSelectedArticle(newValue?.article_no || null);

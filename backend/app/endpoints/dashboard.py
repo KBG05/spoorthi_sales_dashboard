@@ -723,37 +723,39 @@ async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None
     """
     Get product IDs and names for a specific ABC×XYZ cell.
     Used for the popup when clicking a matrix cell or bar chart bar.
+    Fetches from rolling_abc_xyz_summary table to match matrix counts.
     """
-    # Convert numeric time_id to YYYY-MM format
-    year_month = None
+    # Get the appropriate rolling table based on time_id
+    table_name = None
     if time_id is None:
-        # find the max month
-        max_date_sql = """
-            SELECT MAX(invoice_date) as max_date
-            FROM public."spoorthi_dataset_without_spares"
-        """
-        row = query_one(max_date_sql)
-        if not row or not row["max_date"]:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="No data found."
-            )
-        max_date = row["max_date"]
-        year_month = f"{max_date.year}-{max_date.month:02d}"
+        table_name = get_latest_rolling_table()
     else:
-        # Convert numeric time_id to YYYY-MM format
-        year_month = time_id_to_yyyy_mm(time_id)
+        table_name = get_rolling_table_for_time_id(time_id)
+        # Fallback to latest if future month doesn't have a table yet
+        if not table_name:
+            table_name = get_latest_rolling_table()
 
-    sql = """
+    if not table_name:
+        raise HTTPException(
+            status_code=404,
+            detail="No rolling ABC/XYZ summary table found for the specified month",
+        )
+
+    table = safe_table_name(table_name)
+
+    sql = f"""
         SELECT 
-            DISTINCT abc.article_no,
-            abc.article_no as product_name
-        FROM public."spoorthi_abc_xyz_datamart" abc
-        WHERE abc.year_month = %s
-          AND abc.abc = %s AND abc.xyz = %s
-        ORDER BY abc.article_no
+            DISTINCT r.article_no,
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), r.article_no) as product_name
+        FROM {table} r
+        LEFT JOIN public.sphoorti_product_master pm
+            ON pm.article_no = r.article_no
+        WHERE r.abc_category = %s
+          AND r.xyz_category = %s
+        ORDER BY r.article_no
     """
 
-    rows = query_all(sql, (year_month, abc.upper(), xyz.upper()))
+    rows = query_all(sql, (abc.upper(), xyz.upper()))
 
     return (
         [

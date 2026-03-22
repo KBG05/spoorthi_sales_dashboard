@@ -56,13 +56,19 @@ const Forecast: React.FC = () => {
     {
       field: 'article_no',
       headerName: 'Article No',
-      flex: 1,
+      flex: 0.8,
       minWidth: 130,
+    },
+    {
+      field: 'article_description',
+      headerName: 'Article Description',
+      flex: 1.8,
+      minWidth: 260,
     },
     {
       field: 'category',
       headerName: 'Category',
-      flex: 1,
+      flex: 0.8,
       minWidth: 130,
     },
     {
@@ -158,6 +164,7 @@ const Forecast: React.FC = () => {
   const rows = data?.data.map((row, index) => ({
     id: index,
     article_no: row.article_no,
+    article_description: row.article_description || '-',
     category: row.category || '-',
     abc_xyz: row.abc_xyz || '-',
     unique_customers: row.unique_customers,
@@ -189,6 +196,7 @@ const Forecast: React.FC = () => {
 
   const filterableColumns = [
     { field: 'article_no', label: 'Article No' },
+    { field: 'article_description', label: 'Article Description' },
     { field: 'category', label: 'Category' },
     { field: 'abc_xyz', label: 'ABC/XYZ' },
   ];
@@ -341,7 +349,7 @@ const Forecast: React.FC = () => {
         </Paper>
       </Box>
 
-      <Paper elevation={1} sx={{ flex: 1, width: '100%', minHeight: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+      <Paper elevation={1} sx={{ flex: 1, width: '100%', minHeight: 0, minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
@@ -360,6 +368,7 @@ const Forecast: React.FC = () => {
           }}
           sx={{
             border: 'none',
+            minWidth: 0,
             '& .MuiDataGrid-cell': {
               fontSize: '0.875rem',
               fontWeight: 500,

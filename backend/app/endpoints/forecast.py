@@ -12,7 +12,7 @@ last-3-month individual quantities from raw data.
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Optional
 from datetime import datetime
-from ..database import query_one, query_all
+from ..database import query_one, query_all, get_latest_rolling_table
 from ..schemas import ForecastResponse, ForecastRow, User
 from ..endpoints.auth import get_current_user
 
@@ -49,13 +49,8 @@ async def get_demand_forecast(
     if granularity not in valid_granularities:
         granularity = "monthly"
 
-    # Get available granularities
-    gran_rows = query_all(
-        """
-        SELECT DISTINCT granularity FROM public."final_sales_forecasts" ORDER BY granularity
-    """
-    )
-    available_granularities = [r["granularity"] for r in gran_rows] if gran_rows else []
+    # Available granularities are fixed by the new table structure
+    available_granularities = ["monthly", "bimonthly", "quarterly"]
 
     # Find the last 3 months in raw data (for enrichment)
     last3_sql = """
@@ -77,45 +72,60 @@ async def get_demand_forecast(
     month_2_name = month_labels[1] if len(month_labels) > 1 else "Month 2"
     month_3_name = month_labels[2] if len(month_labels) > 2 else "Month 3"
 
-    # Build the enriched query:
-    # - ABC category from forecast table
-    # - Unique customers from raw data (last 3 months)
-    # - Individual month quantities from raw data
+    # Build enrichment columns for last 3 months of raw sales
     month_clauses = []
     for i, ym in enumerate(last3_months, 1):
         month_clauses.append(
             f"COALESCE(SUM(CASE WHEN TO_CHAR(r.invoice_date,'YYYY-MM')='{ym}' THEN r.inv_quantity END),0) AS month_{i}_quantity"
         )
-    # Pad if fewer than 3 months
     while len(month_clauses) < 3:
         month_clauses.append(f"0 AS month_{len(month_clauses)+1}_quantity")
 
     month_cols = ", ".join(month_clauses)
-
     three_months_ago = last3_months[0] + "-01" if last3_months else "2000-01-01"
 
+    # Get ABC category from the latest rolling table
+    rolling_table = get_latest_rolling_table()
+    if rolling_table:
+        abc_join = (
+            f'LEFT JOIN public."{rolling_table}" rl ON rl.article_no = f.article_no'
+        )
+        abc_col = "COALESCE(rl.abc_category, '') AS abc_category"
+    else:
+        abc_join = ""
+        abc_col = "'' AS abc_category"
+
+    # Map granularity to the correct period/forecast columns in the new table structure
+    # Latest rows = those whose monthly_period parses to the MAX date across all rows
     data_query = f"""
-        WITH forecast AS (
+        WITH latest_period AS (
+            SELECT MAX(TO_DATE(monthly_period, 'MM/YYYY')) AS max_period
+            FROM public.final_sales_forecasts
+        ),
+        forecast AS (
             SELECT
-                f.forecast_period,
                 f.article_no,
-                f.granularity,
-                f.final_forecast AS predicted_quantity,
-                f.abc_category,
-                CASE
-                    WHEN f.granularity = 'monthly' THEN TO_DATE(f.forecast_period, 'DD-MM-YYYY')
-                    WHEN f.granularity IN ('bimonthly', 'quarterly') THEN TO_DATE(SPLIT_PART(f.forecast_period, ' - ', 1), 'MM-YYYY')
-                    ELSE NULL
-                END AS sort_period
-            FROM public."final_sales_forecasts" f
-            WHERE f.granularity = %s
+                CASE '{granularity}'
+                    WHEN 'monthly'    THEN f.monthly_period
+                    WHEN 'bimonthly'  THEN f.bimonthly_period
+                    WHEN 'quarterly'  THEN f.quarterly_period
+                END AS forecast_period,
+                CASE '{granularity}'
+                    WHEN 'monthly'    THEN f.monthly_forecast
+                    WHEN 'bimonthly'  THEN f.bimonthly_forecast
+                    WHEN 'quarterly'  THEN f.quarterly_forecast
+                END AS predicted_quantity,
+                {abc_col}
+            FROM public.final_sales_forecasts f
+            {abc_join}
+            WHERE TO_DATE(f.monthly_period, 'MM/YYYY') = (SELECT max_period FROM latest_period)
         ),
         enrichment AS (
             SELECT
                 r.article_no,
                 COUNT(DISTINCT r.customer_name) AS unique_customers,
                 {month_cols}
-            FROM public."spoorthi_dataset_without_spares" r
+            FROM public.spoorthi_dataset_without_spares r
             WHERE r.invoice_date >= '{three_months_ago}'
             GROUP BY r.article_no
         )
@@ -123,9 +133,9 @@ async def get_demand_forecast(
             fc.forecast_period,
             fc.article_no,
             COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), fc.article_no) AS article_description,
-            fc.granularity,
+            '{granularity}' AS granularity,
             fc.predicted_quantity,
-            COALESCE(fc.abc_category, '') AS abc_category,
+            fc.abc_category,
             COALESCE(en.unique_customers, 0) AS unique_customers,
             COALESCE(en.month_1_quantity, 0) AS month_1_quantity,
             COALESCE(en.month_2_quantity, 0) AS month_2_quantity,
@@ -133,10 +143,10 @@ async def get_demand_forecast(
         FROM forecast fc
         LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = fc.article_no
         LEFT JOIN enrichment en ON en.article_no = fc.article_no
-        ORDER BY fc.sort_period DESC NULLS LAST, fc.article_no
+        ORDER BY fc.article_no
     """
 
-    rows = query_all(data_query, (granularity,))
+    rows = query_all(data_query)
 
     if not rows:
         raise HTTPException(

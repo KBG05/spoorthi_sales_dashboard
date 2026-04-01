@@ -18,6 +18,7 @@ import {
   Paper,
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
+import { useTheme } from '@mui/material/styles';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { productBehaviourApi } from '../api';
 import { ABC_COLORS } from '../constants/constants';
@@ -27,6 +28,7 @@ import type { ProductListItem, ProductBehaviourDataPoint } from '../api/types';
 const PRODUCT_COLORS = ['#FF6B9D', '#00D9FF', '#FFB800', '#A855F7'];
 
 const ProductBehaviour: React.FC = () => {
+  const theme = useTheme();
   const [financialYear, setFinancialYear] = useState('');
   const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [abcClass, setAbcClass] = useState<'A' | 'B' | 'C'>('A');
@@ -296,6 +298,8 @@ const ProductBehaviour: React.FC = () => {
                         xAxis={[{
                           scaleType: 'band',
                           data: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+                          height: 44,
+                          tickLabelStyle: { fontSize: 12, fontWeight: 600, fill: theme.palette.text.secondary },
                         }]}
                         yAxis={[
                           {
@@ -406,7 +410,7 @@ const ProductBehaviour: React.FC = () => {
                           });
                         })()}
                         height={selectedProducts.length === 1 ? 450 : 300}
-                        margin={{ top: 10, right: 0, bottom: 40, left: 0 }}
+                        margin={{ top: 10, right: 0, bottom: 48, left: 0 }}
                         grid={{ vertical: false, horizontal: true }}
                         slotProps={{
                           legend: {

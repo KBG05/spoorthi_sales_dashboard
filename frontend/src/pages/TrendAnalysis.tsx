@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
+import { useTheme } from '@mui/material/styles';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { ABC_COLORS } from '../constants/constants';
 import { abcApi, customerTrendApi } from '../api';
@@ -48,13 +49,14 @@ function TabPanel(props: TabPanelProps) {
 }
 
 // Memoized chart component for ABC Analysis
-const ABCTrendChart = memo(({ 
+const ABCTrendChart = memo(({
   chartConfig, 
   metric 
 }: { 
   chartConfig: { formattedDates: string[], chartSeries: any[] }, 
   metric: 'Revenue' | 'Quantity' 
 }) => {
+  const theme = useTheme();
   if (chartConfig.chartSeries.length === 0) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -66,9 +68,12 @@ const ABCTrendChart = memo(({
   return (
     <Box sx={{ width: '100%', flex: 1, minHeight: 0 }}>
       <LineChart
+        height={420}
         xAxis={[{
           scaleType: 'point',
           data: chartConfig.formattedDates,
+          height: 44,
+          tickLabelStyle: { fontSize: 12, fontWeight: 600, fill: theme.palette.text.secondary },
           valueFormatter: (value: string, context: AxisValueFormatterContext) => {
             if (context.location === 'tick') {
               return value.split(' ')[0];
@@ -119,8 +124,8 @@ const ABCTrendChart = memo(({
         }}
         sx={{
           width: '100%',
-          height: '100%',
           '& .MuiChartsTooltip-mark': { ry: 4, rx: 4 },
+          '& .MuiChartsAxis-tickLabel': { fill: theme.palette.text.secondary },
         }}
       />
     </Box>
@@ -128,13 +133,14 @@ const ABCTrendChart = memo(({
 });
 
 // Memoized chart component for Customer Trend
-const CustomerTrendChart = memo(({ 
+const CustomerTrendChart = memo(({
   chartConfig, 
   metric 
 }: { 
   chartConfig: { monthLabels: string[], chartSeries: any[] }, 
   metric: 'Revenue' | 'Quantity' 
 }) => {
+  const theme = useTheme();
   if (chartConfig.chartSeries.length === 0) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -146,9 +152,12 @@ const CustomerTrendChart = memo(({
   return (
     <Box sx={{ width: '100%', flex: 1, minHeight: 0 }}>
       <LineChart
+        height={420}
         xAxis={[{
           scaleType: 'point',
           data: chartConfig.monthLabels,
+          height: 44,
+          tickLabelStyle: { fontSize: 12, fontWeight: 600, fill: theme.palette.text.secondary },
           valueFormatter: (value: string, context: AxisValueFormatterContext) => {
             if (context.location === 'tick') {
               return value.split(' ')[0];
@@ -201,8 +210,8 @@ const CustomerTrendChart = memo(({
         }}
         sx={{
           width: '100%',
-          height: '100%',
           '& .MuiChartsTooltip-mark': { ry: 4, rx: 4 },
+          '& .MuiChartsAxis-tickLabel': { fill: theme.palette.text.secondary },
         }}
       />
     </Box>

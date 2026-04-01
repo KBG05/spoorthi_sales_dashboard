@@ -424,10 +424,11 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: abcCount.map(d => d.category),
-                  label: 'ABC Category',
+                  height: 44,
                   tickLabelStyle: {
                     fontSize: 15,
                     fontWeight: 600,
+                    fill: theme.palette.text.secondary,
                   },
                   colorMap: {
                     type: 'ordinal',
@@ -461,7 +462,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
                   height={310}
-                margin={{ top: 74, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 74, bottom: 8, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -498,10 +499,11 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: abcRevenue.map(d => d.category),
-                  label: 'ABC Category',
+                  height: 44,
                   tickLabelStyle: {
                     fontSize: 15,
                     fontWeight: 600,
+                    fill: theme.palette.text.secondary,
                   },
                   colorMap: {
                     type: 'ordinal',
@@ -545,7 +547,7 @@ const Dashboard = () => {
                   valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                 }]}
                   height={295}
-                margin={{ top: 76, bottom: 0, left: 36, right: 10 }}
+                margin={{ top: 76, bottom: 8, left: 36, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {
                   const value = item.value as number;
@@ -587,10 +589,16 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: xyzCount.map(d => d.category),
-                  label: 'XYZ Category',
+                  height: 44,
                   tickLabelStyle: {
                     fontSize: 15,
                     fontWeight: 600,
+                    fill: theme.palette.text.secondary,
+                  },
+                  colorMap: {
+                    type: 'ordinal',
+                    values: ['X', 'Y', 'Z'],
+                    colors: [XYZ_COLORS.X, XYZ_COLORS.Y, XYZ_COLORS.Z],
                   },
                 }]}
                 yAxis={[{
@@ -614,12 +622,11 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: xyzCount.map(d => d.count || 0), 
-                  color: XYZ_COLORS.Y, // Orange
                   label: 'Count of Articles',
                   valueFormatter: (value: number | null) => value?.toLocaleString('en-IN') || '0',
                 }]}
                   height={330}
-                margin={{ top: 74, bottom: 0, left: 10, right: 10 }}
+                margin={{ top: 74, bottom: 8, left: 10, right: 10 }}
                 grid={{ vertical: false, horizontal: true }}
                 barLabel="value"
                 slotProps={{
@@ -655,10 +662,16 @@ const Dashboard = () => {
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: xyzRevenue.map(d => d.category),
-                  label: 'XYZ Category',
+                  height: 44,
                   tickLabelStyle: {
                     fontSize: 15,
                     fontWeight: 600,
+                    fill: theme.palette.text.secondary,
+                  },
+                  colorMap: {
+                    type: 'ordinal',
+                    values: ['X', 'Y', 'Z'],
+                    colors: [XYZ_COLORS.X, XYZ_COLORS.Y, XYZ_COLORS.Z],
                   },
                 }]}
                 yAxis={[{
@@ -693,13 +706,12 @@ const Dashboard = () => {
                 }]}
                 series={[{ 
                   data: xyzRevenue.map(d => d.revenue || 0), 
-                  color: XYZ_COLORS.Z, // Red
                   label: 'Revenue of Articles (Cr)',
                   valueFormatter: (value: number | null) => value ? `₹${(value / 10).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Cr` : '₹0.00 Cr',
                   barLabelPlacement:"outside"
                 }]}
                   height={315}
-                  margin={{ top: 76, bottom: 0, left: 36, right: 10 }}
+                  margin={{ top: 76, bottom: 8, left: 36, right: 10 }}
 
                 grid={{ vertical: false, horizontal: true }}
                 barLabel={(item) => {

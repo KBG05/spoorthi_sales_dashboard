@@ -143,6 +143,7 @@ async def get_demand_forecast(
         FROM forecast fc
         LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = fc.article_no
         LEFT JOIN enrichment en ON en.article_no = fc.article_no
+        WHERE fc.abc_category = 'A'
         ORDER BY fc.article_no
     """
 

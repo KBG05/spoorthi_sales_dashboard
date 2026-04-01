@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { LineChart } from '@mui/x-charts/LineChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
+import { useTheme } from '@mui/material/styles';
 import { customerComparisonApi } from '../api';
 import { ABC_COLORS } from '../constants/constants';
 import type { CustomerListItem, ProductListItem, CustomerBehaviourDataPoint } from '../api/types';
@@ -29,6 +30,7 @@ import type { CustomerListItem, ProductListItem, CustomerBehaviourDataPoint } fr
 const CUSTOMER_COLORS = ['#FF6B9D', '#00D9FF'];
 
 const CustomerComparison: React.FC = () => {
+  const theme = useTheme();
   const [financialYear, setFinancialYear] = useState<string>('');
   const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [abcClasses, setAbcClasses] = useState<string[]>(['A']);
@@ -444,6 +446,12 @@ const CustomerComparison: React.FC = () => {
                           {
                             scaleType: 'band',
                             data: months,
+                            height: 44,
+                            tickLabelStyle: {
+                              fontSize: 12,
+                              fontWeight: 600,
+                              fill: theme.palette.text.secondary,
+                            },
                           },
                         ]}
                         yAxis={[
@@ -597,8 +605,12 @@ const CustomerComparison: React.FC = () => {
 
                           return allSeries;
                         })()}
-                        margin={{ top: 10, right: 0, bottom: 40, left: 0 }}
+                        margin={{ top: 10, right: 0, bottom: 48, left: 0 }}
                         grid={{ vertical: false, horizontal: true }}
+                        sx={{
+                          '& .MuiChartsAxis-tickLabel': { fill: theme.palette.text.secondary },
+                          '& .MuiLineElement-root': { strokeWidth: 2.5 },
+                        }}
                         slotProps={{
                           legend: {
                             direction: 'horizontal',

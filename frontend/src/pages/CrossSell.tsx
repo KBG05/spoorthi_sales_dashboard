@@ -309,14 +309,14 @@ const CrossSell = () => {
         </Button>
       </Box>
 
-      <Paper elevation={1} sx={{ flex: 1, width: '100%', maxWidth: 1400, mx: 'auto', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <Paper elevation={1} sx={{ width: '100%', maxWidth: 1400, mx: 'auto', boxSizing: 'border-box' }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
           loading={loading}
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[10, 25, 50]}
           initialState={{
-            pagination: { paginationModel: { pageSize: 5 } },
+            pagination: { paginationModel: { pageSize: 10 } },
           }}
           slots={{ toolbar: GridToolbar }}
           slotProps={{
@@ -325,6 +325,7 @@ const CrossSell = () => {
               printOptions: { disableToolbarButton: true },
             },
           }}
+          autoHeight
           getRowHeight={() => 'auto'}
           sx={{
             border: 'none',

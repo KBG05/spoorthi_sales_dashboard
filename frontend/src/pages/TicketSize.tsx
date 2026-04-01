@@ -15,7 +15,7 @@ import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { ticketSizeApi } from '../api';
 import type { TicketSizeBand } from '../api/types';
-import { ABC_COLORS } from '../constants/constants';
+import { DASHBOARD_CHART_COLORS } from '../constants/constants';
 
 const TicketSize: React.FC = () => {
   const theme = useTheme();
@@ -119,7 +119,7 @@ const TicketSize: React.FC = () => {
           </Typography>
           <Box flex={1} minHeight={0}>
             <BarChart
-              xAxis={[{ scaleType: 'band', data: countData.bands }]}
+              xAxis={[{ scaleType: 'band', data: countData.bands, height: 44, colorMap: { type: 'ordinal', colors: DASHBOARD_CHART_COLORS.slice() } }]}
               yAxis={[{
                 width: 70,
                 min: 0,
@@ -138,12 +138,11 @@ const TicketSize: React.FC = () => {
                 {
                   data: countData.values,
                   label: 'Count',
-                  color: ABC_COLORS.Overall,
                   valueFormatter: (value, { dataIndex }) => 
                     countData.labels[dataIndex] || value?.toString() || '0',
                 },
               ]}
-              margin={{ top: 0, right: 30, bottom: 50, left: 80 }}
+              margin={{ top: 36, right: 30, bottom: 50, left: 80 }}
               grid={{ vertical: false, horizontal: true }}
               barLabel="value"
               slotProps={{
@@ -169,13 +168,13 @@ const TicketSize: React.FC = () => {
           
           <Box flex={1} minHeight={0}>
             <BarChart
-              xAxis={[{ scaleType: 'band', data: revenueData.bands }]}
+              xAxis={[{ scaleType: 'band', data: revenueData.bands, height: 44, colorMap: { type: 'ordinal', colors: DASHBOARD_CHART_COLORS.slice() } }]}
               yAxis={[{
                 width: 70,
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     // Short format for tick labels
-                    return `₹${value.toFixed(0)}`;
+                    return `₹${value.toFixed(1)}Cr`;
                   }
                   // Full format for tooltips
                   return `₹${value.toFixed(2)}Cr`;
@@ -196,12 +195,11 @@ const TicketSize: React.FC = () => {
                 {
                   data: revenueData.values,
                   label: 'Revenue (CR)',
-                  color: ABC_COLORS.A,
                   valueFormatter: (value, { dataIndex }) => 
                     revenueData.labels[dataIndex] || `₹${value?.toFixed(2)}Cr`,
                 },
               ]}
-              margin={{ top: 0, right: 30, bottom: 50, left: 100 }}
+              margin={{ top: 36, right: 30, bottom: 50, left: 100 }}
               barLabel={(item) => `₹${item.value?.toFixed(1)}Cr`}
               slotProps={{
                 barLabel: {

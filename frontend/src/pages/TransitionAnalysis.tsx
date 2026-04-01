@@ -136,7 +136,7 @@ const TransitionAnalysis: React.FC = () => {
       {
         field: 'trend_values',
         headerName: analysisType==='Products'?'Sales Trend':'Purchase trend',
-        width: 220,
+        flex: 1,
         minWidth: 220,
         sortable: false,
         filterable: false,
@@ -316,8 +316,8 @@ const TransitionAnalysis: React.FC = () => {
         sx={{
           flex: 1,
           width: '100%',
-          maxWidth: 'none',
-          mx: 0,
+          maxWidth: analysisType === 'Customers' ? 1100 : 'none',
+          mx: analysisType === 'Customers' ? 'auto' : 0,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',

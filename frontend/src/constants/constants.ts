@@ -13,43 +13,40 @@ export const FINANCIAL_YEARS = [
 // Every chart / cell / badge must import from here.
 // ──────────────────────────────────────────────────────────────
 
-// ABC Category colors – sophisticated, not neon
-// A – Rich green (high-ticket products)
-// B – Warm amber (mid-range)
-// C – Deep red    (low-ticket)
-// Overall – Slate blue
+// ABC Category colors – vibrant
+// A – Electric green (high-ticket products)
+// B – Vivid orange (mid-range)
+// C – Hot red       (low-ticket)
+// Overall – Vivid blue
 export const ABC_COLORS: Record<string, string> = {
-  A: '#2d8659',
-  B: '#d4893d',
-  C: '#b84a42',
-  Overall: '#2f63b8',
-  Unknown: '#7a8fa8',
+  A: '#00C853',     // Electric green
+  B: '#FF6D00',     // Vivid amber-orange
+  C: '#FF1744',     // Vivid red
+  Overall: '#2979FF', // Vivid blue
+  Unknown: '#90A4AE', // Muted blue-gray
 };
 
-// XYZ Category colors (demand variability)
-// X – Green  (consistent demand)
+// XYZ Category colors – consistent with ABC
+// X – Green (consistent demand)
 // Y – Orange (variable demand)
-// Z – Red    (erratic / few customers)
+// Z – Red (erratic demand)
 export const XYZ_COLORS: Record<string, string> = {
-  X: '#2d8659',
-  Y: '#d4893d',
-  Z: '#b84a42',
+  X: '#00C853', // Electric green
+  Y: '#FF6D00', // Vivid orange
+  Z: '#FF1744', // Vivid red
 };
 
-// Combined ABC-XYZ colors — derived from ABC base colors
-// A-combos → Green  (A color)
-// B-combos → Orange (B color)
-// C-combos → Red    (C color)
+// Combined ABC-XYZ colors
 export const ABC_XYZ_COLORS: Record<string, string> = {
-  AX: '#2d8659',
-  AY: '#2d8659',
-  AZ: '#2d8659',
-  BX: '#d4893d',
-  BY: '#d4893d',
-  BZ: '#d4893d',
-  CX: '#b84a42',
-  CY: '#b84a42',
-  CZ: '#b84a42',
+  AX: '#00C853', // A category = electric green
+  AY: '#00C853',
+  AZ: '#00C853',
+  BX: '#FF6D00', // B category = vivid orange
+  BY: '#FF6D00',
+  BZ: '#FF6D00',
+  CX: '#FF1744', // C category = vivid red
+  CY: '#FF1744',
+  CZ: '#FF1744',
 };
 
 // Top-performer palette – 10 vibrant, distinct colors for both light and dark modes

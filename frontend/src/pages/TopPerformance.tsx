@@ -15,7 +15,7 @@ import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { topPerformanceApi } from '../api';
 import type { TopPerformersResponse } from '../api/types';
-import { TOP_PERFORMER_COLORS } from '../constants/constants';
+import { TOP_PERFORMER_PALETTE } from '../constants/constants';
 
 const TopPerformance: React.FC = () => {
   const theme = useTheme();
@@ -123,9 +123,15 @@ const TopPerformance: React.FC = () => {
                 scaleType: 'band', 
                 data: fyChartData.labels, 
                 tickLabelStyle: { fontSize: 12, fontWeight: 600 },
+                colorMap: {
+                  type: 'ordinal',
+                  colors: TOP_PERFORMER_PALETTE.map(([light, dark]) => theme.palette.mode === 'dark' ? dark : light),
+                },
                 width: 300
               }]}
               xAxis={[{ 
+                height: 44,
+                tickLabelStyle: { fontSize: 12, fontWeight: 600, fill: theme.palette.text.secondary },
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     if (value >= 100) return `₹${value.toFixed(0)}Cr`;
@@ -136,15 +142,14 @@ const TopPerformance: React.FC = () => {
                 },
                 min: 0,
               }]}
+              margin={{ top: 20, right: 80, bottom: 50, left: 220 }}
               series={[
                 {
                   data: fyChartData.revenues,
                   label: 'Revenue of Articles (Cr)',
-                  color: TOP_PERFORMER_COLORS.fy,
                   valueFormatter: (value) => `₹${value?.toFixed(2)} Cr`,
                 },
               ]}
-              margin={{ top: 20, right: 80, bottom: 40, left: 220 }}
               grid={{ vertical: true, horizontal: false }}
               barLabel={(item) => `₹${item.value?.toFixed(2)} Cr`}
               slotProps={{
@@ -171,9 +176,15 @@ const TopPerformance: React.FC = () => {
                 scaleType: 'band', 
                 data: latestChartData.labels, 
                 tickLabelStyle: { fontSize: 12, fontWeight: 600 },
+                colorMap: {
+                  type: 'ordinal',
+                  colors: TOP_PERFORMER_PALETTE.map(([light, dark]) => theme.palette.mode === 'dark' ? dark : light),
+                },
                 width: 300
               }]}
               xAxis={[{ 
+                height: 44,
+                tickLabelStyle: { fontSize: 12, fontWeight: 600, fill: theme.palette.text.secondary },
                 valueFormatter: (value: number, context: AxisValueFormatterContext) => {
                   if (context.location === 'tick') {
                     if (value >= 100) return `₹${value.toFixed(0)}Cr`;
@@ -184,15 +195,14 @@ const TopPerformance: React.FC = () => {
                 },
                 min: 0,
               }]}
+              margin={{ top: 20, right: 80, bottom: 50, left: 220 }}
               series={[
                 {
                   data: latestChartData.revenues,
                   label: 'Revenue of Articles (Cr)',
-                  color: TOP_PERFORMER_COLORS.latest,
                   valueFormatter: (value) => `₹${value?.toFixed(2)} Cr`,
                 },
               ]}
-              margin={{ top: 20, right: 80, bottom: 40, left: 220 }}
               grid={{ vertical: true, horizontal: false }}
               barLabel={(item) => `₹${item.value?.toFixed(2)} Cr`}
               slotProps={{

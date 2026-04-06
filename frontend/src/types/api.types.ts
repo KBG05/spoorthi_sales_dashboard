@@ -124,15 +124,27 @@ export interface TransitionAnalysisResponse {
 // Forecast Types
 // ===================================
 export interface ForecastRow {
-  product_id: number;
-  forecast_month: string;
+  article_no: string;
+  article_description?: string;
+  forecast_period: string;
+  granularity: string;
   predicted_quantity: number;
+  abc_category: string;
+  unique_customers: number;
+  last_3_months_quantity: number;
+  month_1_quantity: number;
+  month_2_quantity: number;
+  month_3_quantity: number;
 }
 
 export interface ForecastResponse {
   table_name: string;
   display_month: string;
   data: ForecastRow[];
+  available_granularities: string[];
+  month_1_name: string;
+  month_2_name: string;
+  month_3_name: string;
 }
 
 // ===================================

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, memo } from 'react';
+import { useEffect, useState, useMemo, memo, useRef } from 'react';
 import { 
   Box, 
   Typography, 
@@ -57,6 +57,20 @@ const ABCTrendChart = memo(({
   metric: 'Revenue' | 'Quantity' 
 }) => {
   const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartHeight, setChartHeight] = useState(420);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      const h = entries[0].contentRect.height;
+      if (h > 50) setChartHeight(h);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (chartConfig.chartSeries.length === 0) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -66,9 +80,9 @@ const ABCTrendChart = memo(({
   }
 
   return (
-    <Box sx={{ width: '100%', flex: 1, minHeight: 0 }}>
+    <Box ref={containerRef} sx={{ width: '100%', flex: 1, minHeight: 0 }}>
       <LineChart
-        height={420}
+        height={chartHeight}
         xAxis={[{
           scaleType: 'point',
           data: chartConfig.formattedDates,
@@ -141,6 +155,20 @@ const CustomerTrendChart = memo(({
   metric: 'Revenue' | 'Quantity' 
 }) => {
   const theme = useTheme();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartHeight, setChartHeight] = useState(420);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      const h = entries[0].contentRect.height;
+      if (h > 50) setChartHeight(h);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (chartConfig.chartSeries.length === 0) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
@@ -150,9 +178,9 @@ const CustomerTrendChart = memo(({
   }
 
   return (
-    <Box sx={{ width: '100%', flex: 1, minHeight: 0 }}>
+    <Box ref={containerRef} sx={{ width: '100%', flex: 1, minHeight: 0 }}>
       <LineChart
-        height={420}
+        height={chartHeight}
         xAxis={[{
           scaleType: 'point',
           data: chartConfig.monthLabels,

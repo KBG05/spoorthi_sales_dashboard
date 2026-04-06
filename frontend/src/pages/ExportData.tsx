@@ -43,7 +43,7 @@ const ExportData = () => {
     },
     {
       title: 'Demand Forecast',
-      description: 'Downloads Product ID, Forecast Month, and Predicted Quantity from the latest forecast table.',
+      description: 'Downloads Article No, Description, ABC Category, and Monthly/Bimonthly/Quarterly forecasts from the latest forecast table (ABC-A articles).',
       buttonText: 'DOWNLOAD FORECAST',
       endpoint: 'forecast',
       filename: 'demand_forecast.csv',

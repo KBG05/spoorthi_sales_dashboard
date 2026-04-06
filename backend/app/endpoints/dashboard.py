@@ -475,34 +475,53 @@ async def export_rolling_abc_xyz():
 async def export_forecast():
     """
     Export Demand Forecast results as CSV.
-    Downloads Product ID, Forecast Month, and Predicted Quantity from the latest forecast table.
+    Downloads all granularity forecasts (monthly, bimonthly, quarterly) for A-category
+    articles from the latest final_sales_forecasts table.
     """
-    # Find latest forecast table
-    table_query = """
-        SELECT table_name 
-        FROM information_schema.tables 
-        WHERE table_schema = 'public' 
+    # Confirm table exists
+    table_check = query_one(
+        """
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
         AND table_name = 'final_sales_forecasts'
         LIMIT 1
     """
-
-    result = query_one(table_query)
-
-    if not result or not result.get("table_name"):
+    )
+    if not table_check:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No forecast table found."
         )
 
-    table_name = result["table_name"]
+    # Get ABC category from the latest rolling table
+    rolling_table = get_latest_rolling_table()
+    if rolling_table:
+        abc_join = f'LEFT JOIN public."{rolling_table}" rl ON rl.article_no = f.article_no'
+        abc_col = 'COALESCE(rl.abc_category, \'\') AS "ABCCategory"'
+    else:
+        abc_join = ""
+        abc_col = "'' AS \"ABCCategory\""
 
-    # Fetch forecast data from final_sales_forecasts
+    # Fetch all forecast columns for the latest monthly period, ABC='A' articles
     sql = f"""
-        SELECT 
-            f.article_no,
-            f.article_no AS "ProductName",
-            REPLACE(f.forecast_period::text, ' - ', ', ') AS "ForecastPeriod",
-            f.final_forecast AS "PredictedQuantity"
-        FROM public."{table_name}" f
+        WITH latest_period AS (
+            SELECT MAX(TO_DATE(monthly_period, 'MM/YYYY')) AS max_period
+            FROM public.final_sales_forecasts
+        )
+        SELECT
+            f.article_no AS "ArticleNo",
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), f.article_no) AS "ArticleDescription",
+            {abc_col},
+            f.monthly_period AS "MonthlyPeriod",
+            ROUND(f.monthly_forecast::numeric, 2) AS "MonthlyForecast",
+            f.bimonthly_period AS "BimonthlyPeriod",
+            ROUND(f.bimonthly_forecast::numeric, 2) AS "BimonthlyForecast",
+            f.quarterly_period AS "QuarterlyPeriod",
+            ROUND(f.quarterly_forecast::numeric, 2) AS "QuarterlyForecast"
+        FROM public.final_sales_forecasts f
+        LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = f.article_no
+        {abc_join}
+        WHERE TO_DATE(f.monthly_period, 'MM/YYYY') = (SELECT max_period FROM latest_period)
         ORDER BY f.article_no
     """
 

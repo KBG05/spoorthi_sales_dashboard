@@ -28,13 +28,16 @@ import {
   ChevronRight as ChevronRightIcon,
   ListAlt as ListAltIcon,
   Compare as CompareIcon,
+  CloudUpload as CloudUploadIcon,
 } from '@mui/icons-material';
 import { DRAWER_WIDTH } from '../constants/constants';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NavItem {
   path: string;
   label: string;
   icon: React.ReactElement;
+  requiredRole?: string;
 }
 
 const navItems: NavItem[] = [
@@ -51,6 +54,7 @@ const navItems: NavItem[] = [
   { path: '/cross-sell', label: 'Cross-Sell Analysis', icon: <ShoppingCartIcon /> },
   { path: '/customer-product', label: 'Customer Product List', icon: <ListAltIcon /> },
   { path: '/export-data', label: 'Export Data', icon: <CompareArrowsIcon /> },
+  { path: '/upload', label: 'Upload Data', icon: <CloudUploadIcon />, requiredRole: 'upload' },
 ];
 
 interface SidebarProps {
@@ -60,8 +64,13 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onToggle }: SidebarProps) {
   const theme = useTheme();
+  const { user } = useAuth();
   const activeAccent = theme.palette.mode === 'light' ? '#a437b0' : '#d16be0';
   const activeText = theme.palette.mode === 'light' ? '#6d1f7a' : '#f2ccf8';
+
+  const visibleNavItems = navItems.filter(
+    (item) => !item.requiredRole || user?.role === item.requiredRole
+  );
 
   return (
     <Drawer
@@ -103,7 +112,7 @@ export default function Sidebar({ open, onToggle }: SidebarProps) {
 
       {/* Navigation List */}
       <List sx={{ pt: 0.5, pb: 1.5 }}>
-        {navItems.map((item) => (
+        {visibleNavItems.map((item) => (
           <Tooltip
             key={item.path}
             title={open ? '' : item.label}

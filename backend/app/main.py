@@ -25,6 +25,7 @@ from .endpoints import (
     customer_product,
     customer_comparison,
     masters,
+    upload,
 )
 
 
@@ -82,6 +83,7 @@ app.include_router(cba.router)
 app.include_router(customer_class_comparison.router)
 app.include_router(customer_product.router)
 app.include_router(customer_comparison.router)
+app.include_router(upload.router)
 
 
 @app.get("/")

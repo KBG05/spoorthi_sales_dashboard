@@ -20,6 +20,8 @@ import CustomerProduct from './pages/CustomerProduct';
 import CustomerComparison from './pages/CustomerComparison';
 import Login from './pages/Login';
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleRoute from './components/RoleRoute';
+import UploadData from './pages/UploadData';
 
 function App() {
   return (
@@ -51,6 +53,14 @@ function App() {
         <Route path="customer-product" element={<CustomerProduct />} />
         <Route path="customer-comparison" element={<CustomerComparison />} />
         <Route path="export-data" element={<ExportData />} />
+        <Route
+          path="upload"
+          element={
+            <RoleRoute requiredRole="upload">
+              <UploadData />
+            </RoleRoute>
+          }
+        />
       </Route>
     </Routes>
   );

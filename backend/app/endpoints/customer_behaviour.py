@@ -99,18 +99,19 @@ async def get_customers_by_class(
 
     # Fallback: get customers from dataset, join with datamart for ABC
     # Filter by FY date range so only customers with actual purchases appear
+    class_placeholders = ",".join(["%s"] * len(class_list))
     sql = f"""
         SELECT DISTINCT d.customer_name
         FROM public."spoorthi_dataset_without_spares" d
         INNER JOIN public."spoorthi_abc_xyz_datamart" m
             ON d.article_no = m.article_no
-            AND m.fin_year_label = '{fy_label}'
-        WHERE m.abc IN ({class_in})
-            AND d.invoice_date BETWEEN '{start_year}-04-01' AND '{end_year}-03-31'
+            AND m.fin_year_label = %s
+        WHERE m.abc IN ({class_placeholders})
+            AND d.invoice_date BETWEEN %s AND %s
         ORDER BY d.customer_name
     """
 
-    rows = query_all(sql)
+    rows = query_all(sql, (fy_label, *class_list, f"{start_year}-04-01", f"{end_year}-03-31"))
 
     return [
         CustomerListItem(

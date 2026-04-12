@@ -433,20 +433,8 @@ async def export_rolling_abc_xyz():
 
     table = safe_table_name(table_name)
 
-    # Get all available data from the rolling summary table
-    sql = f"""
-        SELECT 
-            r.article_no,
-            COALESCE(dm.category, 'Unknown') AS category,
-            r.abc_category,
-            r.xyz_category,
-            r.total_revenue,
-            r.total_quantity
-        FROM {table} r
-        LEFT JOIN public."spoorthi_abc_xyz_datamart" dm 
-            ON r.article_no = dm.article_no
-        ORDER BY r.abc_category, r.xyz_category, r.total_revenue DESC
-    """
+    # Matches R: dbReadTable(db_conn, latest_table) — all columns, no joins
+    sql = f"SELECT * FROM {table} ORDER BY abc_category, xyz_category, total_revenue DESC"
 
     rows = query_all(sql)
 
@@ -475,8 +463,7 @@ async def export_rolling_abc_xyz():
 async def export_forecast():
     """
     Export Demand Forecast results as CSV.
-    Downloads all granularity forecasts (monthly, bimonthly, quarterly) for A-category
-    articles from the latest final_sales_forecasts table.
+    Matches R: SELECT * FROM final_sales_forecasts — all columns, no filters, no joins.
     """
     # Confirm table exists
     table_check = query_one(
@@ -493,39 +480,8 @@ async def export_forecast():
             status_code=status.HTTP_404_NOT_FOUND, detail="No forecast table found."
         )
 
-    # Get ABC category from the latest rolling table
-    rolling_table = get_latest_rolling_table()
-    if rolling_table:
-        abc_join = f'LEFT JOIN public."{rolling_table}" rl ON rl.article_no = f.article_no'
-        abc_col = 'COALESCE(rl.abc_category, \'\') AS "ABCCategory"'
-    else:
-        abc_join = ""
-        abc_col = "'' AS \"ABCCategory\""
-
-    # Fetch all forecast columns for the latest monthly period, ABC='A' articles
-    sql = f"""
-        WITH latest_period AS (
-            SELECT MAX(TO_DATE(monthly_period, 'MM/YYYY')) AS max_period
-            FROM public.final_sales_forecasts
-        )
-        SELECT
-            f.article_no AS "ArticleNo",
-            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), f.article_no) AS "ArticleDescription",
-            {abc_col},
-            f.monthly_period AS "MonthlyPeriod",
-            ROUND(f.monthly_forecast::numeric, 2) AS "MonthlyForecast",
-            f.bimonthly_period AS "BimonthlyPeriod",
-            ROUND(f.bimonthly_forecast::numeric, 2) AS "BimonthlyForecast",
-            f.quarterly_period AS "QuarterlyPeriod",
-            ROUND(f.quarterly_forecast::numeric, 2) AS "QuarterlyForecast"
-        FROM public.final_sales_forecasts f
-        LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = f.article_no
-        {abc_join}
-        WHERE TO_DATE(f.monthly_period, 'MM/YYYY') = (SELECT max_period FROM latest_period)
-        ORDER BY f.article_no
-    """
-
-    rows = query_all(sql)
+    # Matches R: dbGetQuery(db_conn, "SELECT * FROM final_sales_forecasts")
+    rows = query_all("SELECT * FROM public.final_sales_forecasts ORDER BY article_no")
 
     if not rows:
         raise HTTPException(
@@ -552,12 +508,12 @@ async def export_cross_sell():
     Export Cross-Sell Recommendations as CSV.
     Downloads Distributor Code, Products Bought Together, and Suggested Product from the latest cross-sell table.
     """
-    # Find latest cross_sell table
+    # Matches R: find_latest_table("cross_sell_") \u2014 any table starting with cross_sell_
     table_query = """
         SELECT tablename
         FROM pg_catalog.pg_tables
         WHERE schemaname = 'public'
-          AND tablename ~ '^cross_sell_[0-9]{4}_[0-9]{2}$'
+          AND tablename ~ '^cross_sell_'
         ORDER BY tablename DESC
         LIMIT 1
     """
@@ -572,17 +528,8 @@ async def export_cross_sell():
 
     table_name = result["tablename"]
 
-    # Use new Spoorthi cross-sell table structure
-    data_query = f"""
-        SELECT 
-            cr."Customer" AS "Customer_Name",
-            cr."Trigger_Items_Antecedents" AS "Products_Bought_Together",
-            cr."Recommended_Items_Consequents" AS "Suggested_Product"
-        FROM public."{table_name}" cr
-        ORDER BY cr."Customer"
-    """
-
-    rows = query_all(data_query)
+    # Matches R: dbReadTable(db_conn, latest_table) — all columns, no renaming
+    rows = query_all(f'SELECT * FROM public."{table_name}" ORDER BY "Customer"')
 
     if not rows:
         raise HTTPException(
@@ -763,12 +710,15 @@ async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None
     table = safe_table_name(table_name)
 
     sql = f"""
-        SELECT 
-            DISTINCT r.article_no,
-            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), r.article_no) as product_name
+        SELECT
+            r.article_no,
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), r.article_no) AS product_name
         FROM {table} r
-        LEFT JOIN public.sphoorti_product_master pm
-            ON pm.article_no = r.article_no
+        LEFT JOIN (
+            SELECT DISTINCT ON (article_no) article_no, description, article_name
+            FROM public.sphoorti_product_master
+            ORDER BY article_no
+        ) pm ON pm.article_no = r.article_no
         WHERE r.abc_category = %s
           AND r.xyz_category = %s
         ORDER BY r.article_no

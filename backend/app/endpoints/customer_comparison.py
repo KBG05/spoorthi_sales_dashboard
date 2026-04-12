@@ -57,6 +57,7 @@ async def get_articles_by_class(
     class_list = [c.strip().upper() for c in abc_classes.split(",")]
     class_in = ",".join(f"'{c}'" for c in class_list)
 
+    class_placeholders = ",".join(["%s"] * len(class_list))
     sql = f"""
                 SELECT DISTINCT
                         dm.article_no,
@@ -64,11 +65,11 @@ async def get_articles_by_class(
                 FROM public.spoorthi_abc_xyz_datamart dm
                 LEFT JOIN public.sphoorti_product_master pm
                         ON pm.article_no = dm.article_no
-                WHERE dm.fin_year_label = '{fy_label}'
-                    AND dm.abc IN ({class_in})
+                WHERE dm.fin_year_label = %s
+                    AND dm.abc IN ({class_placeholders})
                 ORDER BY dm.article_no
     """
-    rows = query_all(sql)
+    rows = query_all(sql, (fy_label, *class_list))
 
     return [
         ArticleListItem(

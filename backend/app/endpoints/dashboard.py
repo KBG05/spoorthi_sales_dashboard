@@ -44,6 +44,13 @@ def time_id_to_yyyy_mm(time_id: int) -> str:
     return f"{year}-{month:02d}"
 
 
+def year_month_to_time_id(year: int, month: int) -> int:
+    """
+    Convert year/month to TimeID (months since January 2021).
+    """
+    return (year - BASE_DATE.year) * 12 + month
+
+
 def get_month_string_from_time_id(time_id: int) -> str:
     """
     Convert TimeID to month string in 'Month YYYY' format.
@@ -59,6 +66,60 @@ def get_month_string_from_time_id(time_id: int) -> str:
         return month_date.strftime("%B %Y")
     except Exception:
         return "Unknown month"
+
+
+@router.get("/available-months")
+async def get_available_months():
+    """
+    Get last 12 available months for dashboard filters.
+    Uses rolling_abc_xyz_summary tables when available; falls back to raw data.
+    """
+    table_sql = """
+        SELECT tablename
+        FROM pg_catalog.pg_tables
+        WHERE schemaname = 'public'
+          AND tablename ~ '^rolling_abc_xyz_summary_[0-9]{4}_[0-9]{2}$'
+        ORDER BY tablename DESC
+        LIMIT 12
+    """
+    rows = query_all(table_sql)
+
+    months = []
+    if rows:
+        for row in rows:
+            table_name = row["tablename"]
+            parts = table_name.split("_")
+            year = int(parts[-2])
+            month = int(parts[-1])
+            label = datetime(year, month, 1).strftime("%B %Y")
+            months.append(
+                {
+                    "id": year_month_to_time_id(year, month),
+                    "name": label,
+                    "year_month": f"{year}-{month:02d}",
+                }
+            )
+    else:
+        raw_sql = """
+            SELECT DISTINCT TO_CHAR(invoice_date, 'YYYY-MM') AS ym
+            FROM public."spoorthi_dataset_without_spares"
+            ORDER BY ym DESC
+            LIMIT 12
+        """
+        raw_rows = query_all(raw_sql)
+        for row in raw_rows:
+            ym = row["ym"]
+            year, month = map(int, ym.split("-"))
+            label = datetime(year, month, 1).strftime("%B %Y")
+            months.append(
+                {
+                    "id": year_month_to_time_id(year, month),
+                    "name": label,
+                    "year_month": ym,
+                }
+            )
+
+    return {"months": months}
 
 
 @router.get("/kpis")

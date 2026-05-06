@@ -252,7 +252,8 @@ const TrendAnalysis = () => {
   // ABC Analysis state
   const [abcLoading, setAbcLoading] = useState(true);
   const [abcTrendData, setAbcTrendData] = useState<ABCTrendResponse | null>(null);
-  const [abcFinancialYear, setAbcFinancialYear] = useState('FY24-25');
+  const [abcFinancialYear, setAbcFinancialYear] = useState('');
+  const [abcAvailableYears, setAbcAvailableYears] = useState<string[]>([]);
   const [abcCategories, setAbcCategories] = useState<string[]>(['A', 'B', 'C']);
   const [xyzCategories, setXyzCategories] = useState<string[]>(['X', 'Y', 'Z']);
   const [abcMetric, setAbcMetric] = useState<'Revenue' | 'Quantity'>('Revenue');
@@ -303,6 +304,27 @@ const TrendAnalysis = () => {
     fetchAvailableYears();
   }, []);
 
+  // Fetch ABC available years on mount
+  useEffect(() => {
+    const fetchAbcAvailableYears = async () => {
+      try {
+        const response = await abcApi.getAvailableYears();
+        const years = response.data.financial_years;
+        setAbcAvailableYears(years);
+        if (years.length > 0 && !abcFinancialYear) {
+          setAbcFinancialYear(years[0]);
+        } else if (years.length === 0) {
+          setAbcLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching ABC years:', error);
+        setAbcAvailableYears([]);
+        setAbcLoading(false);
+      }
+    };
+    fetchAbcAvailableYears();
+  }, []);
+
   // Fetch ABC data
   useEffect(() => {
     const fetchData = async () => {
@@ -319,7 +341,7 @@ const TrendAnalysis = () => {
       }
     };
 
-    if (abcCategories.length > 0 && xyzCategories.length > 0) {
+    if (abcFinancialYear && abcCategories.length > 0 && xyzCategories.length > 0) {
       fetchData();
     }
   }, [abcFinancialYear, abcCategories, xyzCategories, abcMetric]);
@@ -471,10 +493,11 @@ const TrendAnalysis = () => {
                     label="Financial Year"
                     onChange={(e: SelectChangeEvent) => setAbcFinancialYear(e.target.value)}
                     size="small"
+                    disabled={abcAvailableYears.length === 0}
                   >
-                    <MenuItem value="FY23-24">FY23-24</MenuItem>
-                    <MenuItem value="FY24-25">FY24-25</MenuItem>
-                    <MenuItem value="FY25-26">FY25-26</MenuItem>
+                    {abcAvailableYears.map((year) => (
+                      <MenuItem key={year} value={year}>{year}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
 

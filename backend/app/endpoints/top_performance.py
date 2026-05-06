@@ -8,7 +8,7 @@ Provides top performers (customers and products) analysis.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Depends
-from typing import Literal
+from typing import Literal, List
 from ..database import query_all, query_one, parse_fy
 from ..schemas import TopPerformersResponse, TopPerformerItem, User
 from ..endpoints.auth import get_current_user
@@ -25,6 +25,92 @@ def _get_latest_month_start():
     if not row or not row["latest"]:
         return None
     return row["latest"]
+
+
+def _fy_labels_from_raw_data() -> List[str]:
+    sql = """
+        SELECT DISTINCT
+            CASE
+                WHEN EXTRACT(MONTH FROM invoice_date) >= 4
+                    THEN EXTRACT(YEAR FROM invoice_date)::int
+                ELSE (EXTRACT(YEAR FROM invoice_date)::int - 1)
+            END AS start_year
+        FROM public."spoorthi_dataset_without_spares"
+        ORDER BY start_year DESC
+    """
+    rows = query_all(sql)
+    return [
+        f"FY{str(int(r['start_year']))[-2:]}-{str(int(r['start_year']) + 1)[-2:]}"
+        for r in rows
+    ]
+
+
+def _fy_labels_from_customer_tables() -> List[str]:
+    sql = """
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name LIKE 'customer_abc_xyz_fy_%'
+          AND table_name ~ 'customer_abc_xyz_fy_[0-9]{4}_[0-9]{4}'
+        ORDER BY table_name DESC
+    """
+    rows = query_all(sql)
+    fy_years = []
+
+    for row in rows:
+        table_name = row["table_name"]
+        suffix = table_name.replace("customer_abc_xyz_fy_", "")
+        parts = suffix.split("_")
+        if len(parts) == 2:
+            y1 = parts[0][2:]
+            y2 = parts[1][2:]
+            fy_years.append(f"FY{y1}-{y2}")
+
+    return fy_years
+
+
+def _fy_labels_from_product_tables() -> List[str]:
+    sql = """
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name LIKE 'abc_categorization_spoorthi_%'
+          AND table_name ~ 'abc_categorization_spoorthi_[0-9]{4}_[0-9]{4}'
+        ORDER BY table_name DESC
+    """
+    rows = query_all(sql)
+    fy_years = []
+
+    for row in rows:
+        table_name = row["table_name"]
+        suffix = table_name.replace("abc_categorization_spoorthi_", "")
+        parts = suffix.split("_")
+        if len(parts) == 2:
+            y1 = parts[0][2:]
+            y2 = parts[1][2:]
+            fy_years.append(f"FY{y1}-{y2}")
+
+    return fy_years
+
+
+@router.get("/available-years")
+async def get_available_years(
+    entity_type: Literal["Customers", "Products"] = Query(
+        ..., description="'Customers' or 'Products'"
+    )
+):
+    """
+    Get list of available financial years based on tables used for top performers.
+    """
+    fy_years = _fy_labels_from_raw_data()
+
+    if not fy_years:
+        if entity_type == "Customers":
+            fy_years = _fy_labels_from_customer_tables()
+        else:
+            fy_years = _fy_labels_from_product_tables()
+
+    return {"financial_years": fy_years}
 
 
 @router.get("/top-performers", response_model=TopPerformersResponse)

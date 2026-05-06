@@ -7,6 +7,12 @@ export interface KPIResponse {
   time_id: number;
 }
 
+export interface DashboardMonthOption {
+  id: number;
+  name: string;
+  year_month: string;
+}
+
 export interface ABCXYZMatrixCell {
   abc: string;
   xyz: string;

@@ -19,12 +19,34 @@ import { TOP_PERFORMER_PALETTE } from '../constants/constants';
 
 const TopPerformance: React.FC = () => {
   const theme = useTheme();
-  const [financialYear, setFinancialYear] = useState('FY24-25');
+  const [financialYear, setFinancialYear] = useState('');
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [entityType, setEntityType] = useState<'Customers' | 'Products'>('Customers');
   const [data, setData] = useState<TopPerformersResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const response = await topPerformanceApi.getAvailableYears(entityType);
+        const years = response.data.financial_years;
+        setAvailableYears(years);
+        if (years.length > 0 && !years.includes(financialYear)) {
+          setFinancialYear(years[0]);
+        } else if (years.length === 0) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching top performance years:', error);
+        setAvailableYears([]);
+        setLoading(false);
+      }
+    };
+    fetchAvailableYears();
+  }, [entityType]);
+
+  useEffect(() => {
+    if (!financialYear) return;
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -92,10 +114,13 @@ const TopPerformance: React.FC = () => {
             value={financialYear}
             label="Financial Year"
             onChange={(e) => setFinancialYear(e.target.value)}
+            disabled={availableYears.length === 0}
           >
-            <MenuItem value="FY23-24">FY23-24</MenuItem>
-            <MenuItem value="FY24-25">FY24-25</MenuItem>
-            <MenuItem value="FY25-26">FY25-26</MenuItem>
+            {availableYears.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 

@@ -19,6 +19,27 @@ router = APIRouter(prefix="/abc", tags=["ABC Analysis"], dependencies=[Depends(g
 BASE_DATE = datetime(2021, 1, 1)
 
 
+@router.get("/available-years")
+async def get_available_years():
+    """
+    Get list of available financial years from the datamart.
+    """
+    sql = """
+        SELECT DISTINCT fin_year_label
+        FROM public."spoorthi_abc_xyz_datamart"
+        WHERE fin_year_label IS NOT NULL
+        ORDER BY fin_year_label DESC
+    """
+    rows = query_all(sql)
+
+    if not rows:
+        return {"financial_years": []}
+
+    return {
+        "financial_years": [row["fin_year_label"] for row in rows if row["fin_year_label"]]
+    }
+
+
 @router.get("/trend", response_model=ABCTrendResponse)
 async def get_abc_trend(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),

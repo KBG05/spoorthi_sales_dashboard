@@ -5,7 +5,7 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { dashboardApi } from '../api';
-import type { KPIResponse, ABCXYZMatrixCell, ABCXYZProductItem } from '../api/types';
+import type { KPIResponse, ABCXYZMatrixCell, ABCXYZProductItem, DashboardMonthOption } from '../api/types';
 import { ABC_COLORS, XYZ_COLORS, ABC_XYZ_COLORS, formatQuantity } from '../constants/constants';
 
 // Custom Rupee Icon Component
@@ -23,21 +23,8 @@ interface CategoryData {
 
 const Dashboard = () => {
   const theme = useTheme();
-  const [selectedMonth, setSelectedMonth] = useState<number | ''>(12);
-  const [availableMonths] = useState<Array<{id: number, name: string}>>([
-    { id: 4, name: 'April 2025' },
-    { id: 5, name: 'May 2025' },
-    { id: 6, name: 'June 2025' },
-    { id: 7, name: 'July 2025' },
-    { id: 8, name: 'August 2025' },
-    { id: 9, name: 'September 2025' },
-    { id: 10, name: 'October 2025' },
-    { id: 11, name: 'November 2025' },
-    { id: 12, name: 'December 2025' },
-    { id: 1, name: 'January 2026' },
-    { id: 2, name: 'February 2026' },
-    { id: 3, name: 'March 2026' },
-  ]);
+  const [selectedMonth, setSelectedMonth] = useState<number | ''>('');
+  const [availableMonths, setAvailableMonths] = useState<DashboardMonthOption[]>([]);
   const [kpiData, setKpiData] = useState<KPIResponse | null>(null);
   const [abcXyzMatrix, setAbcXyzMatrix] = useState<ABCXYZMatrixCell[]>([]);
   const [matrixPeriodLabel, setMatrixPeriodLabel] = useState<string>('');
@@ -50,26 +37,28 @@ const Dashboard = () => {
   const [productPopup, setProductPopup] = useState<{ open: boolean; abc: string; xyz: string; products: ABCXYZProductItem[]; loading: boolean }>({ open: false, abc: '', xyz: '', products: [], loading: false });
 
   useEffect(() => {
+    const fetchMonths = async () => {
+      try {
+        const response = await dashboardApi.getAvailableMonths();
+        const months = response.data.months || [];
+        setAvailableMonths(months);
+        if (months.length > 0 && selectedMonth === '') {
+          setSelectedMonth(months[0].id);
+        }
+      } catch (error) {
+        console.error('Error fetching available months:', error);
+        setAvailableMonths([]);
+      }
+    };
+    fetchMonths();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      
-      // Convert month selection to TimeID
-      // TimeID calculation: (year - 2021) * 12 + month
-      // April 2025 (id=4) -> TimeID = (2025-2021)*12 + 4 = 52
-      // December 2025 (id=12) -> TimeID = (2025-2021)*12 + 12 = 60
-      // January 2026 (id=1) -> TimeID = (2026-2021)*12 + 1 = 61
-      // March 2026 (id=3) -> TimeID = (2026-2021)*12 + 3 = 63
-      let timeId: number | undefined = undefined;
-      if (selectedMonth !== '') {
-        if (selectedMonth >= 4 && selectedMonth <= 12) {
-          // April to December 2025
-          timeId = (2025 - 2021) * 12 + selectedMonth;
-        } else if (selectedMonth >= 1 && selectedMonth <= 3) {
-          // January to March 2026
-          timeId = (2026 - 2021) * 12 + selectedMonth;
-        }
-      }
-      
+
+      const timeId = selectedMonth === '' ? undefined : selectedMonth;
+
       // Fetch each dataset independently to prevent one failure from stopping others
       const fetchKPIs = dashboardApi.getKPIs(timeId)
         .then(res => setKpiData(res.data))
@@ -158,14 +147,7 @@ const Dashboard = () => {
   const handleMatrixCellClick = async (abc: string, xyz: string) => {
     setProductPopup({ open: true, abc, xyz, products: [], loading: true });
     try {
-      let timeId: number | undefined = undefined;
-      if (selectedMonth !== '') {
-        if (selectedMonth >= 4 && selectedMonth <= 12) {
-          timeId = (2025 - 2021) * 12 + selectedMonth;
-        } else if (selectedMonth >= 1 && selectedMonth <= 3) {
-          timeId = (2026 - 2021) * 12 + selectedMonth;
-        }
-      }
+      const timeId = selectedMonth === '' ? undefined : selectedMonth;
       const res = await dashboardApi.getABCXYZProducts(abc, xyz, timeId);
       setProductPopup(prev => ({ ...prev, products: res.data, loading: false }));
     } catch (err) {
@@ -186,7 +168,11 @@ const Dashboard = () => {
             value={selectedMonth}
             label="Month Filter"
             onChange={(e) => setSelectedMonth(e.target.value as number | '')}
+            disabled={availableMonths.length === 0}
           >
+            <MenuItem value="">
+              Latest
+            </MenuItem>
             {availableMonths.map((month) => (
               <MenuItem key={month.id} value={month.id}>
                 {month.name}

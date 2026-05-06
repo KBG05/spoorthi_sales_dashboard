@@ -19,12 +19,34 @@ import { DASHBOARD_CHART_COLORS } from '../constants/constants';
 
 const TicketSize: React.FC = () => {
   const theme = useTheme();
-  const [financialYear, setFinancialYear] = useState('FY24-25');
+  const [financialYear, setFinancialYear] = useState('');
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [dimension, setDimension] = useState<'Products' | 'Customers'>('Customers');
   const [data, setData] = useState<TicketSizeBand[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const response = await ticketSizeApi.getAvailableYears();
+        const years = response.data.financial_years;
+        setAvailableYears(years);
+        if (years.length > 0 && !financialYear) {
+          setFinancialYear(years[0]);
+        } else if (years.length === 0) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching ticket size years:', error);
+        setAvailableYears([]);
+        setLoading(false);
+      }
+    };
+    fetchAvailableYears();
+  }, []);
+
+  useEffect(() => {
+    if (!financialYear) return;
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -92,10 +114,13 @@ const TicketSize: React.FC = () => {
             value={financialYear}
             label="Financial Year"
             onChange={(e) => setFinancialYear(e.target.value)}
+            disabled={availableYears.length === 0}
           >
-            <MenuItem value="FY23-24">FY23-24</MenuItem>
-            <MenuItem value="FY24-25">FY24-25</MenuItem>
-            <MenuItem value="FY25-26">FY25-26</MenuItem>
+            {availableYears.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 

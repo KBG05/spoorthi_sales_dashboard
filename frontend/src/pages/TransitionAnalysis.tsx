@@ -58,13 +58,35 @@ const TrendSparkline = ({ values }: { values: number[] }) => {
 
 const TransitionAnalysis: React.FC = () => {
   const [analysisType, setAnalysisType] = useState<'Products' | 'Customers'>('Products');
-  const [financialYear, setFinancialYear] = useState('FY24-25');
+  const [financialYear, setFinancialYear] = useState('');
+  const [availableYears, setAvailableYears] = useState<string[]>([]);
   const [data, setData] = useState<TransitionAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [searchTexts, setSearchTexts] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const fetchAvailableYears = async () => {
+      try {
+        const response = await transitionAnalysisApi.getAvailableYears();
+        const years = response.data.financial_years;
+        setAvailableYears(years);
+        if (years.length > 0 && !financialYear) {
+          setFinancialYear(years[0]);
+        } else if (years.length === 0) {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error fetching transition years:', error);
+        setAvailableYears([]);
+        setLoading(false);
+      }
+    };
+    fetchAvailableYears();
+  }, []);
+
+  useEffect(() => {
+    if (!financialYear) return;
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -228,10 +250,13 @@ const TransitionAnalysis: React.FC = () => {
             value={financialYear}
             label="Financial Year"
             onChange={(e) => setFinancialYear(e.target.value)}
+            disabled={availableYears.length === 0}
           >
-            <MenuItem value="FY23-24">FY23-24</MenuItem>
-            <MenuItem value="FY24-25">FY24-25</MenuItem>
-            <MenuItem value="FY25-26">FY25-26</MenuItem>
+            {availableYears.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 

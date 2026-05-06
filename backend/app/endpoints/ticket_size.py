@@ -25,6 +25,33 @@ CRORE = 100 * LAKH
 BAND_LEVELS = ["0-5L", "5L-20L", "20L-50L", "50L-1CR", "1CR+"]
 
 
+@router.get("/available-years")
+async def get_available_years():
+    """
+    Get list of available financial years based on invoice data.
+    """
+    sql = """
+        SELECT DISTINCT
+            CASE
+                WHEN EXTRACT(MONTH FROM invoice_date) >= 4
+                    THEN EXTRACT(YEAR FROM invoice_date)::int
+                ELSE (EXTRACT(YEAR FROM invoice_date)::int - 1)
+            END AS start_year
+        FROM public."spoorthi_dataset_without_spares"
+        ORDER BY start_year DESC
+    """
+    rows = query_all(sql)
+
+    fy_years = []
+    for row in rows:
+        start_year = int(row["start_year"])
+        fy_years.append(
+            f"FY{str(start_year)[-2:]}-{str(start_year + 1)[-2:]}"
+        )
+
+    return {"financial_years": fy_years}
+
+
 @router.get("/bands", response_model=List[TicketSizeBand])
 async def get_ticket_size_bands(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),

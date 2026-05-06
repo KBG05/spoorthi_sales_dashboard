@@ -1,6 +1,7 @@
 import apiClient from './client.js';
 import type {
   KPIResponse,
+  DashboardMonthOption,
   ABCTrendResponse,
   CustomerTrendDataPoint,
   CrossSellRecommendation,
@@ -27,6 +28,11 @@ import type {
 
 // Dashboard API
 export const dashboardApi = {
+  getAvailableMonths: async () => {
+    return await apiClient.get<{ months: DashboardMonthOption[] }>(
+      '/dashboard/available-months'
+    );
+  },
   getKPIs: async (timeId?: number) => {
     return await apiClient.get<KPIResponse>('/dashboard/kpis', {
       params: timeId ? { time_id: timeId } : undefined,
@@ -78,6 +84,11 @@ export const dashboardApi = {
 // ABC Analysis API
 // ABC Analysis API
 export const abcApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>(
+      '/abc/available-years'
+    );
+  },
   getTrend: async (financialYear: string, abcCategories: string, xyzCategories: string, metric: string) => {
     return await apiClient.get<ABCTrendResponse>('/abc/trend', {
       params: {
@@ -236,6 +247,12 @@ export const crossSellApi = {
 
 // Top Performance API
 export const topPerformanceApi = {
+  getAvailableYears: async (entityType: 'Customers' | 'Products') => {
+    return await apiClient.get<{ financial_years: string[] }>(
+      '/top-performance/available-years',
+      { params: { entity_type: entityType } }
+    );
+  },
   getTopPerformers: async (
     entityType: 'Customers' | 'Products',
     financialYear: string
@@ -249,6 +266,11 @@ export const topPerformanceApi = {
 
 // Ticket Size API
 export const ticketSizeApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>(
+      '/ticket-size/available-years'
+    );
+  },
   getBands: async (financialYear: string, dimension: 'Products' | 'Customers') => {
     const response = await apiClient.get<TicketSizeBand[]>('/ticket-size/bands', {
       params: {
@@ -272,6 +294,11 @@ export const forecastApi = {
 
 // Transition Analysis API
 export const transitionAnalysisApi = {
+  getAvailableYears: async () => {
+    return await apiClient.get<{ financial_years: string[] }>(
+      '/transition-analysis/available-years'
+    );
+  },
   getTransitions: async (
     analysisType: 'Products' | 'Customers',
     financialYear: string = 'FY24-25'

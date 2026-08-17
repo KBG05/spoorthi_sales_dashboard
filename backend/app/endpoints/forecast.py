@@ -56,6 +56,7 @@ async def get_demand_forecast(
     last3_sql = """
         SELECT DISTINCT TO_CHAR(invoice_date, 'YYYY-MM') AS ym
         FROM spoorthi_dataset_without_spares
+        WHERE invoice_date IS NOT NULL
         ORDER BY ym DESC LIMIT 3
     """
     last3_rows = query_all(last3_sql)

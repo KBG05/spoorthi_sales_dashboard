@@ -38,6 +38,7 @@ async def get_available_years():
                 ELSE (EXTRACT(YEAR FROM invoice_date)::int - 1)
             END AS start_year
         FROM public."spoorthi_dataset_without_spares"
+        WHERE invoice_date IS NOT NULL
         ORDER BY start_year DESC
     """
     rows = query_all(sql)

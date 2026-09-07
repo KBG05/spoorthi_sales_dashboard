@@ -22,22 +22,29 @@ BASE_DATE = datetime(2021, 1, 1)
 @router.get("/available-years")
 async def get_available_years():
     """
-    Get list of available financial years based on spoorthi_abc_xyz_datamart.
+    Get list of available financial years based on which customer_abc_xyz_fy_*
+    tables actually exist. This table is only generated for the previous
+    *completed* financial year (see customer_abc_generator.py), so it always
+    lags one FY behind spoorthi_abc_xyz_datamart's rolling monthly coverage.
     """
     table_query = """
-        SELECT DISTINCT fin_year_label 
-        FROM public.spoorthi_abc_xyz_datamart 
-        WHERE fin_year_label IS NOT NULL
-        ORDER BY fin_year_label DESC
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name LIKE 'customer_abc_xyz_fy_%'
+          AND table_name ~ 'customer_abc_xyz_fy_[0-9]{4}_[0-9]{4}'
+        ORDER BY table_name DESC
     """
-    
+
     rows = query_all(table_query)  # type: ignore
-    
-    if not rows:
-        return {"financial_years": []}
-    
-    fy_years = [row["fin_year_label"] for row in rows if row["fin_year_label"]]
-    
+
+    fy_years = []
+    for row in rows:
+        suffix = row["table_name"].replace("customer_abc_xyz_fy_", "")
+        parts = suffix.split("_")
+        if len(parts) == 2:
+            fy_years.append(f"FY{parts[0][2:]}-{parts[1][2:]}")
+
     return {"financial_years": fy_years}
 
 # Month labels for financial year (Apr-Mar)
@@ -85,22 +92,39 @@ def get_customer_trend(
     
     start_date = f"{start_year}-04-01"
     end_date = f"{end_year}-03-31"
-    
+
+    # customer_abc_xyz_fy_* is only generated for completed financial years
+    # (see customer_abc_generator.py) — guard with a clear message instead of
+    # letting an UndefinedTable error surface for the current, still-open FY.
+    fy_table = f"customer_abc_xyz_fy_{start_year}_{end_year}"
+    table_exists_row = query_all(
+        "SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname='public' AND tablename=%s",
+        (fy_table,)
+    )
+    if not table_exists_row:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Customer ABC/XYZ classification for {fy_label} is not available yet — "
+                "it is generated once that financial year is complete."
+            ),
+        )
+
     # Query data
     sql = f'''
-        SELECT 
+        SELECT
             TO_CHAR(a.invoice_date, 'YYYY-MM') AS "TimeID",
             c.abc_category AS "Category",
             SUM(a.ass_value) AS "Revenue",
             SUM(a.inv_quantity) AS "Quantity"
         FROM public."spoorthi_dataset_without_spares" a
-        INNER JOIN public."customer_abc_xyz_fy_{start_year}_{end_year}" c 
+        INNER JOIN public."{fy_table}" c
             ON a.customer_name = c.customer_name
         WHERE a.invoice_date BETWEEN '{start_date}' AND '{end_date}'
         GROUP BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
         ORDER BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
     '''
-    
+
     rows = query_all(sql)  # type: ignore
     
     if not rows:

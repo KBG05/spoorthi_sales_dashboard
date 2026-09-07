@@ -498,7 +498,7 @@ const CustomerBehaviour: React.FC = () => {
                           const overallData = data.filter(d => d.type.includes('Overall'));
                           if (overallData.length > 0) {
                             const monthValueMap = new Map(overallData.map(d => [d.month, d.value]));
-                            const alignedData = months.map(month => monthValueMap.get(month) || null);
+                            const alignedData = months.map(month => monthValueMap.get(month) ?? null);
                             
                             allSeries.push({
                               data: alignedData,
@@ -526,7 +526,7 @@ const CustomerBehaviour: React.FC = () => {
                           const productDataFiltered = data.filter(d => d.type.includes('Article'));
                           if (productDataFiltered.length > 0) {
                             const monthValueMap = new Map(productDataFiltered.map(d => [d.month, d.value]));
-                            const alignedData = months.map(month => monthValueMap.get(month) || null);
+                            const alignedData = months.map(month => monthValueMap.get(month) ?? null);
                             
                             allSeries.push({
                               data: alignedData,

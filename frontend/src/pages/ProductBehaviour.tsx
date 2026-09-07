@@ -379,7 +379,7 @@ const ProductBehaviour: React.FC = () => {
                               productData.filter(d => d.type === type).map(d => [d.month, d.value])
                             );
                             // Align data with fixed month array
-                            const alignedData = months.map(month => monthValueMap.get(month) || null);
+                            const alignedData = months.map(month => monthValueMap.get(month) ?? null);
                             
                             return {
                               data: alignedData,

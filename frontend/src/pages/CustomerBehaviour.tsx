@@ -414,9 +414,12 @@ const CustomerBehaviour: React.FC = () => {
               const productInfo = groupedProducts.find(p => p.article_no === articleNo);
               const productLabel = productInfo?.article_names.length ? productInfo.article_names.join(', ') : `Article ${articleNo}`;
               
+              const paperHeight = selectedProducts.length === 1 ? 500 : 350;
+              const chartHeight = paperHeight - 90;
+
               return (
                 <Grid size={{ xs: 12, md: selectedProducts.length === 1 ? 12 : 6 }} key={articleNo}>
-                  <Paper sx={{ p: 2, height: selectedProducts.length === 1 ? 500 : 350 }}>
+                  <Paper sx={{ p: 2, height: paperHeight }}>
                     <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold', color: productColor }}>
                       {articleNo} - {productLabel}
                     </Typography>
@@ -426,7 +429,7 @@ const CustomerBehaviour: React.FC = () => {
                       </Box>
                     ) : (
                       <LineChart
-                        height={450}
+                        height={chartHeight}
                         xAxis={[{
                           scaleType: 'band',
                           data: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],

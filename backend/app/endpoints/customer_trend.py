@@ -22,28 +22,32 @@ BASE_DATE = datetime(2021, 1, 1)
 @router.get("/available-years")
 async def get_available_years():
     """
-    Get list of available financial years based on which customer_abc_xyz_fy_*
-    tables actually exist. This table is only generated for the previous
-    *completed* financial year (see customer_abc_generator.py), so it always
-    lags one FY behind spoorthi_abc_xyz_datamart's rolling monthly coverage.
+    Get list of available financial years based on raw invoice data.
+
+    customer_abc_xyz_fy_* is only generated for the previous *completed*
+    financial year (see customer_abc_generator.py), so for the current,
+    still-open FY /trend below computes ABC classification on the fly from
+    spoorthi_dataset_without_spares instead of joining to that table — so
+    the current FY belongs in this list too, not just completed ones.
     """
-    table_query = """
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = 'public'
-          AND table_name LIKE 'customer_abc_xyz_fy_%'
-          AND table_name ~ 'customer_abc_xyz_fy_[0-9]{4}_[0-9]{4}'
-        ORDER BY table_name DESC
+    sql = """
+        SELECT DISTINCT
+            CASE
+                WHEN EXTRACT(MONTH FROM invoice_date) >= 4
+                    THEN EXTRACT(YEAR FROM invoice_date)::int
+                ELSE (EXTRACT(YEAR FROM invoice_date)::int - 1)
+            END AS start_year
+        FROM public."spoorthi_dataset_without_spares"
+        WHERE invoice_date IS NOT NULL
+        ORDER BY start_year DESC
     """
 
-    rows = query_all(table_query)  # type: ignore
+    rows = query_all(sql)  # type: ignore
 
-    fy_years = []
-    for row in rows:
-        suffix = row["table_name"].replace("customer_abc_xyz_fy_", "")
-        parts = suffix.split("_")
-        if len(parts) == 2:
-            fy_years.append(f"FY{parts[0][2:]}-{parts[1][2:]}")
+    fy_years = [
+        f"FY{str(int(r['start_year']))[-2:]}-{str(int(r['start_year']) + 1)[-2:]}"
+        for r in rows
+    ]
 
     return {"financial_years": fy_years}
 
@@ -94,36 +98,67 @@ def get_customer_trend(
     end_date = f"{end_year}-03-31"
 
     # customer_abc_xyz_fy_* is only generated for completed financial years
-    # (see customer_abc_generator.py) — guard with a clear message instead of
-    # letting an UndefinedTable error surface for the current, still-open FY.
+    # (see customer_abc_generator.py). For the current, still-open FY, fall
+    # back to classifying customers on the fly from raw invoice data using
+    # the same cumulative-revenue-percentile rule as customer_abc_generator.py
+    # (<=70% -> A, <=90% -> B, else C).
     fy_table = f"customer_abc_xyz_fy_{start_year}_{end_year}"
     table_exists_row = query_all(
         "SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname='public' AND tablename=%s",
         (fy_table,)
     )
-    if not table_exists_row:
-        raise HTTPException(
-            status_code=404,
-            detail=(
-                f"Customer ABC/XYZ classification for {fy_label} is not available yet — "
-                "it is generated once that financial year is complete."
-            ),
-        )
 
-    # Query data
-    sql = f'''
-        SELECT
-            TO_CHAR(a.invoice_date, 'YYYY-MM') AS "TimeID",
-            c.abc_category AS "Category",
-            SUM(a.ass_value) AS "Revenue",
-            SUM(a.inv_quantity) AS "Quantity"
-        FROM public."spoorthi_dataset_without_spares" a
-        INNER JOIN public."{fy_table}" c
-            ON a.customer_name = c.customer_name
-        WHERE a.invoice_date BETWEEN '{start_date}' AND '{end_date}'
-        GROUP BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
-        ORDER BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
-    '''
+    if table_exists_row:
+        sql = f'''
+            SELECT
+                TO_CHAR(a.invoice_date, 'YYYY-MM') AS "TimeID",
+                c.abc_category AS "Category",
+                SUM(a.ass_value) AS "Revenue",
+                SUM(a.inv_quantity) AS "Quantity"
+            FROM public."spoorthi_dataset_without_spares" a
+            INNER JOIN public."{fy_table}" c
+                ON a.customer_name = c.customer_name
+            WHERE a.invoice_date BETWEEN '{start_date}' AND '{end_date}'
+            GROUP BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
+            ORDER BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
+        '''
+    else:
+        sql = f'''
+            WITH customer_revenue AS (
+                SELECT customer_name, SUM(ass_value) AS total_revenue
+                FROM public."spoorthi_dataset_without_spares"
+                WHERE invoice_date BETWEEN '{start_date}' AND '{end_date}'
+                    AND customer_name IS NOT NULL
+                GROUP BY customer_name
+            ),
+            ranked AS (
+                SELECT customer_name, total_revenue,
+                    SUM(total_revenue) OVER (ORDER BY total_revenue DESC) AS cum_revenue,
+                    SUM(total_revenue) OVER () AS total_all
+                FROM customer_revenue
+            ),
+            customer_abc AS (
+                SELECT customer_name,
+                    CASE
+                        WHEN total_all IS NULL OR total_all = 0 THEN 'C'
+                        WHEN 100.0 * cum_revenue / total_all <= 70 THEN 'A'
+                        WHEN 100.0 * cum_revenue / total_all <= 90 THEN 'B'
+                        ELSE 'C'
+                    END AS abc_category
+                FROM ranked
+            )
+            SELECT
+                TO_CHAR(a.invoice_date, 'YYYY-MM') AS "TimeID",
+                c.abc_category AS "Category",
+                SUM(a.ass_value) AS "Revenue",
+                SUM(a.inv_quantity) AS "Quantity"
+            FROM public."spoorthi_dataset_without_spares" a
+            INNER JOIN customer_abc c
+                ON a.customer_name = c.customer_name
+            WHERE a.invoice_date BETWEEN '{start_date}' AND '{end_date}'
+            GROUP BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
+            ORDER BY TO_CHAR(a.invoice_date, 'YYYY-MM'), c.abc_category
+        '''
 
     rows = query_all(sql)  # type: ignore
     

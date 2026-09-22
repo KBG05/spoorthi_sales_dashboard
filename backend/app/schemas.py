@@ -175,6 +175,16 @@ class TicketSizeBand(BaseModel):
     plot_label: str  # Formatted label for display
 
 
+class TicketSizeBandDetail(BaseModel):
+    """A single customer/product row within a ticket size band (drill-down)."""
+
+    id: str
+    name: str
+    revenue: float
+    invoice_count: int
+    related_count: int  # distinct customers (for Products) or products (for Customers)
+
+
 # -----------------------
 # transition_analysis_server.R
 # -----------------------

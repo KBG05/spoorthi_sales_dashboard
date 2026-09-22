@@ -9,13 +9,31 @@ import {
   ToggleButton,
   CircularProgress,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
+  Paper,
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { BarChart } from '@mui/x-charts/BarChart';
 import type { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { useTheme } from '@mui/material/styles';
 import { ticketSizeApi } from '../api';
-import type { TicketSizeBand } from '../api/types';
+import type { TicketSizeBand, TicketSizeBandDetail } from '../api/types';
 import { DASHBOARD_CHART_COLORS } from '../constants/constants';
+
+const formatRupees = (value: number) => {
+  if (value >= 1e7) return `₹${(value / 1e7).toFixed(2)} CR`;
+  if (value >= 1e5) return `₹${(value / 1e5).toFixed(2)} L`;
+  return `₹${value.toLocaleString('en-IN')}`;
+};
 
 const TicketSize: React.FC = () => {
   const theme = useTheme();
@@ -24,6 +42,10 @@ const TicketSize: React.FC = () => {
   const [dimension, setDimension] = useState<'Products' | 'Customers'>('Customers');
   const [data, setData] = useState<TicketSizeBand[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [selectedBand, setSelectedBand] = useState<string | null>(null);
+  const [bandDetails, setBandDetails] = useState<TicketSizeBandDetail[]>([]);
+  const [bandDetailsLoading, setBandDetailsLoading] = useState(false);
 
   useEffect(() => {
     const fetchAvailableYears = async () => {
@@ -78,6 +100,27 @@ const TicketSize: React.FC = () => {
       labels: filtered.map(item => item.plot_label),
     };
   }, [data]);
+
+  const handleBandClick = async (band: string) => {
+    setSelectedBand(band);
+    setBandDetailsLoading(true);
+    try {
+      const result = await ticketSizeApi.getBandDetails(financialYear, dimension, band);
+      setBandDetails(result);
+    } catch (error) {
+      console.error('Error fetching ticket size band details:', error);
+      setBandDetails([]);
+    } finally {
+      setBandDetailsLoading(false);
+    }
+  };
+
+  const closeBandDetails = () => {
+    setSelectedBand(null);
+    setBandDetails([]);
+  };
+
+  const relatedColumnLabel = dimension === 'Products' ? 'Customers' : 'Products';
 
   // Approximate total revenue in Crores
 
@@ -142,8 +185,13 @@ const TicketSize: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Number of {dimension}
           </Typography>
-          <Box flex={1} minHeight={0}>
+          <Box flex={1} minHeight={0} sx={{ cursor: 'pointer' }}>
             <BarChart
+              onAxisClick={(_event, data) => {
+                if (!data) return;
+                const band = countData.bands[data.dataIndex];
+                if (band) handleBandClick(band);
+              }}
               xAxis={[{ scaleType: 'band', data: countData.bands, height: 44, colorMap: { type: 'ordinal', colors: DASHBOARD_CHART_COLORS.slice() } }]}
               yAxis={[{
                 width: 70,
@@ -191,8 +239,13 @@ const TicketSize: React.FC = () => {
             Total Revenue
           </Typography>
           
-          <Box flex={1} minHeight={0}>
+          <Box flex={1} minHeight={0} sx={{ cursor: 'pointer' }}>
             <BarChart
+              onAxisClick={(_event, data) => {
+                if (!data) return;
+                const band = revenueData.bands[data.dataIndex];
+                if (band) handleBandClick(band);
+              }}
               xAxis={[{ scaleType: 'band', data: revenueData.bands, height: 44, colorMap: { type: 'ordinal', colors: DASHBOARD_CHART_COLORS.slice() } }]}
               yAxis={[{
                 width: 70,
@@ -255,6 +308,54 @@ const TicketSize: React.FC = () => {
           </Box>
         </Box>
       </Box>
+
+      <Dialog open={selectedBand !== null} onClose={closeBandDetails} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box>
+            {dimension} in band {selectedBand}
+            <Typography variant="body2" color="text.secondary">
+              {financialYear}
+            </Typography>
+          </Box>
+          <IconButton onClick={closeBandDetails} size="small">
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
+          {bandDetailsLoading ? (
+            <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+              <CircularProgress size={28} />
+            </Box>
+          ) : bandDetails.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+              No {dimension.toLowerCase()} found in this band.
+            </Typography>
+          ) : (
+            <TableContainer component={Paper} variant="outlined" sx={{ maxHeight: 420 }}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>{dimension === 'Products' ? 'Product' : 'Customer'}</TableCell>
+                    <TableCell align="right">Revenue</TableCell>
+                    <TableCell align="right">Invoices</TableCell>
+                    <TableCell align="right">{relatedColumnLabel}</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {bandDetails.map((row) => (
+                    <TableRow key={row.id} hover>
+                      <TableCell>{row.name}</TableCell>
+                      <TableCell align="right">{formatRupees(row.revenue)}</TableCell>
+                      <TableCell align="right">{row.invoice_count.toLocaleString('en-IN')}</TableCell>
+                      <TableCell align="right">{row.related_count.toLocaleString('en-IN')}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

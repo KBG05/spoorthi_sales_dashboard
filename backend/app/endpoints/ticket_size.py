@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List, Literal
 from datetime import datetime
 from ..database import query_all, parse_fy
-from ..schemas import TicketSizeBand, User
+from ..schemas import TicketSizeBand, TicketSizeBandDetail, User
 from ..endpoints.auth import get_current_user
 
 router = APIRouter(prefix="/ticket-size", tags=["Ticket Size"], dependencies=[Depends(get_current_user)])
@@ -135,5 +135,86 @@ async def get_ticket_size_bands(
             value=revenue_val,
             plot_label=f"₹{round(revenue_cr, 1)} CR"
         ))
-    
+
     return result
+
+
+@router.get("/band-details", response_model=List[TicketSizeBandDetail])
+async def get_ticket_size_band_details(
+    financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
+    dimension: Literal["Products", "Customers"] = Query("Products", description="'Products' or 'Customers'"),
+    band: str = Query(..., description="Revenue band, e.g. '0-5L'"),
+):
+    """
+    Get the individual customers/products that fall within a given revenue band,
+    for drill-down when a ticket size bar is clicked.
+    """
+    if band not in BAND_LEVELS:
+        raise HTTPException(status_code=400, detail="Invalid band")
+
+    try:
+        start_year, end_year, fy_label = parse_fy(financial_year)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid financial year format")
+
+    start_date = f"{start_year}-04-01"
+    end_date = f"{end_year}-03-31"
+
+    if dimension == "Products":
+        sql = '''
+            SELECT
+              d.article_no AS "ID",
+              COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), d.article_no) AS "Name",
+              SUM(d.ass_value) AS "Total_Revenue",
+              COUNT(*) AS "Invoice_Count",
+              COUNT(DISTINCT d.customer_name) AS "Customer_Count"
+            FROM public."spoorthi_dataset_without_spares" d
+            LEFT JOIN public.sphoorti_product_master pm
+              ON pm.article_no = d.article_no
+            WHERE d.invoice_date BETWEEN %s AND %s
+            GROUP BY d.article_no, "Name"
+        '''
+    else:
+        sql = '''
+            SELECT
+              d.customer_name AS "ID",
+              d.customer_name AS "Name",
+              SUM(d.ass_value) AS "Total_Revenue",
+              COUNT(*) AS "Invoice_Count",
+              COUNT(DISTINCT d.article_no) AS "Product_Count"
+            FROM public."spoorthi_dataset_without_spares" d
+            WHERE d.invoice_date BETWEEN %s AND %s
+            GROUP BY d.customer_name
+        '''
+
+    rows = query_all(sql, (start_date, end_date))  # type: ignore
+
+    results = []
+    for row in rows:
+        revenue = float(row["Total_Revenue"] or 0)
+
+        if revenue <= 5 * LAKH:
+            row_band = "0-5L"
+        elif revenue <= 20 * LAKH:
+            row_band = "5L-20L"
+        elif revenue <= 50 * LAKH:
+            row_band = "20L-50L"
+        elif revenue <= 1 * CRORE:
+            row_band = "50L-1CR"
+        else:
+            row_band = "1CR+"
+
+        if row_band != band:
+            continue
+
+        results.append(TicketSizeBandDetail(
+            id=str(row["ID"]),
+            name=str(row.get("Name") or row["ID"]),
+            revenue=revenue,
+            invoice_count=int(row["Invoice_Count"] or 0),
+            related_count=int(row.get("Customer_Count") or row.get("Product_Count") or 0),
+        ))
+
+    results.sort(key=lambda r: r.revenue, reverse=True)
+
+    return results

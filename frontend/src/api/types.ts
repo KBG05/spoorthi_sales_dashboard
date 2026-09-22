@@ -115,6 +115,14 @@ export interface TicketSizeBand {
   plot_label: string;
 }
 
+export interface TicketSizeBandDetail {
+  id: string;
+  name: string;
+  revenue: number;
+  invoice_count: number;
+  related_count: number; // distinct customers (Products) or products (Customers)
+}
+
 export interface ForecastRow {
   article_no: string;
   article_description?: string;

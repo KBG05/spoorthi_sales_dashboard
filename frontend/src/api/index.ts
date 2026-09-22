@@ -11,6 +11,7 @@ import type {
   ProductBehaviourDataPoint,
   TopPerformersResponse,
   TicketSizeBand,
+  TicketSizeBandDetail,
   ForecastResponse,
   TransitionAnalysisResponse,
   RFMMetrics,
@@ -276,6 +277,20 @@ export const ticketSizeApi = {
       params: {
         financial_year: financialYear,
         dimension: dimension,
+      },
+    });
+    return response.data;
+  },
+  getBandDetails: async (
+    financialYear: string,
+    dimension: 'Products' | 'Customers',
+    band: string
+  ) => {
+    const response = await apiClient.get<TicketSizeBandDetail[]>('/ticket-size/band-details', {
+      params: {
+        financial_year: financialYear,
+        dimension: dimension,
+        band: band,
       },
     });
     return response.data;

@@ -673,6 +673,130 @@ async def export_rfm_monthly():
     )
 
 
+@router.get("/export/ticket-size")
+async def export_ticket_size():
+    """
+    Export high-value Ticket Size bands (20L-50L, 50L-1CR, 1CR+) for the 3 most
+    recent financial years, covering both Customers and Products. Returns an
+    XLSX workbook with one sheet per financial year.
+    """
+    LAKH = 100000
+    CRORE = 100 * LAKH
+    HIGH_VALUE_BANDS = ["20L-50L", "50L-1CR", "1CR+"]
+
+    fy_rows = query_all(
+        """
+        SELECT DISTINCT
+            CASE
+                WHEN EXTRACT(MONTH FROM invoice_date) >= 4
+                    THEN EXTRACT(YEAR FROM invoice_date)::int
+                ELSE (EXTRACT(YEAR FROM invoice_date)::int - 1)
+            END AS start_year
+        FROM public."spoorthi_dataset_without_spares"
+        WHERE invoice_date IS NOT NULL
+        ORDER BY start_year DESC
+        LIMIT 3
+        """
+    )
+    if not fy_rows:
+        raise HTTPException(status_code=404, detail="No invoice data available.")
+
+    def band_for(revenue: float) -> str:
+        if revenue <= 5 * LAKH:
+            return "0-5L"
+        elif revenue <= 20 * LAKH:
+            return "5L-20L"
+        elif revenue <= 50 * LAKH:
+            return "20L-50L"
+        elif revenue <= 1 * CRORE:
+            return "50L-1CR"
+        return "1CR+"
+
+    band_order = {b: i for i, b in enumerate(HIGH_VALUE_BANDS)}
+    sheets: Dict[str, pd.DataFrame] = {}
+
+    for fy_row in fy_rows:
+        start_year = int(fy_row["start_year"])
+        end_year = start_year + 1
+        fy_label = f"FY{str(start_year)[-2:]}-{str(end_year)[-2:]}"
+        start_date = f"{start_year}-04-01"
+        end_date = f"{end_year}-03-31"
+
+        export_rows: List[Dict[str, Any]] = []
+
+        customer_rows = query_all(
+            '''
+            SELECT customer_name AS "Name", SUM(ass_value) AS "Total_Revenue"
+            FROM public."spoorthi_dataset_without_spares"
+            WHERE invoice_date BETWEEN %s AND %s
+            GROUP BY customer_name
+            ''',
+            (start_date, end_date),
+        )
+        for row in customer_rows:
+            revenue = float(row["Total_Revenue"] or 0)
+            band = band_for(revenue)
+            if band not in HIGH_VALUE_BANDS:
+                continue
+            export_rows.append({
+                "Dimension": "Customer",
+                "Name": row["Name"],
+                "Ticket_Band": band,
+                "Revenue": revenue,
+            })
+
+        product_rows = query_all(
+            '''
+            SELECT
+              d.article_no AS "ArticleNo",
+              COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), d.article_no) AS "Name",
+              SUM(d.ass_value) AS "Total_Revenue"
+            FROM public."spoorthi_dataset_without_spares" d
+            LEFT JOIN public.sphoorti_product_master pm
+              ON pm.article_no = d.article_no
+            WHERE d.invoice_date BETWEEN %s AND %s
+            GROUP BY d.article_no, "Name"
+            ''',
+            (start_date, end_date),
+        )
+        for row in product_rows:
+            revenue = float(row["Total_Revenue"] or 0)
+            band = band_for(revenue)
+            if band not in HIGH_VALUE_BANDS:
+                continue
+            export_rows.append({
+                "Dimension": "Product",
+                "Name": row["Name"],
+                "Ticket_Band": band,
+                "Revenue": revenue,
+            })
+
+        export_rows.sort(
+            key=lambda r: (r["Dimension"], band_order[r["Ticket_Band"]], -r["Revenue"])
+        )
+
+        sheets[fy_label] = pd.DataFrame(
+            export_rows, columns=["Dimension", "Name", "Ticket_Band", "Revenue"]
+        )
+
+    if all(df.empty for df in sheets.values()):
+        raise HTTPException(status_code=404, detail="No high-value ticket size data available.")
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="openpyxl") as writer:
+        for fy_label, df in sheets.items():
+            df.to_excel(writer, sheet_name=fy_label, index=False)
+    output.seek(0)
+
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": "attachment; filename=ticket_size_high_value_bands.xlsx"
+        },
+    )
+
+
 @router.get("/abc-xyz-matrix", response_model=ABCXYZMatrixResponse)
 async def get_abc_xyz_matrix(time_id: Optional[int] = None):
     """

@@ -65,6 +65,14 @@ const ExportData = () => {
       filename: 'rfm_monthly_scores.csv',
       buttonColor: '#ef6c00',
     },
+    {
+      title: 'Ticket Size (High-Value Bands)',
+      description: 'Downloads Customers and Products in the 20L-50L, 50L-1CR, and 1CR+ revenue bands for the 3 most recent financial years, one sheet per year, with their ticket band and revenue.',
+      buttonText: 'DOWNLOAD TICKET SIZE',
+      endpoint: 'ticket-size',
+      filename: 'ticket_size_high_value_bands.xlsx',
+      buttonColor: '#5e35b1',
+    },
   ];
 
   return (

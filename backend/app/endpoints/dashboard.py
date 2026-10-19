@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi import HTTPException, status
 from datetime import datetime, timedelta
 from datetime import datetime, timedelta
@@ -520,11 +520,32 @@ async def export_rolling_abc_xyz():
     )
 
 
+FORECAST_HORIZONS = ("monthly", "bimonthly", "quarterly")
+
+FORECAST_EXCEL_HEADERS = {
+    "article_no": "Article No",
+    "article_description": "Article Description",
+    "abc_category": "ABC Category",
+    "monthly_period": "Monthly Period",
+    "monthly_forecast": "Monthly Forecast",
+    "bimonthly_period": "Bimonthly Period",
+    "bimonthly_forecast": "Bimonthly Forecast",
+    "quarterly_period": "Quarterly Period",
+    "quarterly_forecast": "Quarterly Forecast",
+    "forecast_generated_at": "Forecast Generated At",
+}
+
+
 @router.get("/export/forecast")
-async def export_forecast():
+async def export_forecast(
+    format: str = Query("csv", pattern="^(csv|xlsx)$"),
+    horizon: Optional[str] = Query(None, pattern="^(monthly|bimonthly|quarterly)$"),
+):
     """
-    Export Demand Forecast results as CSV.
-    Matches R: SELECT * FROM final_sales_forecasts — all columns, no filters, no joins.
+    Export Demand Forecast results (all runs, all ABC classes) as CSV or XLSX.
+    Adds article_description (product master) and abc_category (latest rolling
+    ABC/XYZ table) right after article_no. Optional `horizon` keeps only that
+    horizon's period/forecast columns; omitted = all horizons.
     """
     # Confirm table exists
     table_check = query_one(
@@ -541,8 +562,36 @@ async def export_forecast():
             status_code=status.HTTP_404_NOT_FOUND, detail="No forecast table found."
         )
 
-    # Matches R: dbGetQuery(db_conn, "SELECT * FROM final_sales_forecasts")
-    rows = query_all("SELECT * FROM public.final_sales_forecasts ORDER BY article_no")
+    # Item-wise ABC from the latest rolling ABC/XYZ run; articles not in it stay blank
+    rolling_table = get_latest_rolling_table()
+    if rolling_table:
+        abc_join = (
+            f'LEFT JOIN public."{rolling_table}" rl ON rl.article_no = f.article_no'
+        )
+        abc_col = "COALESCE(rl.abc_category, '') AS abc_category"
+    else:
+        abc_join = ""
+        abc_col = "'' AS abc_category"
+
+    rows = query_all(
+        f"""
+        SELECT
+            f.article_no,
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), f.article_no) AS article_description,
+            {abc_col},
+            f.monthly_period,
+            f.monthly_forecast,
+            f.bimonthly_period,
+            f.bimonthly_forecast,
+            f.quarterly_period,
+            f.quarterly_forecast,
+            f.forecast_generated_at
+        FROM public.final_sales_forecasts f
+        LEFT JOIN public.sphoorti_product_master pm ON pm.article_no = f.article_no
+        {abc_join}
+        ORDER BY f.article_no, TO_DATE(f.monthly_period, 'MM/YYYY')
+        """
+    )
 
     if not rows:
         raise HTTPException(
@@ -550,8 +599,42 @@ async def export_forecast():
             detail="No forecast data available for export.",
         )
 
-    # Convert to pandas DataFrame and then to CSV
     df = pd.DataFrame(rows)
+    if horizon:
+        dropped = [
+            f"{h}_{suffix}"
+            for h in FORECAST_HORIZONS
+            if h != horizon
+            for suffix in ("period", "forecast")
+        ]
+        df = df.drop(columns=dropped)
+    filename = f"demand_forecast_{horizon}" if horizon else "demand_forecast"
+
+    if format == "xlsx":
+        # openpyxl cannot write tz-aware datetimes
+        ts = pd.to_datetime(df["forecast_generated_at"])
+        if ts.dt.tz is not None:
+            ts = ts.dt.tz_localize(None)
+        df["forecast_generated_at"] = ts
+        df = df.rename(columns=FORECAST_EXCEL_HEADERS)
+
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            df.to_excel(writer, sheet_name="Demand Forecast", index=False)
+            ws = writer.sheets["Demand Forecast"]
+            ws.freeze_panes = "A2"
+            for col_cells in ws.columns:
+                width = max(len(str(c.value or "")) for c in col_cells[:200])
+                ws.column_dimensions[col_cells[0].column_letter].width = min(
+                    max(width + 2, 12), 60
+                )
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": f"attachment; filename={filename}.xlsx"},
+        )
+
     output = io.StringIO()
     df.to_csv(output, index=False)
     output.seek(0)
@@ -559,7 +642,7 @@ async def export_forecast():
     return StreamingResponse(
         iter([output.getvalue()]),
         media_type="text/csv",
-        headers={"Content-Disposition": "attachment; filename=demand_forecast.csv"},
+        headers={"Content-Disposition": f"attachment; filename={filename}.csv"},
     )
 
 

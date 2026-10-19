@@ -1,29 +1,8 @@
 import { Box, Typography, Paper, Button } from '@mui/material';
 import { Download } from '@mui/icons-material';
-import { apiClient } from '../api/client';
+import { downloadExport } from '../utils/download';
 
 const ExportData = () => {
-  const handleDownload = async (endpoint: string, filename: string) => {
-    try {
-      const response = await apiClient.get(`/dashboard/export/${endpoint}`, {
-        responseType: 'blob',
-      });
-      
-      const blob = new Blob([response.data]);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      alert('Failed to download file. Please try again.');
-    }
-  };
-
   const exportCards = [
     {
       title: 'Rolling ABC/XYZ Analysis',
@@ -43,11 +22,19 @@ const ExportData = () => {
     },
     {
       title: 'Demand Forecast',
-      description: 'Downloads Article No, Description, ABC Category, and Monthly/Bimonthly/Quarterly forecasts from the latest forecast table (ABC-A articles).',
+      description: 'Downloads Article No, Article Description, ABC Category (latest ABC run), and Monthly/Bimonthly/Quarterly forecasts for all forecast runs as CSV.',
       buttonText: 'DOWNLOAD FORECAST',
       endpoint: 'forecast',
       filename: 'demand_forecast.csv',
       buttonColor: '#2e7d32',
+    },
+    {
+      title: 'Demand Forecast (Excel)',
+      description: 'Same as Demand Forecast, as an Excel file with readable headers (Article No, Article Description, ABC Category, Monthly Period, ...).',
+      buttonText: 'DOWNLOAD FORECAST XLSX',
+      endpoint: 'forecast?format=xlsx',
+      filename: 'demand_forecast.xlsx',
+      buttonColor: '#1b5e20',
     },
     {
       title: 'Cross-Sell Recommendations',
@@ -121,7 +108,7 @@ const ExportData = () => {
             <Button
               variant="contained"
               startIcon={<Download />}
-              onClick={() => handleDownload(card.endpoint, card.filename)}
+              onClick={() => downloadExport(card.endpoint, card.filename)}
               sx={{
                 bgcolor: card.buttonColor,
                 color: 'white',

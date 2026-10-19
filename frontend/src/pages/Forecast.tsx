@@ -13,12 +13,15 @@ import {
   TextField,
   ListSubheader,
   InputAdornment,
+  Button,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import { Download } from '@mui/icons-material';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import type { GridColDef } from '@mui/x-data-grid';
 import { forecastApi } from '../api';
 import type { ForecastResponse } from '../api/types';
+import { downloadExport } from '../utils/download';
 
 import { ABC_COLORS, formatQuantity, withAlpha } from '../constants/constants';
 
@@ -36,6 +39,20 @@ const Forecast: React.FC = () => {
   const [granularity, setGranularity] = useState('monthly');
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [searchTexts, setSearchTexts] = useState<Record<string, string>>({});
+  const [exportHorizon, setExportHorizon] = useState('monthly');
+
+  useEffect(() => {
+    setExportHorizon(granularity);
+  }, [granularity]);
+
+  const handleExport = (format: 'csv' | 'xlsx') => {
+    const isAll = exportHorizon === 'all';
+    const endpoint = isAll
+      ? `forecast?format=${format}`
+      : `forecast?format=${format}&horizon=${exportHorizon}`;
+    const filename = isAll ? `demand_forecast.${format}` : `demand_forecast_${exportHorizon}.${format}`;
+    downloadExport(endpoint, filename);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -331,14 +348,37 @@ const Forecast: React.FC = () => {
         <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
           {forecastedPeriodTitle}
         </Typography>
-        <Paper elevation={1} sx={{ px: 2.5, py: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Total Predicted Quantity:
-          </Typography>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            {formatQuantity(totalPredictedQuantity)}
-          </Typography>
-        </Paper>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Export horizon</InputLabel>
+            <Select
+              value={exportHorizon}
+              label="Export horizon"
+              onChange={(e) => setExportHorizon(e.target.value)}
+            >
+              {GRANULARITY_ORDER.map((g) => (
+                <MenuItem key={g} value={g}>
+                  {GRANULARITY_LABELS[g]}
+                </MenuItem>
+              ))}
+              <MenuItem value="all">All</MenuItem>
+            </Select>
+          </FormControl>
+          <Button variant="outlined" size="small" startIcon={<Download />} onClick={() => handleExport('csv')}>
+            Export CSV
+          </Button>
+          <Button variant="outlined" size="small" startIcon={<Download />} onClick={() => handleExport('xlsx')}>
+            Export XLSX
+          </Button>
+          <Paper elevation={1} sx={{ px: 2.5, py: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Total Predicted Quantity:
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              {formatQuantity(totalPredictedQuantity)}
+            </Typography>
+          </Paper>
+        </Box>
       </Box>
 
       <Paper elevation={1} sx={{ flex: 1, width: '100%', minHeight: 0, minWidth: 0, boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>

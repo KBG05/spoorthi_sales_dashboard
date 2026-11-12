@@ -134,6 +134,7 @@ async def get_demand_forecast(
             fc.forecast_period,
             fc.article_no,
             COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), fc.article_no) AS article_description,
+            NULLIF(TRIM(pm.category), '') AS product_category,
             '{granularity}' AS granularity,
             fc.predicted_quantity,
             fc.abc_category,
@@ -168,6 +169,7 @@ async def get_demand_forecast(
             ForecastRow(
                 article_no=str(row["article_no"]),
                 article_description=row.get("article_description"),
+                product_category=row.get("product_category"),
                 forecast_period=str(fp),
                 granularity=row["granularity"],
                 predicted_quantity=float(row["predicted_quantity"] or 0),

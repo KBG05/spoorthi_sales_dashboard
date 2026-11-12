@@ -83,6 +83,12 @@ const Forecast: React.FC = () => {
       minWidth: 260,
     },
     {
+      field: 'product_category',
+      headerName: 'Category',
+      flex: 1.1,
+      minWidth: 170,
+    },
+    {
       field: 'abc_category',
       headerName: 'ABC',
       flex: 0.6,
@@ -176,6 +182,7 @@ const Forecast: React.FC = () => {
     id: index,
     article_no: row.article_no,
     article_description: row.article_description || '-',
+    product_category: row.product_category || '-',
     abc_category: row.abc_category || '-',
     unique_customers: row.unique_customers,
     last_3_months_quantity: row.last_3_months_quantity,
@@ -207,6 +214,7 @@ const Forecast: React.FC = () => {
   const filterableColumns = [
     { field: 'article_no', label: 'Article No' },
     { field: 'article_description', label: 'Article Description' },
+    { field: 'product_category', label: 'Category' },
     { field: 'abc_category', label: 'ABC' },
   ];
 

@@ -525,6 +525,7 @@ FORECAST_HORIZONS = ("monthly", "bimonthly", "quarterly")
 FORECAST_EXCEL_HEADERS = {
     "article_no": "Article No",
     "article_description": "Article Description",
+    "product_category": "Product Category",
     "abc_category": "ABC Category",
     "monthly_period": "Monthly Period",
     "monthly_forecast": "Monthly Forecast",
@@ -543,7 +544,7 @@ async def export_forecast(
 ):
     """
     Export Demand Forecast results (all runs, all ABC classes) as CSV or XLSX.
-    Adds article_description (product master) and abc_category (latest rolling
+    Adds article_description and product_category (product master) and abc_category (latest rolling
     ABC/XYZ table) right after article_no. Optional `horizon` keeps only that
     horizon's period/forecast columns; omitted = all horizons.
     """
@@ -578,6 +579,7 @@ async def export_forecast(
         SELECT
             f.article_no,
             COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), f.article_no) AS article_description,
+            NULLIF(TRIM(pm.category), '') AS product_category,
             {abc_col},
             f.monthly_period,
             f.monthly_forecast,

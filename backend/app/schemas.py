@@ -213,6 +213,7 @@ class ForecastRow(BaseModel):
 
     article_no: str
     article_description: Optional[str] = None
+    product_category: Optional[str] = None
     forecast_period: str  # "DD-MM-YYYY" or "MM-YYYY - MM-YYYY"
     granularity: str  # "monthly", "bimonthly", "quarterly"
     predicted_quantity: float

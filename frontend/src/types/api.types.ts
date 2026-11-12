@@ -126,6 +126,7 @@ export interface TransitionAnalysisResponse {
 export interface ForecastRow {
   article_no: string;
   article_description?: string;
+  product_category?: string;
   forecast_period: string;
   granularity: string;
   predicted_quantity: number;

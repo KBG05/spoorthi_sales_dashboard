@@ -74,6 +74,20 @@ export const DASHBOARD_CHART_COLORS: readonly string[] = [
   '#22A8C6',
 ];
 
+// Product category trend palette (up to 10 distinct series; cycles beyond that)
+export const CATEGORY_TREND_COLORS: readonly string[] = [
+  '#2979FF',
+  '#00C853',
+  '#FF6D00',
+  '#D500F9',
+  '#FF1744',
+  '#00B8D4',
+  '#FFD600',
+  '#6D4C41',
+  '#F50057',
+  '#64DD17',
+];
+
 // Multi-line chart palette (for multi-product / multi-customer grids)
 export const PRODUCT_COLORS: readonly string[] = [
   '#3b5a9d',

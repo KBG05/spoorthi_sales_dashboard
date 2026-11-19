@@ -163,7 +163,7 @@ def get_customer_trend(
     rows = query_all(sql)  # type: ignore
     
     if not rows:
-        raise HTTPException(status_code=404, detail="No data found")
+        return []
     
     # Parse categories filter
     selected_categories = [cat.strip() for cat in abc_categories.split(",")]

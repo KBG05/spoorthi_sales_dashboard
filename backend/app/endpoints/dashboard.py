@@ -955,11 +955,14 @@ async def get_abc_xyz_matrix(time_id: Optional[int] = None):
 
 
 @router.get("/abc-xyz-products", response_model=List[ABCXYZArticleItem])
-async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None):
+async def get_abc_xyz_products(
+    abc: Optional[str] = None, xyz: Optional[str] = None, time_id: Optional[int] = None
+):
     """
-    Get product IDs and names for a specific ABC×XYZ cell.
-    Used for the popup when clicking a matrix cell or bar chart bar.
-    Fetches from rolling_abc_xyz_summary table to match matrix counts.
+    List articles (with description, product category and rolling revenue/quantity)
+    for an ABC×XYZ matrix cell, or for a single ABC or XYZ category when the other
+    is omitted (dashboard bar-chart click). Sorted by revenue, highest first.
+    Fetches from the rolling_abc_xyz_summary table so it matches the chart counts.
     """
     # Get the appropriate rolling table based on time_id
     table_name = None
@@ -977,36 +980,53 @@ async def get_abc_xyz_products(abc: str, xyz: str, time_id: Optional[int] = None
             detail="No rolling ABC/XYZ summary table found for the specified month",
         )
 
+    if not abc and not xyz:
+        raise HTTPException(status_code=400, detail="Provide abc, xyz or both")
+
     table = safe_table_name(table_name)
+
+    filters, params = [], []
+    if abc:
+        filters.append("r.abc_category = %s")
+        params.append(abc.upper())
+    if xyz:
+        filters.append("r.xyz_category = %s")
+        params.append(xyz.upper())
 
     sql = f"""
         SELECT
             r.article_no,
-            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), r.article_no) AS product_name
+            COALESCE(NULLIF(pm.description, ''), NULLIF(pm.article_name, ''), r.article_no) AS product_name,
+            NULLIF(TRIM(pm.category), '') AS product_category,
+            r.abc_category,
+            r.xyz_category,
+            r.total_revenue,
+            r.total_quantity
         FROM {table} r
         LEFT JOIN (
-            SELECT DISTINCT ON (article_no) article_no, description, article_name
+            SELECT DISTINCT ON (BTRIM(article_no, E' \\t\\r\\n'))
+                BTRIM(article_no, E' \\t\\r\\n') AS article_no, description, article_name, category
             FROM public.sphoorti_product_master
-            ORDER BY article_no
-        ) pm ON pm.article_no = r.article_no
-        WHERE r.abc_category = %s
-          AND r.xyz_category = %s
-        ORDER BY r.article_no
+            ORDER BY BTRIM(article_no, E' \\t\\r\\n')
+        ) pm ON pm.article_no = BTRIM(r.article_no, E' \\t\\r\\n')
+        WHERE {" AND ".join(filters)}
+        ORDER BY r.total_revenue DESC NULLS LAST, r.article_no
     """
 
-    rows = query_all(sql, (abc.upper(), xyz.upper()))
+    rows = query_all(sql, tuple(params))
 
-    return (
-        [
-            ABCXYZArticleItem(
-                article_no=str(row["article_no"]),
-                article_name=row.get("product_name") or "-",
-            )
-            for row in rows
-        ]
-        if rows
-        else []
-    )
+    return [
+        ABCXYZArticleItem(
+            article_no=str(row["article_no"]),
+            article_name=row.get("product_name") or "-",
+            product_category=row.get("product_category"),
+            abc_category=row.get("abc_category"),
+            xyz_category=row.get("xyz_category"),
+            total_revenue=float(row.get("total_revenue") or 0),
+            total_quantity=float(row.get("total_quantity") or 0),
+        )
+        for row in rows
+    ]
 
 
 @router.get("/category-hierarchy", response_model=Dict[str, Any])

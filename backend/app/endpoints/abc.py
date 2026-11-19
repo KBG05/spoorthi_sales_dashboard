@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import List
 from datetime import datetime, timedelta
 from ..database import query_all, parse_fy
-from ..schemas import ABCTrendDataPoint, ABCTrendResponse, User
+from ..schemas import ABCTrendDataPoint, ABCTrendResponse, CategoryTrendResponse, CategoryTrendDataPoint
 from ..endpoints.auth import get_current_user
 
 router = APIRouter(prefix="/abc", tags=["ABC Analysis"], dependencies=[Depends(get_current_user)])
@@ -45,7 +45,8 @@ async def get_abc_trend(
     financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25')"),
     abc_categories: str = Query("A,B,C", description="Comma-separated ABC categories"),
     xyz_categories: str = Query("X,Y,Z", description="Comma-separated XYZ categories"),
-    metric: str = Query("Revenue", description="'Revenue' or 'Quantity'")
+    metric: str = Query("Revenue", description="'Revenue' or 'Quantity'"),
+    product_categories: str = Query("", description="Optional comma-separated product categories to narrow the trend to"),
 ):
     """
     Get product trend data by ABC/XYZ categories for a financial year.
@@ -93,8 +94,14 @@ async def get_abc_trend(
     abc_list = [cat.strip().upper() for cat in abc_categories.split(",")]
     xyz_list = [cat.strip().upper() for cat in xyz_categories.split(",")]
     
+    abc_list = [c for c in abc_list if c in ("A", "B", "C")] or ["A", "B", "C"]
+    xyz_list = [c for c in xyz_list if c in ("X", "Y", "Z")] or ["X", "Y", "Z"]
     abc_in = ",".join([f"'{cat}'" for cat in abc_list])
     xyz_in = ",".join([f"'{cat}'" for cat in xyz_list])
+
+    category_list = [c.strip() for c in product_categories.split(",") if c.strip()]
+    category_filter = "AND COALESCE(NULLIF(TRIM(category), ''), 'Uncategorised') = ANY(%s)" if category_list else ""
+    category_params = (category_list,) if category_list else None
     
     # Build query - two queries: one for filtered data, one for overall
     sql_filtered = f'''
@@ -108,6 +115,7 @@ async def get_abc_trend(
         WHERE fin_year = {fy_year}
             AND abc IN ({abc_in})
             AND xyz IN ({xyz_in})
+            {category_filter}
         GROUP BY year_month, abc, xyz
         ORDER BY year_month
     '''
@@ -120,12 +128,13 @@ async def get_abc_trend(
             SUM(ass_value) AS "TotalValue"
         FROM public."spoorthi_abc_xyz_datamart"
         WHERE fin_year = {fy_year}
+            {category_filter}
         GROUP BY year_month
         ORDER BY year_month
     '''
     
-    rows = query_all(sql_filtered)  # type: ignore
-    overall_rows = query_all(sql_overall)  # type: ignore
+    rows = query_all(sql_filtered, category_params)  # type: ignore
+    overall_rows = query_all(sql_overall, category_params)  # type: ignore
     
     # Process overall data first
     overall = {}
@@ -141,13 +150,10 @@ async def get_abc_trend(
         
         overall[time_id] = value
     
-    # If no filtered data but we have overall data, return just overall
-    # If no data at all, raise 404
+    # No data at all: return an empty series so the UI shows its empty state
+    # (a 404 here used to leave the previous chart on screen).
     if not rows and not overall_rows:
-        raise HTTPException(
-            status_code=404,
-            detail="No data found for the selected filters"
-        )
+        return ABCTrendResponse(data=[], metric=metric, financial_year=financial_year)
     
     # Process filtered data: aggregate by TimeID and ABC_Category
     from collections import defaultdict
@@ -197,4 +203,74 @@ async def get_abc_trend(
         data=data_points,
         metric=metric,
         financial_year=financial_year
+    )
+
+
+_CATEGORY_SQL = "COALESCE(NULLIF(TRIM(category), ''), 'Uncategorised')"
+
+
+@router.get("/category-trend", response_model=CategoryTrendResponse)
+async def get_category_trend(
+    financial_year: str = Query(..., description="Financial year (e.g., 'FY24-25' or '2024-25')"),
+    categories: str = Query("", description="Comma-separated product categories; empty = top 5 by revenue"),
+    metric: str = Query("Revenue", description="'Revenue' or 'Quantity'"),
+):
+    """
+    Monthly revenue/quantity trend per product category for a financial year.
+
+    Also returns every category with sales in the FY (ordered by revenue) so the
+    UI can build its filter, and the categories actually plotted.
+    Revenue is returned in millions, matching /abc/trend.
+    """
+    try:
+        fy_year, _, _ = parse_fy(financial_year)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid financial year format. Expected 'FY24-25' or '2024-25'")
+
+    available_rows = query_all(
+        f"""
+        SELECT {_CATEGORY_SQL} AS category, SUM(ass_value) AS total
+        FROM public."spoorthi_abc_xyz_datamart"
+        WHERE fin_year = %s
+        GROUP BY 1
+        ORDER BY total DESC NULLS LAST
+        """,
+        (fy_year,),
+    )
+    available = [r["category"] for r in available_rows]
+
+    requested = [c.strip() for c in categories.split(",") if c.strip()]
+    selected = [c for c in requested if c in available] if requested else available[:5]
+
+    if not selected:
+        return CategoryTrendResponse(
+            data=[], metric=metric, financial_year=financial_year,
+            available_categories=available, selected_categories=[],
+        )
+
+    value_col = "inv_quantity" if metric == "Quantity" else "ass_value"
+    rows = query_all(
+        f"""
+        SELECT year_month, {_CATEGORY_SQL} AS category, SUM({value_col}) AS value
+        FROM public."spoorthi_abc_xyz_datamart"
+        WHERE fin_year = %s AND {_CATEGORY_SQL} = ANY(%s)
+        GROUP BY 1, 2
+        ORDER BY 1, 2
+        """,
+        (fy_year, selected),
+    )
+
+    divisor = 1_000_000 if metric == "Revenue" else 1
+    data = [
+        CategoryTrendDataPoint(
+            month_date=f"{r['year_month']}-01",
+            category=r["category"],
+            value=round(float(r["value"] or 0) / divisor, 2),
+        )
+        for r in rows
+    ]
+
+    return CategoryTrendResponse(
+        data=data, metric=metric, financial_year=financial_year,
+        available_categories=available, selected_categories=selected,
     )

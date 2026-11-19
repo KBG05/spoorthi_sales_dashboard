@@ -43,7 +43,12 @@ class ABCXYZMatrixResponse(BaseModel):
 
 class ABCXYZArticleItem(BaseModel):
     article_no: str
-    article_name: Optional[str] = None
+    article_name: Optional[str] = None  # description from the product master
+    product_category: Optional[str] = None
+    abc_category: Optional[str] = None
+    xyz_category: Optional[str] = None
+    total_revenue: float = 0
+    total_quantity: float = 0
 
 
 class CategoryHierarchyItem(BaseModel):
@@ -73,6 +78,24 @@ class ABCTrendResponse(BaseModel):
     data: List[ABCTrendDataPoint]
     metric: str  # "Revenue" or "Quantity"
     financial_year: str
+
+
+class CategoryTrendDataPoint(BaseModel):
+    """Single monthly point for a product category trend"""
+
+    month_date: str  # Format: "YYYY-MM-DD"
+    category: str
+    value: float  # Revenue in millions or Quantity
+
+
+class CategoryTrendResponse(BaseModel):
+    """Response for product category trend endpoint"""
+
+    data: List[CategoryTrendDataPoint]
+    metric: str
+    financial_year: str
+    available_categories: List[str]  # all categories with sales in the FY, by revenue
+    selected_categories: List[str]  # categories actually plotted
 
 
 # -----------------------
@@ -148,7 +171,8 @@ class TopPerformerItem(BaseModel):
 
     id: str  # customer_name or article_no
     revenue: float  # Total revenue
-    name: Optional[str] = None  # Customer or Article name
+    quantity: float = 0  # Total quantity
+    name: Optional[str] = None  # Customer, article description or category
 
 
 class TopPerformersResponse(BaseModel):
@@ -156,7 +180,8 @@ class TopPerformersResponse(BaseModel):
 
     top_fy: List[TopPerformerItem]  # Top 10 for entire FY
     top_latest: List[TopPerformerItem]  # Top 10 for latest month
-    entity_type: str  # "Customers" or "Articles"
+    entity_type: str  # "Customers", "Products" or "Categories"
+    metric: str = "Value"  # "Value" or "Quantity"
 
 
 # Backward-compatible alias

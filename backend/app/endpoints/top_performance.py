@@ -4,13 +4,14 @@ Top Performance Endpoints
 Replicates: server/top_performance_server.R
 UI Reference: ui/top_performance_ui.R
 
-Provides top performers (customers and products) analysis.
+Provides top performers (customers, products and product categories) analysis,
+ranked by value or quantity.
 """
 
 from fastapi import APIRouter, HTTPException, Query, Depends
 from typing import Literal, List
 from ..database import query_all, query_one, parse_fy
-from ..schemas import TopPerformersResponse, TopPerformerItem, User
+from ..schemas import TopPerformersResponse, TopPerformerItem
 from ..endpoints.auth import get_current_user
 
 router = APIRouter(prefix="/top-performance", tags=["Top Performance"], dependencies=[Depends(get_current_user)])
@@ -94,14 +95,75 @@ def _fy_labels_from_product_tables() -> List[str]:
     return fy_years
 
 
+EntityType = Literal["Customers", "Products", "Categories"]
+Metric = Literal["Value", "Quantity"]
+
+# Grouping key / display name per entity. Product category comes from the
+# product master (same source as the forecast export), falling back to the
+# invoice row's own category for articles missing from the master.
+# Article codes in the invoice data sometimes carry trailing tabs/newlines, which
+# plain TRIM() (spaces only) leaves in place and would split one product in two.
+_ARTICLE = "BTRIM(d.article_no, E' \\t\\r\\n')"
+
+_ENTITY_SQL = {
+    "Customers": ("d.customer_name", "d.customer_name"),
+    "Products": (
+        _ARTICLE,
+        f"COALESCE(MAX(NULLIF(TRIM(pm.description), '')), MAX(NULLIF(TRIM(pm.article_name), '')), {_ARTICLE})",
+    ),
+    "Categories": (
+        "COALESCE(NULLIF(TRIM(pm.category), ''), NULLIF(TRIM(d.category), ''), 'Uncategorised')",
+        None,
+    ),
+}
+
+
+def _top_rows(entity_type: str, metric: str, start_date, end_date=None, limit: int = 10):
+    key_sql, name_sql = _ENTITY_SQL[entity_type]
+    name_sql = name_sql or key_sql
+    order_col = "total_quantity" if metric == "Quantity" else "total_revenue"
+    date_filter = "d.invoice_date >= %s" + (" AND d.invoice_date <= %s" if end_date else "")
+    params = (start_date, end_date) if end_date else (start_date,)
+    sql = f"""
+        WITH pm AS (
+            SELECT DISTINCT ON (BTRIM(article_no, E' \\t\\r\\n'))
+                BTRIM(article_no, E' \\t\\r\\n') AS article_no, description, article_name, category
+            FROM public.sphoorti_product_master
+            WHERE article_no IS NOT NULL AND BTRIM(article_no, E' \\t\\r\\n') <> ''
+            ORDER BY BTRIM(article_no, E' \\t\\r\\n')
+        )
+        SELECT
+            {key_sql} AS id,
+            {name_sql} AS name,
+            SUM(d.ass_value) AS total_revenue,
+            SUM(d.inv_quantity) AS total_quantity
+        FROM public.spoorthi_dataset_without_spares d
+        LEFT JOIN pm ON pm.article_no = {_ARTICLE}
+        WHERE {date_filter}
+          AND {key_sql} IS NOT NULL
+        GROUP BY {key_sql}
+        ORDER BY {order_col} DESC NULLS LAST
+        LIMIT {int(limit)}
+    """
+    return [
+        TopPerformerItem(
+            id=str(r["id"]),
+            name=str(r["name"]),
+            revenue=float(r["total_revenue"] or 0),
+            quantity=float(r["total_quantity"] or 0),
+        )
+        for r in query_all(sql, params)
+    ]
+
+
 @router.get("/available-years")
 async def get_available_years(
-    entity_type: Literal["Customers", "Products"] = Query(
-        ..., description="'Customers' or 'Products'"
+    entity_type: EntityType = Query(
+        ..., description="'Customers', 'Products' or 'Categories'"
     )
 ):
     """
-    Get list of available financial years based on tables used for top performers.
+    Get list of available financial years for top performers (from raw invoice data).
     """
     fy_years = _fy_labels_from_raw_data()
 
@@ -116,15 +178,16 @@ async def get_available_years(
 
 @router.get("/top-performers", response_model=TopPerformersResponse)
 async def get_top_performers(
-    entity_type: Literal["Customers", "Products"] = Query(..., description="'Customers' or 'Products'"),
-    financial_year: str = Query("FY24-25", description="Financial year for FY data")
+    entity_type: EntityType = Query(..., description="'Customers', 'Products' or 'Categories'"),
+    financial_year: str = Query("FY24-25", description="Financial year for FY data"),
+    metric: Metric = Query("Value", description="Rank by 'Value' (revenue) or 'Quantity'"),
 ):
     """
-    Get top 10 performers (customers or products) for FY and latest month.
-    Matches: top_performance_server.R
+    Get top 10 customers, products or product categories for the FY and the latest month,
+    ranked by value or quantity. Each item carries both revenue and quantity.
     """
     try:
-        start_year, end_year, fy_label = parse_fy(financial_year)
+        start_year, end_year, _ = parse_fy(financial_year)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid financial year format")
 
@@ -132,79 +195,12 @@ async def get_top_performers(
     if not latest_month_start:
         raise HTTPException(status_code=404, detail="No data found")
 
-    # Helper to check if a table exists
-    def _table_exists(table_name: str) -> bool:
-        row = query_one(
-            "SELECT 1 FROM pg_catalog.pg_tables WHERE schemaname='public' AND tablename=%s",
-            (table_name,)
-        )
-        return row is not None
-
-    # FY date range for fallback raw-data queries
-    fy_start_date = f"{start_year}-04-01"
-    fy_end_date = f"{end_year}-03-31"
-
-    if entity_type == "Customers":
-        fy_table = f"customer_abc_xyz_fy_{start_year}_{end_year}"
-        if _table_exists(fy_table):
-            fy_sql = f'''SELECT customer_name, total_revenue
-                FROM public."{fy_table}" ORDER BY total_revenue DESC LIMIT 10'''
-            fy_rows = query_all(fy_sql)
-        else:
-            fy_sql = f'''SELECT customer_name, SUM(ass_value) AS total_revenue
-                FROM public."spoorthi_dataset_without_spares"
-                WHERE invoice_date >= '{fy_start_date}' AND invoice_date <= '{fy_end_date}'
-                GROUP BY customer_name ORDER BY total_revenue DESC LIMIT 10'''
-            fy_rows = query_all(fy_sql)
-
-        latest_sql = f'''SELECT customer_name, SUM(ass_value) AS total_revenue
-            FROM public."spoorthi_dataset_without_spares"
-            WHERE invoice_date >= '{latest_month_start}'
-            GROUP BY customer_name ORDER BY total_revenue DESC LIMIT 10'''
-        latest_rows = query_all(latest_sql)
-
-        top_fy = [
-            TopPerformerItem(id=str(r["customer_name"]), revenue=float(r["total_revenue"] or 0), name=r["customer_name"])
-            for r in fy_rows
-        ]
-        top_latest = [
-            TopPerformerItem(id=str(r["customer_name"]), revenue=float(r["total_revenue"] or 0), name=r["customer_name"])
-            for r in latest_rows
-        ]
-
-    else:  # Products
-        fy_table = f"abc_categorization_spoorthi_{start_year}_{end_year}"
-        if _table_exists(fy_table):
-            fy_sql = f'''SELECT article_no, ass__value
-                FROM public."{fy_table}" ORDER BY ass__value DESC LIMIT 10'''
-            fy_rows = query_all(fy_sql)
-            top_fy = [
-                TopPerformerItem(id=str(r["article_no"]), revenue=float(r["ass__value"] or 0), name=str(r["article_no"]))
-                for r in fy_rows
-            ]
-        else:
-            fy_sql = f'''SELECT article_no, SUM(ass_value) AS total_revenue
-                FROM public."spoorthi_dataset_without_spares"
-                WHERE invoice_date >= '{fy_start_date}' AND invoice_date <= '{fy_end_date}'
-                GROUP BY article_no ORDER BY total_revenue DESC LIMIT 10'''
-            fy_rows = query_all(fy_sql)
-            top_fy = [
-                TopPerformerItem(id=str(r["article_no"]), revenue=float(r["total_revenue"] or 0), name=str(r["article_no"]))
-                for r in fy_rows
-            ]
-
-        latest_sql = f'''SELECT article_no, SUM(ass_value) AS total_revenue
-            FROM public."spoorthi_dataset_without_spares"
-            WHERE invoice_date >= '{latest_month_start}'
-            GROUP BY article_no ORDER BY total_revenue DESC LIMIT 10'''
-        latest_rows = query_all(latest_sql)
-        top_latest = [
-            TopPerformerItem(id=str(r["article_no"]), revenue=float(r["total_revenue"] or 0), name=str(r["article_no"]))
-            for r in latest_rows
-        ]
+    top_fy = _top_rows(entity_type, metric, f"{start_year}-04-01", f"{end_year}-03-31")
+    top_latest = _top_rows(entity_type, metric, latest_month_start)
 
     return TopPerformersResponse(
         top_fy=top_fy,
         top_latest=top_latest,
-        entity_type=entity_type
+        entity_type=entity_type,
+        metric=metric,
     )

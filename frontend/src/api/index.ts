@@ -3,6 +3,7 @@ import type {
   KPIResponse,
   DashboardMonthOption,
   ABCTrendResponse,
+  CategoryTrendResponse,
   CustomerTrendDataPoint,
   CrossSellRecommendation,
   CustomerBehaviourDataPoint,
@@ -10,6 +11,8 @@ import type {
   ProductListItem,
   ProductBehaviourDataPoint,
   TopPerformersResponse,
+  TopPerformerEntity,
+  TopPerformerMetric,
   TicketSizeBand,
   TicketSizeBandDetail,
   ForecastResponse,
@@ -67,9 +70,10 @@ export const dashboardApi = {
       params: timeId ? { time_id: timeId } : undefined,
     });
   },
+  // Pass '' for abc or xyz to list a whole ABC or XYZ category (bar-chart click)
   getABCXYZProducts: async (abc: string, xyz: string, timeId?: number) => {
     return await apiClient.get<ABCXYZProductItem[]>('/dashboard/abc-xyz-products', {
-      params: { abc, xyz, ...(timeId ? { time_id: timeId } : {}) },
+      params: { ...(abc ? { abc } : {}), ...(xyz ? { xyz } : {}), ...(timeId ? { time_id: timeId } : {}) },
     });
   },
   getCategoryHierarchy: async (timeId?: number, metric: 'revenue' | 'quantity' = 'revenue') => {
@@ -90,13 +94,29 @@ export const abcApi = {
       '/abc/available-years'
     );
   },
-  getTrend: async (financialYear: string, abcCategories: string, xyzCategories: string, metric: string) => {
+  getTrend: async (
+    financialYear: string,
+    abcCategories: string,
+    xyzCategories: string,
+    metric: string,
+    productCategories: string[] = []
+  ) => {
     return await apiClient.get<ABCTrendResponse>('/abc/trend', {
       params: {
         financial_year: financialYear,
         abc_categories: abcCategories,
         xyz_categories: xyzCategories,
         metric: metric,
+        product_categories: productCategories.join(','),
+      },
+    });
+  },
+  getCategoryTrend: async (financialYear: string, categories: string[], metric: string) => {
+    return await apiClient.get<CategoryTrendResponse>('/abc/category-trend', {
+      params: {
+        financial_year: financialYear,
+        categories: categories.join(','),
+        metric,
       },
     });
   },
@@ -248,18 +268,20 @@ export const crossSellApi = {
 
 // Top Performance API
 export const topPerformanceApi = {
-  getAvailableYears: async (entityType: 'Customers' | 'Products') => {
+  getAvailableYears: async (entityType: TopPerformerEntity) => {
     return await apiClient.get<{ financial_years: string[] }>(
       '/top-performance/available-years',
       { params: { entity_type: entityType } }
     );
   },
   getTopPerformers: async (
-    entityType: 'Customers' | 'Products',
-    financialYear: string
+    entityType: TopPerformerEntity,
+    financialYear: string,
+    metric: TopPerformerMetric = 'Value'
   ) => {
     const response = await apiClient.get<TopPerformersResponse>(
-      `/top-performance/top-performers?entity_type=${entityType}&financial_year=${financialYear}`
+      '/top-performance/top-performers',
+      { params: { entity_type: entityType, financial_year: financialYear, metric } }
     );
     return response.data;
   },

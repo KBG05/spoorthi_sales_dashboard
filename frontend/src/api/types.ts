@@ -28,6 +28,11 @@ export interface ABCXYZMatrixResponse {
 export interface ABCXYZProductItem {
   article_no: string;
   article_name?: string;
+  product_category?: string | null;
+  abc_category?: string | null;
+  xyz_category?: string | null;
+  total_revenue: number;
+  total_quantity: number;
 }
 
 export interface CategoryHierarchyItem {
@@ -53,6 +58,20 @@ export interface ABCTrendResponse {
   data: ABCTrendDataPoint[];
   metric: string;
   financial_year: string;
+}
+
+export interface CategoryTrendDataPoint {
+  month_date: string;
+  category: string;
+  value: number;
+}
+
+export interface CategoryTrendResponse {
+  data: CategoryTrendDataPoint[];
+  metric: string;
+  financial_year: string;
+  available_categories: string[];
+  selected_categories: string[];
 }
 
 export interface CustomerTrendDataPoint {
@@ -96,16 +115,21 @@ export interface ProductBehaviourDataPoint {
   article_no?: string;
 }
 
+export type TopPerformerEntity = 'Customers' | 'Products' | 'Categories';
+export type TopPerformerMetric = 'Value' | 'Quantity';
+
 export interface TopPerformerItem {
   id: string;
   revenue: number;
+  quantity: number;
   name?: string;
 }
 
 export interface TopPerformersResponse {
   top_fy: TopPerformerItem[];
   top_latest: TopPerformerItem[];
-  entity_type: 'Customers' | 'Products';
+  entity_type: TopPerformerEntity;
+  metric: TopPerformerMetric;
 }
 
 export interface TicketSizeBand {

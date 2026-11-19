@@ -21,6 +21,9 @@ interface CategoryData {
   revenue?: number;
 }
 
+// Bars open the article list, so show they are clickable
+const BAR_CLICK_SX = { '& .MuiBarElement-root': { cursor: 'pointer' } };
+
 const Dashboard = () => {
   const theme = useTheme();
   const [selectedMonth, setSelectedMonth] = useState<number | ''>('');
@@ -143,7 +146,7 @@ const Dashboard = () => {
     },
   ];
 
-  // Handler for product popup when clicking matrix cell
+  // Handler for the article popup: matrix cell (abc + xyz) or bar-chart click (abc or xyz alone)
   const handleMatrixCellClick = async (abc: string, xyz: string) => {
     setProductPopup({ open: true, abc, xyz, products: [], loading: true });
     try {
@@ -407,6 +410,8 @@ const Dashboard = () => {
             </Typography>
             {abcCount.length > 0 ? (
               <BarChart
+                onItemClick={(_, d) => abcCount[d.dataIndex] && handleMatrixCellClick(abcCount[d.dataIndex].category, '')}
+                sx={BAR_CLICK_SX}
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: abcCount.map(d => d.category),
@@ -482,6 +487,8 @@ const Dashboard = () => {
             </Typography>
             {abcRevenue.length > 0 ? (
               <BarChart
+                onItemClick={(_, d) => abcRevenue[d.dataIndex] && handleMatrixCellClick(abcRevenue[d.dataIndex].category, '')}
+                sx={BAR_CLICK_SX}
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: abcRevenue.map(d => d.category),
@@ -572,6 +579,8 @@ const Dashboard = () => {
             </Typography>
             {xyzCount.length > 0 ? (
               <BarChart
+                onItemClick={(_, d) => xyzCount[d.dataIndex] && handleMatrixCellClick('', xyzCount[d.dataIndex].category)}
+                sx={BAR_CLICK_SX}
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: xyzCount.map(d => d.category),
@@ -645,6 +654,8 @@ const Dashboard = () => {
             </Typography>
             {xyzRevenue.length > 0 ? (
               <BarChart
+                onItemClick={(_, d) => xyzRevenue[d.dataIndex] && handleMatrixCellClick('', xyzRevenue[d.dataIndex].category)}
+                sx={BAR_CLICK_SX}
                 xAxis={[{ 
                   scaleType: 'band', 
                   data: xyzRevenue.map(d => d.category),
@@ -729,12 +740,19 @@ const Dashboard = () => {
       <Dialog
         open={productPopup.open}
         onClose={() => setProductPopup(prev => ({ ...prev, open: false }))}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Products — {productPopup.abc}{productPopup.xyz}
+            {productPopup.abc && productPopup.xyz
+              ? `Articles — ${productPopup.abc}${productPopup.xyz}`
+              : `Articles — ${productPopup.abc ? 'ABC' : 'XYZ'} Category ${productPopup.abc || productPopup.xyz}`}
+            {!productPopup.loading && (
+              <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                ({productPopup.products.length})
+              </Typography>
+            )}
           </Typography>
           <IconButton size="small" onClick={() => setProductPopup(prev => ({ ...prev, open: false }))}>
             <CloseIcon />
@@ -746,19 +764,33 @@ const Dashboard = () => {
               <CircularProgress />
             </Box>
           ) : productPopup.products.length > 0 ? (
-            <TableContainer sx={{ maxHeight: 400 }}>
+            <TableContainer sx={{ maxHeight: 520 }}>
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: 600 }}>Article No</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Article Name</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Product Category</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{productPopup.abc && !productPopup.xyz ? 'XYZ' : productPopup.xyz && !productPopup.abc ? 'ABC' : 'ABC/XYZ'}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="right">Revenue (₹)</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }} align="right">Qty</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {productPopup.products.map((p) => (
                     <TableRow key={p.article_no} hover>
-                      <TableCell>{p.article_no}</TableCell>
+                      <TableCell sx={{ whiteSpace: 'nowrap' }}>{p.article_no}</TableCell>
                       <TableCell>{p.article_name || '-'}</TableCell>
+                      <TableCell>{p.product_category || '-'}</TableCell>
+                      <TableCell>
+                        {productPopup.abc && !productPopup.xyz
+                          ? p.xyz_category
+                          : productPopup.xyz && !productPopup.abc
+                            ? p.abc_category
+                            : `${p.abc_category ?? ''}${p.xyz_category ?? ''}`}
+                      </TableCell>
+                      <TableCell align="right">{Math.round(p.total_revenue).toLocaleString('en-IN')}</TableCell>
+                      <TableCell align="right">{Math.round(p.total_quantity).toLocaleString('en-IN')}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

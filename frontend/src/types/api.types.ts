@@ -91,14 +91,17 @@ export interface ProductBehaviourDataPoint {
 // Top Performance Types
 // ===================================
 export interface TopPerformerItem {
-  id: number;
+  id: string;
   revenue: number;
+  quantity: number;
+  name?: string;
 }
 
 export interface TopPerformersResponse {
   top_fy: TopPerformerItem[];
   top_latest: TopPerformerItem[];
   entity_type: string;
+  metric: string;
 }
 
 // ===================================
